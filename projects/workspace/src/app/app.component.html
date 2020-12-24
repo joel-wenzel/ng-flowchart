@@ -1,0 +1,19 @@
+<main>
+  <div id="canvas" ngFlowchartCanvas></div>
+  <div id="palette">
+    <div
+      class="plugin-op"
+      *ngFor="let op of pluginOps"
+      [ngFlowchartStep]="canvasContent"
+      [ngFlowchartStepData]="op"
+    >
+      <span>{{ op }}</span>
+    </div>
+    <ng-template #canvasContent let-data="data">
+      <div class="card">
+        <span>{{ data }}</span>
+        <button (click)="onClick()"></button>
+      </div>
+    </ng-template>
+  </div>
+</main>
