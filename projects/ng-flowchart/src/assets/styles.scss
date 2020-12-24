@@ -72,7 +72,25 @@
 
 
 
-
+@keyframes wiggle {
+  0% {
+    transform: translateX(0);
+    border: 2px solid darkred;
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  50% {
+    transform: translateX(0);
+  }
+  75% {
+    transform: translateX(10px);
+  }
+  100% {
+    transform: translateX(0);
+    border: 2px solid darkred;
+  }
+}
 
 @keyframes backgroundAnim {
   0% {

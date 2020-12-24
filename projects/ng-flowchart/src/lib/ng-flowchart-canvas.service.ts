@@ -12,7 +12,8 @@ export class NgFlowchartCanvasService {
   canvasData: NgFlowCanvas.Canvas;
   viewContainer: ViewContainerRef;
 
-  options: NgFlowChart.Options = new NgFlowChart.Options();
+  options: NgFlowChart.Options;
+  callbacks: NgFlowChart.Callbacks;
 
   dragHover: {
     adjacentElement: NgFlowCanvas.CanvasElement,
@@ -28,9 +29,11 @@ export class NgFlowchartCanvasService {
     window['canvas'] = this.canvasData;
   }
 
-  public init(view: ViewContainerRef) {
+  public init(view: ViewContainerRef, callbacks?: NgFlowChart.Callbacks, options?: NgFlowChart.Options) {
     console.debug('init');
     this.viewContainer = view;
+    this.options = options || new NgFlowChart.Options();
+    this.callbacks = callbacks || {};
   }
 
   public onDragStep(drag: DragEvent) {
@@ -42,44 +45,30 @@ export class NgFlowchartCanvasService {
 
     if (step.isRootElement()) {
 
-      this.moveRootElement(event, step);
+      let relativeDropLoc = this.getRelativeDropLocation(event, true);
+
+      if (relativeDropLoc) {
+        step.setPosition(relativeDropLoc.x - step.html.offsetWidth / 2, relativeDropLoc.y - (step.html.offsetHeight / 2));
+      }
       this.render();
-      step.showTree();
     }
     else if (this.dragHover) {
-      //TODO duplicated code with dropPaletteStep
-      document.querySelectorAll('.' + CONSTANTS.CANVAS_STEP_CLASS).forEach(
-        ele => ele.removeAttribute(CONSTANTS.DROP_HOVER_ATTR)
-      );
 
       //TODO need to adjust height
       this.moveCanvasElement(step);
       this.render();
     }
     else {
-      console.log('cancelling drag');
       step.cancelDrag();
     }
 
   }
 
-  private moveRootElement(event: DragEvent, step: NgFlowCanvas.CanvasElement) {
-    let relativeDropLoc = this.getRelativeDropLocation(event, true);
-
-    if (relativeDropLoc) {
-      step.setPosition(relativeDropLoc.x - step.html.offsetWidth / 2, relativeDropLoc.y - (step.html.offsetHeight / 2));
-    }
-  }
-
-  public dropPaletteStep(drag: DragEvent, data: any): boolean {
+  public dropPaletteStep(drag: DragEvent, data: any) {
     console.debug('Drop step ', data);
 
     let relativeDropLoc = this.getRelativeDropLocation(drag, this.canvasData.allElements.length == 0);
     console.debug('Drop location ', relativeDropLoc);
-
-    document.querySelectorAll('.' + CONSTANTS.CANVAS_STEP_CLASS).forEach(
-      ele => ele.removeAttribute(CONSTANTS.DROP_HOVER_ATTR)
-    );
 
     if (relativeDropLoc) {
       //create the template
@@ -89,12 +78,7 @@ export class NgFlowchartCanvasService {
       this.addCanvasElement(view);
 
       this.render();
-
-      return true;
     }
-
-    return false;
-
   }
 
   private adjustCanvasHeight(heightAdjustment: number) {
@@ -119,7 +103,7 @@ export class NgFlowchartCanvasService {
 
   private renderChildren(element: NgFlowCanvas.CanvasElement, currentRect: DOMRect) {
     let childrenDisplay = {};
-    if (element.children && element.children.length > 0) {
+    if (element.hasChildren()) {
       const canvasRect = this.getCanvasRect();
       const rootParentCenterX = currentRect.left - canvasRect.left;
       const rootParentBottomY = currentRect.bottom - canvasRect.top;
@@ -146,7 +130,18 @@ export class NgFlowchartCanvasService {
         let childExtent = childrenDisplay[child.html.id].extent;
         let childLeft = childXPos + childExtent / 2;
 
-        child.html.setAttribute('style', `position: absolute; left: ${childLeft}px; top: ${childYPos}px`);
+        child.setPosition(childLeft, childYPos);
+
+        //check for canvas height/width adjustments
+        //TODO possibly resize to smaller if elements are removed
+        if(childYPos + childrect.height > (canvasRect.height - childrect.height)) {
+          this.getCanvasContentElement().style.height = `${canvasRect.height + childrect.height * 2}px`;
+          //this.getCanvasContentElement().style.fontSize = '80%';
+        }
+
+        if(childLeft + childrect.width + this.options.stepGap > canvasRect.width - childrect.width/2) {
+          this.getCanvasContentElement().style.width = `${canvasRect.width + childrect.width}px`;
+        }
 
         childXPos += childExtent;
 
@@ -172,6 +167,8 @@ export class NgFlowchartCanvasService {
     const rootRect = root.html.getBoundingClientRect();
 
     this.renderChildren(root, rootRect);
+
+    root.showTree();
   }
 
   private findDropLocationForHover(mouseLocation: NgFlowCanvas.CanvasPosition, targetStep: NgFlowCanvas.CanvasElement, canvasRect: DOMRect): [NgFlowCanvas.DropPosition, number] | 'deadzone' | null {
@@ -272,7 +269,7 @@ export class NgFlowchartCanvasService {
     const canvasRect = this.getCanvasRect();
 
     //TODO they can drop wherever on first drop, but maybe change this.
-    if(!this.dragHover && !isRoot) {
+    if (!this.dragHover && !isRoot) {
       return null;
     }
     return {
@@ -307,17 +304,46 @@ export class NgFlowchartCanvasService {
     return canvasEle;
   }
 
-  private moveCanvasElement(element: NgFlowCanvas.CanvasElement) {
-    //TODO error message popups
-    if (!element.parent) {
-      console.error('Root element cannot be moved!');
-      return;
+  private canDropElement(element: NgFlowCanvas.CanvasElement, adjacent: NgFlowCanvas.CanvasElement) {
+    //TODO allow user customization here
+
+    if(this.callbacks.canMoveStep && !this.callbacks.canMoveStep(element, adjacent, this.dragHover.relativePosition)) {
+      console.log('user said we cant move');
+      return false;
     }
+
+    if(element.children && element.children.length > 1 && adjacent.hasChildren()) {
+      if(this.dragHover.relativePosition == 'BELOW') {
+        console.error('cannot move a node with multiple children to a node with children');
+        return false;
+      }
+      
+    }
+
+    return true;
+  }
+
+  private cancelMove(element: NgFlowCanvas.CanvasElement, adjacent: NgFlowCanvas.CanvasElement) {
+    element.cancelDrag();
+    adjacent.html.style.animation="wiggle .2s linear 4";
+
+    setTimeout(() => {
+      adjacent.html.style.animation= null;
+    }, 300)
+  }
+
+  private moveCanvasElement(element: NgFlowCanvas.CanvasElement) {
+    //TODO callback to consumer/user on error
 
     if (!this.dragHover) {
       return;
     }
-    let adjacent = this.canvasData.allElements.find(ele => ele.html.id === this.dragHover.adjacentElement.html.id);
+    let adjacent = this.dragHover.adjacentElement;
+
+    if (!this.canDropElement(element, adjacent)) {
+      this.cancelMove(element, adjacent);
+      return;
+    }
 
     //remove elements parents' child ref
     element.parent.removeChild(element);
@@ -344,7 +370,7 @@ export class NgFlowchartCanvasService {
 
     if (this.dragHover) {
 
-      let adjacent = this.canvasData.allElements.find(ele => ele.html.id === this.dragHover.adjacentElement.html.id);
+      let adjacent = this.dragHover.adjacentElement;
 
       this.canvasData.allElements.push(element);
       element.html.classList.add('placed');
@@ -402,7 +428,7 @@ export class NgFlowchartCanvasService {
   }
 
   private placeStepBelow(newStep: NgFlowCanvas.CanvasElement, adjacentStep: NgFlowCanvas.CanvasElement) {
-    if (adjacentStep.children) {
+    if (adjacentStep.hasChildren()) {
       //move adjacent's children to newStep
       newStep.setChildren(adjacentStep.children.slice());
     }

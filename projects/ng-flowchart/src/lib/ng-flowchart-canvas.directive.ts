@@ -1,4 +1,5 @@
-import { Directive, ElementRef, HostListener, ViewContainerRef } from '@angular/core';
+import { Directive, ElementRef, HostListener, Input, OnInit, ViewContainerRef } from '@angular/core';
+import { NgFlowChart } from './model/flow.model';
 import { CONSTANTS } from './model/flowchart.constants';
 import { NgFlowchartCanvasService } from './ng-flowchart-canvas.service';
 
@@ -9,39 +10,53 @@ import { NgFlowchartCanvasService } from './ng-flowchart-canvas.service';
         NgFlowchartCanvasService
     ]
 })
-export class NgFlowchartCanvasDirective {
+export class NgFlowchartCanvasDirective implements OnInit {
 
     @HostListener('drop', ['$event'])
     onDrop(event: DragEvent) {
         const type = event.dataTransfer.getData('type');
-        if(type == 'FROM_PALETTE') {
+
+        document.querySelectorAll('.' + CONSTANTS.CANVAS_STEP_CLASS).forEach(
+            ele => ele.removeAttribute(CONSTANTS.DROP_HOVER_ATTR)
+        );
+
+        if (type == 'FROM_PALETTE') {
             let data = JSON.parse(event.dataTransfer.getData('data')) || null;
             this.canvas.dropPaletteStep(event, data);
         }
-        else if(type == 'FROM_CANVAS') {
+        else if (type == 'FROM_CANVAS') {
             this.canvas.dropCanvasStep(event, event.dataTransfer.getData('id'));
         }
     }
 
     @HostListener('dragover', ['$event'])
     onDragOver(event: DragEvent) {
-        
+
         event.preventDefault();
         this.canvas.onDragStep(event);
 
     }
 
+    @Input('ngFlowchartCallbacks')
+    callbacks: NgFlowChart.Callbacks;
+
+    @Input('ngFlowchartOptions')
+    options: NgFlowChart.Options;
+
+
     flow: HTMLElement[] = [];
 
     constructor(
-        protected canvasEle: ElementRef<HTMLElement>, 
+        protected canvasEle: ElementRef<HTMLElement>,
         private viewContainer: ViewContainerRef,
-        private canvas: NgFlowchartCanvasService) 
-    {
+        private canvas: NgFlowchartCanvasService) {
         this.canvasEle.nativeElement.classList.add(CONSTANTS.CANVAS_CLASS);
-        this.canvas.init(this.viewContainer);
-
+        
         this.createCanvasContent(this.viewContainer);
+    }
+
+    ngOnInit() {
+        this.canvas.init(this.viewContainer, this.callbacks, this.options);
     }
 
     private createCanvasContent(viewContainer: ViewContainerRef) {

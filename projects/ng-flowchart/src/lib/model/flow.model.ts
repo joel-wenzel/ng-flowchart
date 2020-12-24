@@ -1,4 +1,5 @@
 import { EmbeddedViewRef } from '@angular/core';
+import { NgFlowCanvas } from './canvas.model';
 
 export namespace NgFlowChart {
     export interface Flow {
@@ -10,7 +11,7 @@ export namespace NgFlowChart {
         index?: number;
         name: string;
         data?: any;
-        children?: Step[]; 
+        children?: Step[];
     }
 
     export interface StepView extends EmbeddedViewRef<any> {
@@ -28,10 +29,18 @@ export namespace NgFlowChart {
 
         /** Is the flow sequential? If true, then you will not be able to drag parallel steps */
         isSequential: boolean = false;
+
+        overflowBehavior: 'ZOOM_OUT' | 'SCROLL' = 'ZOOM_OUT';
     }
 
-    
+    export type Callbacks = {
+        canAddStep?: (x: number, y: number) => boolean;
+        canMoveStep?: (movingElement: NgFlowCanvas.CanvasElement, targetElement: NgFlowCanvas.CanvasElement, position: NgFlowCanvas.DropPosition) => boolean;
+    };
 }
+
+    
+
 
 export const SampleFlow: NgFlowChart.Flow = {
     name: 'Sample Flow',

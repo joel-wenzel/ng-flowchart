@@ -1,5 +1,12 @@
 <main>
-  <div id="canvas" ngFlowchartCanvas></div>
+  <div
+    id="canvas"
+    ngFlowchartCanvas
+    [ngFlowchartOptions]="{
+      stepGap: 40
+    }"
+    [ngFlowchartCallbacks]="callbacks"
+  ></div>
   <div id="palette">
     <div
       class="plugin-op"
@@ -10,7 +17,7 @@
       <span>{{ op }}</span>
     </div>
     <ng-template #canvasContent let-data="data">
-      <div class="card" [attr.name]="data" >
+      <div class="card" [attr.name]="data">
         <span>{{ data }}</span>
         <button (click)="onClick()"></button>
       </div>

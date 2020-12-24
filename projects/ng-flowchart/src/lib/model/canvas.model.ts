@@ -80,7 +80,7 @@ export namespace NgFlowCanvas {
             if(!this.children) {
                 this.children = [];
             }
-            if(!index) {
+            if(index == null) {
                 this.children.push(child);
             }
             else {
@@ -116,6 +116,10 @@ export namespace NgFlowCanvas {
                 return;
             }
             this.parent = newParent;
+        }
+
+        hasChildren() {
+            return this.children && this.children.length > 0;
         }
     }
 
