@@ -1,4 +1,6 @@
+import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
 import { NgFlowChart } from './flow.model';
+import { CONSTANTS } from './flowchart.constants';
 
 export namespace NgFlowCanvas {
     export interface Canvas {
@@ -8,15 +10,73 @@ export namespace NgFlowCanvas {
     }
 
     export class CanvasElement {
+        html: HTMLElement;
         children?: Array<CanvasElement>;
         parent?: CanvasElement;
+
+        private _isHoverTarget: boolean = true;
 
         /** Some elements such as loops and if blocks have their own canvas */
         childCanvas?: Canvas;
 
-        constructor(public html: HTMLElement, public view: NgFlowChart.StepView) {}
+        constructor(public view: NgFlowChart.StepView, private canvasRef: NgFlowchartCanvasService) {
+            this.html = this.view.rootNodes[0] as HTMLElement;
 
-        addChild(child: CanvasElement, index?: number) {
+            this.html.id = Date.now() + '';
+            this.html.setAttribute('draggable', 'true');
+            this.html.classList.add(CONSTANTS.CANVAS_STEP_CLASS);
+            view.detectChanges();
+
+            this.html.ondragstart = this.onDragStart.bind(this); 
+        }
+
+        private onDragStart(event: DragEvent) {
+            this.hideTree();
+            event.dataTransfer.setData('type', 'FROM_CANVAS');
+            event.dataTransfer.setData('id', this.html.id);
+            
+        }
+
+        isHoverTarget() {
+            return this._isHoverTarget;
+        }
+
+        hideTree() {
+            this._isHoverTarget = false; 
+            this.html.style.opacity = '.4';
+            if(this.children) {
+                this.children.forEach(child => {
+                    child.hideTree();
+                })
+            }
+        }
+
+        showTree() {
+            this._isHoverTarget = true;
+            this.html.style.opacity = '1';
+            if(this.children) {
+                this.children.forEach(child => {
+                    child.showTree();
+                })
+            }
+        }
+
+        isRootElement(): boolean {
+            return !this.parent;
+        }
+
+        cancelDrag(): void {
+            this.showTree();
+        }
+
+        setPosition(x, y): void {
+            this.html.style.position = 'absolute';
+            this.html.style.left = `${x}px`;
+            this.html.style.top = `${y}px`;
+            
+        }
+
+        addChild(child: CanvasElement, index?: number): void {
             if(!this.children) {
                 this.children = [];
             }
@@ -43,14 +103,14 @@ export namespace NgFlowCanvas {
             return i;
         }
 
-        setChildren(children: Array<CanvasElement>) {
+        setChildren(children: Array<CanvasElement>): void {
             this.children = children;
             this.children.forEach(child => {
                 child.setParent(this, true);
             })
         }
 
-        setParent(newParent: CanvasElement, force: boolean = false) {
+        setParent(newParent: CanvasElement, force: boolean = false): void {
             if(this.parent && !force) {
                 console.warn('This child already has a parent, use force if you know what you are doing');
                 return;
