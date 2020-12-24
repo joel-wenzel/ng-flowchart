@@ -13,7 +13,7 @@
       "entryFile": "src/public-api.ts"
     },
     "assets": [
-      "src/assets/styles.css"
+      "src/assets/styles.scss"
     ]
   }
 }

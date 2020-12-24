@@ -11,8 +11,11 @@ export class NgFlowchartStepDirective implements AfterViewInit {
     onDragStart(event: DragEvent) {
         
         this.data.setActiveTemplate(this.flowStepCanvasContent);
-        // event.dataTransfer.setData('content', canvasCard.outerHTML);
+
+        console.log(this.flowStepCanvasContent.elementRef);
+
         event.dataTransfer.setData('data', JSON.stringify(this.flowStepData));
+        event.dataTransfer.setData('type', 'FROM_PALETTE');
     }
 
     @Input('ngFlowchartStep')

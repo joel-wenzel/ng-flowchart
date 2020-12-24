@@ -11,6 +11,10 @@
 .ngflowchart-canvas-step {
   position: absolute;
   box-sizing: border-box;
+  
+}
+
+.ngflowchart-canvas-step.placed {
   transition: all 0.2s;
 }
 

@@ -13,8 +13,14 @@ export class NgFlowchartCanvasDirective {
 
     @HostListener('drop', ['$event'])
     onDrop(event: DragEvent) {
-        let data = JSON.parse(event.dataTransfer.getData('data')) || null;
-        this.canvas.dropPaletteStep(event, data);
+        const type = event.dataTransfer.getData('type');
+        if(type == 'FROM_PALETTE') {
+            let data = JSON.parse(event.dataTransfer.getData('data')) || null;
+            this.canvas.dropPaletteStep(event, data);
+        }
+        else if(type == 'FROM_CANVAS') {
+            console.log('dropped from canvas');
+        }
     }
 
     @HostListener('dragover', ['$event'])

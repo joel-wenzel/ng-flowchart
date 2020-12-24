@@ -178,9 +178,12 @@ export class NgFlowchartCanvasService {
     const absY = Math.abs(yDiff);
     const absX = Math.abs(xDiff);
 
-    if (absY < (stepRect.height * 1.5) && absX < (stepRect.width * 1.5)) {
+    const distance = Math.sqrt(absY * absY + absX * absX);
+    const accuracyRadius = (stepRect.height + stepRect.width) / 2;
 
-      if (Math.sqrt(absY * absY + absX * absX) < this.options.hoverDeadzoneRadius) {
+    if (distance < accuracyRadius) {
+      if (distance < this.options.hoverDeadzoneRadius) {
+        //basically we are too close to the middle to accurately predict what position they want
         return 'deadzone';
       }
 
@@ -215,7 +218,7 @@ export class NgFlowchartCanvasService {
       const step = this.canvasData.allElements[i];
 
       const position = this.findDropLocationForHover(mouseLocation, step, canvasRect);
-
+    
       if (position) {
         if (position == 'deadzone') {
           bestMatch = null;
@@ -292,6 +295,7 @@ export class NgFlowchartCanvasService {
   }
 
   private createCanvasElement(location: { x: number, y: number }, data: any): NgFlowCanvas.CanvasElement {
+
     const view: NgFlowChart.StepView = this.viewContainer.createEmbeddedView(this.data.getTemplateRef(), {
       data: data
     });
@@ -304,14 +308,14 @@ export class NgFlowchartCanvasService {
     this.getCanvasContentElement().appendChild(canvasCard);
 
     canvasCard.id = Date.now() + '';
-    canvasCard.setAttribute('draggable', 'true');
+    
     canvasCard.classList.add(CONSTANTS.CANVAS_STEP_CLASS);
 
     let element = (view.rootNodes[0] as HTMLElement);
 
     view.detectChanges();
 
-    canvasCard.setAttribute('style', `position: absolute; left: ${location.x - (element.offsetWidth / 2)}px; top: ${location.y - (element.offsetHeight / 2)}px`);
+    canvasCard.setAttribute('style', `position: absolute; right: ${location.x}px; top: ${location.y}px`);
 
     return new NgFlowCanvas.CanvasElement((view.rootNodes[0] as HTMLElement), view);
   }
@@ -322,6 +326,8 @@ export class NgFlowchartCanvasService {
 
       let adjacent = this.canvasData.allElements.find(ele => ele.html.id === this.dragHover.adjacentElement.html.id);
       this.canvasData.allElements.push(element);
+
+      element.html.classList.add('placed');
 
       //sibling of the dragHover
       switch (this.dragHover.relativePosition) {
@@ -373,7 +379,7 @@ export class NgFlowchartCanvasService {
       this.canvasData.rootElement = newStep;
       newStep.addChild(adjacentStep);
     }
-  
+
   }
 
   private placeStepBelow(newStep: NgFlowCanvas.CanvasElement, adjacentStep: NgFlowCanvas.CanvasElement) {
