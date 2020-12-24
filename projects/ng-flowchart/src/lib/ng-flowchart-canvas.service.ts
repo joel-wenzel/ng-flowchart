@@ -1,55 +1,27 @@
 import { Injectable, ViewContainerRef } from '@angular/core';
+import { NgFlowCanvas } from './model/canvas.model';
 import { NgFlowChart } from './model/flow.model';
 import { CONSTANTS } from './model/flowchart.constants';
 import { NgFlowchartDataService } from './ng-flowchart-data.service';
 
-export interface Canvas {
-  name?: string;
-  rootElement: CanvasElement;
-  allElements: CanvasElement[];
-}
 
-export interface CanvasElement {
-  html: HTMLElement;
-
-  view: NgFlowChart.StepView;
-
-  children?: Array<CanvasElement>;
-  parent?: CanvasElement;
-
-  /** Some elements such as loops and if blocks have their own canvas */
-  childCanvas?: Canvas;
-}
-
-export type DropPosition = 'RIGHT' | 'LEFT' | 'BELOW' | 'ABOVE';
-
-export type CanvasPosition = {
-  x: number,
-  y: number
-}
-
-export const emptyCanvas: Canvas = {
-  name: 'New Canvas',
-  rootElement: null,
-  allElements: []
-}
 
 @Injectable()
 export class NgFlowchartCanvasService {
 
-  canvasData: Canvas;
+  canvasData: NgFlowCanvas.Canvas;
   viewContainer: ViewContainerRef;
 
   options: NgFlowChart.Options = new NgFlowChart.Options();
 
   dragHover: {
-    adjacentElement: CanvasElement,
-    relativePosition: DropPosition
+    adjacentElement: NgFlowCanvas.CanvasElement,
+    relativePosition: NgFlowCanvas.DropPosition
   };
 
   constructor(private data: NgFlowchartDataService) {
     this.canvasData = {
-      ...emptyCanvas,
+      ...NgFlowCanvas.emptyCanvas,
       allElements: []
     }
 
@@ -112,7 +84,7 @@ export class NgFlowchartCanvasService {
     this.getCanvasContentElement().setAttribute('style', `height: ${canvasHeight + heightAdjustment}px`);
   }
 
-  private getLeafNodeExtent(element: CanvasElement, extent = 0, count = 0) {
+  private getLeafNodeExtent(element: NgFlowCanvas.CanvasElement, extent = 0, count = 0) {
     if (!element.children || element.children.length == 0) {
       return [extent + (element.html.getBoundingClientRect().width + this.options.stepGap), ++count];
     }
@@ -125,7 +97,7 @@ export class NgFlowchartCanvasService {
     return [extent, count];
   }
 
-  private renderChildren(element: CanvasElement, currentRect: DOMRect) {
+  private renderChildren(element: NgFlowCanvas.CanvasElement, currentRect: DOMRect) {
     let childrenDisplay = {};
     if (element.children && element.children.length > 0) {
       const canvasRect = this.getCanvasRect();
@@ -147,13 +119,13 @@ export class NgFlowchartCanvasService {
       //regardless of the number of children we always want half the content on the left and half on the right
       let childXPos = rootParentCenterX - (totalChildExtent / 2);
       const childYPos = rootParentBottomY + this.options.stepGap;
-      
+
       for (let i = 0; i < element.children.length; i++) {
         let child = element.children[i];
         let childrect = child.html.getBoundingClientRect();
         let childExtent = childrenDisplay[child.html.id].extent;
         let childLeft = childXPos + childExtent / 2;
-       
+
         child.html.setAttribute('style', `position: absolute; left: ${childLeft}px; top: ${childYPos}px`);
 
         childXPos += childExtent;
@@ -193,7 +165,7 @@ export class NgFlowchartCanvasService {
     // }
   }
 
-  private findDropLocationForHover(mouseLocation: CanvasPosition, targetStep: CanvasElement, canvasRect: DOMRect): [DropPosition, number] | 'deadzone' | null {
+  private findDropLocationForHover(mouseLocation: NgFlowCanvas.CanvasPosition, targetStep: NgFlowCanvas.CanvasElement, canvasRect: DOMRect): [NgFlowCanvas.DropPosition, number] | 'deadzone' | null {
 
     const stepRect = targetStep.html.getBoundingClientRect();
 
@@ -229,23 +201,23 @@ export class NgFlowchartCanvasService {
       return;
     }
 
-    const mouseLocation: CanvasPosition = {
+    const mouseLocation: NgFlowCanvas.CanvasPosition = {
       x: event.clientX,
       y: event.clientY
     }
 
     this.dragHover = null;
     const canvasRect = this.getCanvasRect();
-    let bestMatch: [DropPosition, number] = null;
-    let bestStep: CanvasElement = null;
+    let bestMatch: [NgFlowCanvas.DropPosition, number] = null;
+    let bestStep: NgFlowCanvas.CanvasElement = null;
 
-    for(let i = 0; i < this.canvasData.allElements.length; i++) {
+    for (let i = 0; i < this.canvasData.allElements.length; i++) {
       const step = this.canvasData.allElements[i];
 
       const position = this.findDropLocationForHover(mouseLocation, step, canvasRect);
-      
+
       if (position) {
-        if(position == 'deadzone') {
+        if (position == 'deadzone') {
           bestMatch = null;
           bestStep = null;
           break;
@@ -276,7 +248,7 @@ export class NgFlowchartCanvasService {
 
   }
 
-  private getRelativeDropLocation(event: DragEvent): CanvasPosition {
+  private getRelativeDropLocation(event: DragEvent): NgFlowCanvas.CanvasPosition {
     const mouseX = event.clientX;
     const mouseY = event.clientY;
 
@@ -319,37 +291,32 @@ export class NgFlowchartCanvasService {
     return canvasContent as HTMLElement;
   }
 
-  private createCanvasElement(location: { x: number, y: number }, data: any): CanvasElement {
+  private createCanvasElement(location: { x: number, y: number }, data: any): NgFlowCanvas.CanvasElement {
     const view: NgFlowChart.StepView = this.viewContainer.createEmbeddedView(this.data.getTemplateRef(), {
       data: data
     });
 
     view.data = data;
-    
 
+    //TODO move some of this to canvas object
     let canvasCard = (view.rootNodes[0] as HTMLElement);
 
     this.getCanvasContentElement().appendChild(canvasCard);
-
-    
 
     canvasCard.id = Date.now() + '';
     canvasCard.setAttribute('draggable', 'true');
     canvasCard.classList.add(CONSTANTS.CANVAS_STEP_CLASS);
 
-    let element = (view.rootNodes[0] as HTMLElement);    
-    
+    let element = (view.rootNodes[0] as HTMLElement);
+
     view.detectChanges();
 
     canvasCard.setAttribute('style', `position: absolute; left: ${location.x - (element.offsetWidth / 2)}px; top: ${location.y - (element.offsetHeight / 2)}px`);
 
-    return {
-      html: (view.rootNodes[0] as HTMLElement),
-      view: view
-    };
+    return new NgFlowCanvas.CanvasElement((view.rootNodes[0] as HTMLElement), view);
   }
 
-  private addCanvasElement(element: CanvasElement) {
+  private addCanvasElement(element: NgFlowCanvas.CanvasElement) {
 
     if (this.dragHover) {
 
@@ -365,10 +332,10 @@ export class NgFlowchartCanvasService {
           this.placeStepBelow(element, adjacent);
           break;
         case 'LEFT':
-          this.placeStepLeft(element, adjacent);
+          this.placeStepAdjacent(element, adjacent);
           break;
         case 'RIGHT':
-          this.placeStepRight(element, adjacent);
+          this.placeStepAdjacent(element, adjacent, false);
           break;
         default:
           console.error('invalid position', this.dragHover.relativePosition);
@@ -382,61 +349,42 @@ export class NgFlowchartCanvasService {
     }
   }
 
-  private placeStepLeft(newStep: CanvasElement, adjacentStep: CanvasElement) {
+  private placeStepAdjacent(newStep: NgFlowCanvas.CanvasElement, adjacentStep: NgFlowCanvas.CanvasElement, isLeft: boolean = true) {
     if (adjacentStep.parent) {
+      //find the adjacent steps index in the parents child array
       const adjacentIndex = adjacentStep.parent.children.findIndex(child => child.html.id == adjacentStep.html.id);
-
-      adjacentStep.parent.children.splice(adjacentIndex, 0, newStep);
-      newStep.parent = adjacentStep.parent;
+      adjacentStep.parent.addChild(newStep, adjacentIndex + (isLeft ? 0 : 1));
+    }
+    else {
+      console.warn('Parallel actions must have a common parent');
     }
   }
 
-  private placeStepRight(newStep: CanvasElement, adjacentStep: CanvasElement) {
-    if (adjacentStep.parent) {
-      const adjacentIndex = adjacentStep.parent.children.findIndex(child => child.html.id == adjacentStep.html.id);
-
-      adjacentStep.parent.children.splice(adjacentIndex + 1, 0, newStep);
-      newStep.parent = adjacentStep.parent;
-    }
-  }
-
-  private placeStepAbove(newStep: CanvasElement, adjacentStep: CanvasElement) {
+  private placeStepAbove(newStep: NgFlowCanvas.CanvasElement, adjacentStep: NgFlowCanvas.CanvasElement) {
 
     let adjParent = adjacentStep.parent;
     if (adjParent) {
-      //replace adjacent step parent's child pointer
-      let adjParentChildIndex = adjParent.children.findIndex(child => child.html.id === adjacentStep.html.id);
-      adjParent.children[adjParentChildIndex] = newStep;
-
-      //set new step parent
-      newStep.parent = adjParent;
+      //we want to remove child and insert our newStep at the same index
+      let index = adjParent.removeChild(adjacentStep);
+      newStep.addChild(adjacentStep);
+      adjParent.addChild(newStep, index);
     }
-    else {
+    else { // new root node
       this.canvasData.rootElement = newStep;
+      newStep.addChild(adjacentStep);
     }
-
-    //set adjacent's parent as newStep
-    adjacentStep.parent = newStep;
+  
   }
 
-  private placeStepBelow(newStep: CanvasElement, adjacentStep: CanvasElement) {
+  private placeStepBelow(newStep: NgFlowCanvas.CanvasElement, adjacentStep: NgFlowCanvas.CanvasElement) {
 
     if (adjacentStep.children) {
       //move adjacent's children to newStep
-      newStep.children = adjacentStep.children.slice();
-
-      //update child parent refs
-      newStep.children.forEach(child => {
-        child.parent = newStep;
-      });
+      newStep.setChildren(adjacentStep.children.slice());
     }
 
     //new adjacent child pointer
-    adjacentStep.children = [newStep];
-
-    //new step parent pointer
-    newStep.parent = adjacentStep;
-
+    adjacentStep.setChildren([newStep]);
 
   }
 }

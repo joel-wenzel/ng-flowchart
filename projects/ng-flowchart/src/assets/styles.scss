@@ -22,7 +22,20 @@
   border-radius: 100%;
   position: absolute;
   z-index: 1;
-  animation: backgroundAnim 1s linear infinite;
+
+}
+
+.ngflowchart-canvas-step[ngflowchart-drop-hover]::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background: rgb(192, 123, 123);
+  border-radius: 100%;
+  position: absolute;
+  z-index: 0;
+
+  //TODO mixin so theme can be set
+  animation: backgroundAnim 2s linear infinite;
 }
 
 .ngflowchart-canvas-step[ngflowchart-drop-hover="above"]::before,
@@ -53,27 +66,18 @@
   transform: translate(-50%, -50%);
 }
 
-.ngflowchart-canvas-step[ngflowchart-drop-hover]::after {
-  content: "";
-  width: 20px;
-  height: 20px;
-  background: rgb(192, 123, 123);
-  border-radius: 100%;
-  position: absolute;
-  z-index: 0;
-}
+
+
+
 
 @keyframes backgroundAnim {
   0% {
-    height: 14px;
-    width: 14px;
+    background: rgb(192, 123, 123);
   }
   50% {
-    height: 12px;
-    width: 12px;
+    background: rgb(194, 163, 163);
   }
   100% {
-    height: 14px;
-    width: 14px;
+    background: rgb(192, 123, 123);
   }
 }
