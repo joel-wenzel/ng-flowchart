@@ -199,7 +199,7 @@ export class NgFlowchartCanvasService {
       if (absY > absX) {
         return [yDiff > 0 ? 'BELOW' : 'ABOVE', absY];
       }
-      else if (!this.options.isSequential) {
+      else if (!this.options.isSequential && !targetStep.isRootElement()) {
         return [xDiff > 0 ? 'RIGHT' : 'LEFT', absX];
       }
     }
