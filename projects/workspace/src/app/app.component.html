@@ -14,11 +14,12 @@
       [ngFlowchartStep]="canvasContent"
       [ngFlowchartStepData]="op"
     >
-      <span>{{ op }}</span>
+      <span>{{ op.name }}</span>
     </div>
+    <button (click)="printFlowData()">Get Flow Data</button>
     <ng-template #canvasContent let-data="data">
-      <div class="card" [attr.name]="data" #card>
-        <span>{{ data }}</span>
+      <div class="card" [attr.name]="data.name" #card>
+        <span>{{ data.name }}</span>
         <button (click)="onClick(card.id)"></button>
       </div>
     </ng-template>

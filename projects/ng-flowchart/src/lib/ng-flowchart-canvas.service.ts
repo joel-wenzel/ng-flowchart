@@ -1,6 +1,6 @@
 import { Injectable, ViewContainerRef } from '@angular/core';
 import { NgFlowCanvas } from './model/canvas.model';
-import { NgFlowChart } from './model/flow.model';
+import { NgFlowchart } from './model/flow.model';
 import { CONSTANTS } from './model/flowchart.constants';
 import { NgFlowchartDataService } from './ng-flowchart-data.service';
 
@@ -12,27 +12,23 @@ export class NgFlowchartCanvasService {
   canvasData: NgFlowCanvas.Canvas;
   viewContainer: ViewContainerRef;
 
-  options: NgFlowChart.Options;
-  callbacks: NgFlowChart.Callbacks;
+  options: NgFlowchart.Options;
+  callbacks: NgFlowchart.Callbacks;
 
   dragHover: {
     adjacentElement: NgFlowCanvas.CanvasElement,
-    relativePosition: NgFlowCanvas.DropPosition
+    relativePosition: NgFlowchart.DropPosition
   };
 
   constructor(private data: NgFlowchartDataService) {
-    this.canvasData = {
-      ...NgFlowCanvas.emptyCanvas,
-      allElements: []
-    }
+    this.canvasData = new NgFlowCanvas.Canvas();
 
     window['canvas'] = this.canvasData;
   }
 
-  public init(view: ViewContainerRef, callbacks?: NgFlowChart.Callbacks, options?: NgFlowChart.Options) {
-    console.debug('init');
+  public init(view: ViewContainerRef, callbacks?: NgFlowchart.Callbacks, options?: NgFlowchart.Options) {
     this.viewContainer = view;
-    this.options = options || new NgFlowChart.Options();
+    this.options = options || new NgFlowchart.Options();
     this.callbacks = callbacks || {};
   }
 
@@ -67,15 +63,13 @@ export class NgFlowchartCanvasService {
 
   }
 
-  public dropPaletteStep(drag: DragEvent, data: any) {
-    console.debug('Drop step ', data);
-
+  public dropPaletteStep(drag: DragEvent) {
+   
     let relativeDropLoc = this.getRelativeDropLocation(drag, this.canvasData.allElements.length == 0);
-    console.debug('Drop location ', relativeDropLoc);
 
     if (relativeDropLoc) {
       //create the template
-      let view = this.createCanvasElement(relativeDropLoc, data);
+      let view = this.createCanvasElement(relativeDropLoc);
       view.setPosition(relativeDropLoc.x - view.html.offsetWidth / 2, relativeDropLoc.y - (view.html.offsetHeight / 2));
 
       if (!this.canDropElement(view, this.dragHover?.adjacentElement)) {
@@ -257,7 +251,7 @@ export class NgFlowchartCanvasService {
     root.showTree();
   }
 
-  private findDropLocationForHover(mouseLocation: NgFlowCanvas.CanvasPosition, targetStep: NgFlowCanvas.CanvasElement, canvasRect: DOMRect): [NgFlowCanvas.DropPosition, number] | 'deadzone' | null {
+  private findDropLocationForHover(mouseLocation: NgFlowCanvas.CanvasPosition, targetStep: NgFlowCanvas.CanvasElement, canvasRect: DOMRect): [NgFlowchart.DropPosition, number] | 'deadzone' | null {
 
     const stepRect = targetStep.html.getBoundingClientRect();
 
@@ -303,7 +297,7 @@ export class NgFlowchartCanvasService {
 
     this.dragHover = null;
     const canvasRect = this.getCanvasRect();
-    let bestMatch: [NgFlowCanvas.DropPosition, number] = null;
+    let bestMatch: [NgFlowchart.DropPosition, number] = null;
     let bestStep: NgFlowCanvas.CanvasElement = null;
 
     for (let i = 0; i < this.canvasData.allElements.length; i++) {
@@ -350,8 +344,6 @@ export class NgFlowchartCanvasService {
     const mouseX = event.clientX;
     const mouseY = event.clientY;
 
-    console.debug('Mouse Location', mouseX, mouseY);
-    console.debug(this.canvasData);
     const canvasRect = this.getCanvasRect();
 
     if (!this.dragHover && !isRoot) {
@@ -374,13 +366,13 @@ export class NgFlowchartCanvasService {
   }
 
 
-  private createCanvasElement(location: { x: number, y: number }, data: any): NgFlowCanvas.CanvasElement {
+  private createCanvasElement(location: { x: number, y: number }): NgFlowCanvas.CanvasElement {
 
-    const view: NgFlowChart.StepView = this.viewContainer.createEmbeddedView(this.data.getTemplateRef(), {
-      data: data
+    const view: NgFlowchart.StepView = this.viewContainer.createEmbeddedView(this.data.getTemplateRef().template, {
+      data: this.data.getTemplateRef().data
     });
 
-    view.data = data;
+    view.data = this.data.getTemplateRef().data;
 
     this.getCanvasContentElement().appendChild((view.rootNodes[0] as HTMLElement));
 
@@ -392,14 +384,16 @@ export class NgFlowchartCanvasService {
 
   private canDropElement(element: NgFlowCanvas.CanvasElement, adjacent: NgFlowCanvas.CanvasElement) {
     if (this.callbacks.canAddStep) {
-      return this.callbacks.canAddStep(element, adjacent, this.dragHover?.relativePosition);
+      return this.callbacks.canAddStep(this.getChartDrop(element, 'PENDING'));
     }
     return true;
   }
 
   private canMoveElement(element: NgFlowCanvas.CanvasElement, adjacent: NgFlowCanvas.CanvasElement) {
-    if (this.callbacks.canMoveStep && !this.callbacks.canMoveStep(element, adjacent, this.dragHover.relativePosition)) {
-      console.log('user said we cant move');
+    if (
+      this.callbacks.canMoveStep &&
+      !this.callbacks.canMoveStep(this.getChartDrop(element, 'PENDING'))
+    ) {
       return false;
     }
 
@@ -423,6 +417,11 @@ export class NgFlowchartCanvasService {
       setTimeout(() => {
         adjacent.html.style.animation = null;
       }, 300)
+    }
+
+    //TODO better reasons
+    if (this.callbacks.onDropError) {
+      this.callbacks.onDropError(this.getChartDrop(element, 'FAILED', 'TODO'))
     }
 
   }
@@ -548,7 +547,6 @@ export class NgFlowchartCanvasService {
     if (adjacentStep.hasChildren()) {
       if (newStep.hasChildren()) {
         let lastChild = this.findLastSingleChild(newStep);
-        console.log(lastChild);
         if (!lastChild) {
           console.error('Invalid move');
           return;
@@ -570,5 +568,15 @@ export class NgFlowchartCanvasService {
 
   private findCanvasElementById(id) {
     return this.canvasData.allElements.find(ele => ele.html.id === id);
+  }
+
+  private getChartDrop(element: NgFlowCanvas.CanvasElement, status: NgFlowchart.DropStatus, error?: string): NgFlowchart.DropEvent {
+    return {
+      step: new NgFlowchart.Step(element, this),
+      position: this.dragHover?.relativePosition || null,
+      adjacent: this.dragHover ? new NgFlowchart.Step(this.dragHover.adjacentElement, this) : null,
+      status: status,
+      error: error
+    }
   }
 }

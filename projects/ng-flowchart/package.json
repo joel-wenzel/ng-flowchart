@@ -1,6 +1,6 @@
 {
   "name": "@joelwenzel/ng-flowchart",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "peerDependencies": {
     "@angular/common": "^10.2.4",
     "@angular/core": "^10.2.4"
@@ -8,12 +8,15 @@
   "dependencies": {
     "tslib": "^2.0.0"
   },
+  "repository": {
+    "url": "https://github.com/joel-wenzel/ng-flowchart/tree/master/projects/ng-flowchart"
+  },
   "ngPackage": {
     "lib": {
       "entryFile": "src/public-api.ts"
     },
     "assets": [
-      "src/assets/styles.scss"
+      "src/assets/ng-flowchart.scss"
     ]
   }
 }

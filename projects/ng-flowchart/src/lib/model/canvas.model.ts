@@ -1,25 +1,32 @@
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
-import { NgFlowChart } from './flow.model';
+import { NgFlowchart } from './flow.model';
 import { CONSTANTS } from './flowchart.constants';
 
 export namespace NgFlowCanvas {
-    export interface Canvas {
-        name?: string;
+    export class Canvas {
+        name: string = 'Sample Flowchart';
         rootElement: CanvasElement;
-        allElements: CanvasElement[];
+        allElements: CanvasElement[] = [];
+
+        constructor() {
+            
+        }
+
+        findElement(id: string) {
+            
+        }
     }
 
     export class CanvasElement {
+        view: NgFlowchart.StepView;
         html: HTMLElement;
         children?: Array<CanvasElement>;
         parent?: CanvasElement;
 
         private _isHoverTarget: boolean = true;
 
-        /** Some elements such as loops and if blocks have their own canvas */
-        childCanvas?: Canvas;
-
-        constructor(public view: NgFlowChart.StepView, private canvasRef: NgFlowchartCanvasService) {
+        constructor(view: NgFlowchart.StepView, private canvasRef: NgFlowchartCanvasService) {
+            this.view = view;
             this.html = this.view.rootNodes[0] as HTMLElement;
 
             this.html.id = 's' + Date.now();
@@ -35,6 +42,14 @@ export namespace NgFlowCanvas {
             event.dataTransfer.setData('type', 'FROM_CANVAS');
             event.dataTransfer.setData('id', this.html.id);
 
+        }
+
+        getFlowStep(): NgFlowchart.Step {
+            return new NgFlowchart.Step(this, this.canvasRef);
+        }
+
+        getStepJSON() {
+            return new NgFlowchart.Step(this, this.canvasRef).toJSON();
         }
 
         isHoverTarget() {
@@ -136,7 +151,15 @@ export namespace NgFlowCanvas {
             return this.children && this.children.length >= numChildren;
         }
 
-        destroy(recursive: boolean = true) {
+        destroy(recursive: boolean = true): boolean {
+
+            if(this.canvasRef.callbacks.canDeleteStep) {
+                if(!this.canvasRef.callbacks.canDeleteStep(this.getFlowStep())) {
+                    //TODO show the cancel anim here
+                    console.log('User override for delete');
+                    return false;
+                }
+            }
             //remove parents child ref
             //only want to call this on the root of the delete
             let parentIndex;
@@ -145,7 +168,7 @@ export namespace NgFlowCanvas {
             }
 
             this.destroy0(parentIndex, recursive);
-
+            return true;
         }
 
         private destroy0(parentIndex, recursive: boolean = true) {
@@ -195,17 +218,13 @@ export namespace NgFlowCanvas {
         }
     }
 
-    export type DropPosition = 'RIGHT' | 'LEFT' | 'BELOW' | 'ABOVE';
+    
 
     export type CanvasPosition = {
         x: number,
         y: number
     }
 
-    export const emptyCanvas: Canvas = {
-        name: 'New Canvas',
-        rootElement: null,
-        allElements: []
-    }
+   
 }
 

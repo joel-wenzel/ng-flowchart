@@ -4,7 +4,7 @@
   "lib": {
     "entryFile": "src/public-api.ts",
     "styleIncludePaths": [
-      "src/assets/styles.scss"
+      "src/assets/ng-flowchart.scss"
     ]
   }
 }

@@ -1,6 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { NgFlowCanvas } from 'projects/ng-flowchart/src/lib/model/canvas.model';
-import { NgFlowChart } from 'projects/ng-flowchart/src/lib/model/flow.model';
+import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
 import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src/public-api';
 
 @Component({
@@ -11,35 +10,56 @@ import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src/public-api
 export class AppComponent {
   title = 'workspace';
 
-  callbacks: NgFlowChart.Callbacks = {};
+  callbacks: NgFlowchart.Callbacks = {};
 
   pluginOps = [
-    'abc',
-    '123'
+    {
+      name: 'Do Action',
+      inputs: []
+    },
+    {
+      name: 'Router',
+      condition: ''
+    },
+    {
+      name: 'Notification',
+      inputs: [
+        {
+          name: 'Address',
+          value: null
+        }
+      ]
+    }
   ]
 
   @ViewChild(NgFlowchartCanvasDirective)
-  canvasElement: NgFlowchartCanvasDirective ;
+  canvasElement: NgFlowchartCanvasDirective;
 
-  
+
 
   constructor() {
     this.callbacks.canMoveStep = this.canMoveStep;
     this.callbacks.canAddStep = this.canAddStep;
   }
-  
+
 
   onClick(id) {
-    this.canvasElement.deleteStep(id, false);
+    this.canvasElement.getFlow().getStep(id).delete();
+   
   }
 
-  canMoveStep(movingElement: NgFlowCanvas.CanvasElement, target: NgFlowCanvas.CanvasElement, position: NgFlowCanvas.DropPosition): boolean {
-    //TODO public elements/model that is returned here.
-    //IE i dont want users calling 'addChild' etc.
+  canMoveStep(dropEvent: NgFlowchart.DropEvent): boolean {
+    console.log(dropEvent);
+
     return true;
   }
 
-  canAddStep(movingElement: NgFlowCanvas.CanvasElement, target: NgFlowCanvas.CanvasElement, position: NgFlowCanvas.DropPosition): boolean {
+  canAddStep(dropEvent: NgFlowchart.DropEvent): boolean {
+    console.log(dropEvent);
     return true;
+  }
+
+  printFlowData() {
+    console.log(this.canvasElement.getFlowJSON());    
   }
 }

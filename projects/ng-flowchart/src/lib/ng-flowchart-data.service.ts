@@ -1,17 +1,22 @@
 import { Injectable, TemplateRef } from "@angular/core";
 
+export type ActiveTemplate = {
+    template: TemplateRef<any>,
+    data: any
+}
+
 @Injectable({
     providedIn: 'root'
 })
 export class NgFlowchartDataService {
-    
-    activeTemplate: TemplateRef<any>;
+
+    activeTemplate: ActiveTemplate;
 
     constructor() {
 
     }
 
-    public setActiveTemplate(ref: TemplateRef<any>) {
+    public setActiveTemplate(ref: ActiveTemplate) {
         this.activeTemplate = ref;
     }
 
