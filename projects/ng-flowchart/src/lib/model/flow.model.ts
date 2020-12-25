@@ -8,7 +8,7 @@ export namespace NgFlowChart {
     }
 
     export interface Step {
-        index?: number;
+        id: string;
         name: string;
         data?: any;
         children?: Step[];
@@ -17,8 +17,6 @@ export namespace NgFlowChart {
     export interface StepView extends EmbeddedViewRef<any> {
         data?: any
     }
-
-    export type InsertBehavior = 'INSERT_BETWEEN' | 'INSERT_PARALLEL' | 'REPLACE';
 
     export class Options {
         /** The gap (in pixels) between flow steps*/
@@ -30,33 +28,17 @@ export namespace NgFlowChart {
         /** Is the flow sequential? If true, then you will not be able to drag parallel steps */
         isSequential: boolean = false;
 
-        overflowBehavior: 'ZOOM_OUT' | 'SCROLL' = 'ZOOM_OUT';
+        /** Should all children of a step be deleted along with the step. If false, the nodes will be reparented */
+        recursiveDelete: boolean = true;
     }
 
     export type Callbacks = {
-        canAddStep?: (x: number, y: number) => boolean;
+        canAddStep?: (movingElement: NgFlowCanvas.CanvasElement, targetElement: NgFlowCanvas.CanvasElement, position: NgFlowCanvas.DropPosition) => boolean;
         canMoveStep?: (movingElement: NgFlowCanvas.CanvasElement, targetElement: NgFlowCanvas.CanvasElement, position: NgFlowCanvas.DropPosition) => boolean;
+        onDropError?: (element: NgFlowCanvas.CanvasElement, targetElement: NgFlowCanvas.CanvasElement, position: NgFlowCanvas.DropPosition) => void;
     };
 }
 
     
 
 
-export const SampleFlow: NgFlowChart.Flow = {
-    name: 'Sample Flow',
-    steps: [
-        {
-            name: 'Clone Source Code',
-            data: {
-                input1: 'abc',
-                input2: 'joel'
-            }
-        },
-        {
-            name: 'NG Build',
-            data: {
-                input1: 'bob'
-            }
-        }
-    ]
-}

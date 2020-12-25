@@ -13,7 +13,7 @@ import { NgFlowchartCanvasService } from './ng-flowchart-canvas.service';
 export class NgFlowchartCanvasDirective implements OnInit {
 
     @HostListener('drop', ['$event'])
-    onDrop(event: DragEvent) {
+    protected onDrop(event: DragEvent) {
         const type = event.dataTransfer.getData('type');
 
         document.querySelectorAll('.' + CONSTANTS.CANVAS_STEP_CLASS).forEach(
@@ -30,11 +30,16 @@ export class NgFlowchartCanvasDirective implements OnInit {
     }
 
     @HostListener('dragover', ['$event'])
-    onDragOver(event: DragEvent) {
+    protected onDragOver(event: DragEvent) {
 
         event.preventDefault();
         this.canvas.onDragStep(event);
 
+    }
+
+    @HostListener('window:resize', ['$event'])
+    protected onResize(event) {
+        this.reRenderCanvas();
     }
 
     @Input('ngFlowchartCallbacks')
@@ -43,27 +48,39 @@ export class NgFlowchartCanvasDirective implements OnInit {
     @Input('ngFlowchartOptions')
     options: NgFlowChart.Options;
 
-
-    flow: HTMLElement[] = [];
-
     constructor(
         protected canvasEle: ElementRef<HTMLElement>,
         private viewContainer: ViewContainerRef,
-        private canvas: NgFlowchartCanvasService) {
+        private canvas: NgFlowchartCanvasService
+    ) {
+            
         this.canvasEle.nativeElement.classList.add(CONSTANTS.CANVAS_CLASS);
-        
         this.createCanvasContent(this.viewContainer);
+
+
     }
 
     ngOnInit() {
         this.canvas.init(this.viewContainer, this.callbacks, this.options);
     }
 
+    public deleteStep(id: any, recursive: boolean = true) {
+        this.canvas.destroyStepFromId(id, recursive);
+    }
+
     private createCanvasContent(viewContainer: ViewContainerRef) {
-        let canvas = viewContainer.element.nativeElement as HTMLElement;
+        let canvasEle = viewContainer.element.nativeElement as HTMLElement;
         let canvasContent = document.createElement('div');
         canvasContent.classList.add(CONSTANTS.CANVAS_CONTENT_CLASS);
-        canvas.appendChild(canvasContent);
+        canvasEle.appendChild(canvasContent);
+
+        canvasEle.onresize = event => {
+            console.log('ser;weorijs');
+        }
+    }
+
+    public reRenderCanvas() {
+        this.canvas.reRender();
     }
 
 }

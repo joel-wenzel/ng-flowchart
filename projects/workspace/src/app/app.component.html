@@ -17,9 +17,9 @@
       <span>{{ op }}</span>
     </div>
     <ng-template #canvasContent let-data="data">
-      <div class="card" [attr.name]="data">
+      <div class="card" [attr.name]="data" #card>
         <span>{{ data }}</span>
-        <button (click)="onClick()"></button>
+        <button (click)="onClick(card.id)"></button>
       </div>
     </ng-template>
   </div>

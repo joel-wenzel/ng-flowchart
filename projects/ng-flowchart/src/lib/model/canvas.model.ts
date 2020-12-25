@@ -22,19 +22,19 @@ export namespace NgFlowCanvas {
         constructor(public view: NgFlowChart.StepView, private canvasRef: NgFlowchartCanvasService) {
             this.html = this.view.rootNodes[0] as HTMLElement;
 
-            this.html.id = Date.now() + '';
+            this.html.id = 's' + Date.now();
             this.html.setAttribute('draggable', 'true');
             this.html.classList.add(CONSTANTS.CANVAS_STEP_CLASS);
             view.detectChanges();
 
-            this.html.ondragstart = this.onDragStart.bind(this); 
+            this.html.ondragstart = this.onDragStart.bind(this);
         }
 
         private onDragStart(event: DragEvent) {
             this.hideTree();
             event.dataTransfer.setData('type', 'FROM_CANVAS');
             event.dataTransfer.setData('id', this.html.id);
-            
+
         }
 
         isHoverTarget() {
@@ -42,9 +42,14 @@ export namespace NgFlowCanvas {
         }
 
         hideTree() {
-            this._isHoverTarget = false; 
+            this._isHoverTarget = false;
             this.html.style.opacity = '.4';
-            if(this.children) {
+
+            document.querySelectorAll(`.${this.html.id}.arrow`).forEach(
+                ele => (ele as HTMLElement).style.opacity = '.2'
+            )
+
+            if (this.children) {
                 this.children.forEach(child => {
                     child.hideTree();
                 })
@@ -53,8 +58,13 @@ export namespace NgFlowCanvas {
 
         showTree() {
             this._isHoverTarget = true;
+
+            document.querySelectorAll(`.arrow.${this.html.id}`).forEach(
+                ele => (ele as HTMLElement).style.opacity = '1'
+            )
+
             this.html.style.opacity = '1';
-            if(this.children) {
+            if (this.children) {
                 this.children.forEach(child => {
                     child.showTree();
                 })
@@ -73,14 +83,14 @@ export namespace NgFlowCanvas {
             this.html.style.position = 'absolute';
             this.html.style.left = `${x}px`;
             this.html.style.top = `${y}px`;
-            
+
         }
 
         addChild(child: CanvasElement, index?: number): void {
-            if(!this.children) {
+            if (!this.children) {
                 this.children = [];
             }
-            if(index == null) {
+            if (index == null) {
                 this.children.push(child);
             }
             else {
@@ -92,14 +102,14 @@ export namespace NgFlowCanvas {
         }
 
         removeChild(childToRemove: CanvasElement): number {
-            if(!this.children) {
+            if (!this.children) {
                 return -1;
             }
             const i = this.children.findIndex(child => child.html.id == childToRemove.html.id);
-            if(i > -1) {
+            if (i > -1) {
                 this.children.splice(i, 1);
             }
-            
+
             return i;
         }
 
@@ -111,7 +121,7 @@ export namespace NgFlowCanvas {
         }
 
         setParent(newParent: CanvasElement, force: boolean = false): void {
-            if(this.parent && !force) {
+            if (this.parent && !force) {
                 console.warn('This child already has a parent, use force if you know what you are doing');
                 return;
             }
@@ -120,6 +130,68 @@ export namespace NgFlowCanvas {
 
         hasChildren() {
             return this.children && this.children.length > 0;
+        }
+
+        hasNOrMoreChildren(numChildren) {
+            return this.children && this.children.length >= numChildren;
+        }
+
+        destroy(recursive: boolean = true) {
+            //remove parents child ref
+            //only want to call this on the root of the delete
+            let parentIndex;
+            if (this.parent) {
+                parentIndex = this.parent.removeChild(this);
+            }
+
+            this.destroy0(parentIndex, recursive);
+
+        }
+
+        private destroy0(parentIndex, recursive: boolean = true) {
+
+            this.view.destroy();
+            //remove from master array
+            let index = this.canvasRef.canvasData.allElements.findIndex(ele => ele.html.id == this.html.id);
+            if (index >= 0) {
+                this.canvasRef.canvasData.allElements.splice(index, 1);
+            }
+
+            if (this.hasChildren()) {
+
+                //this was the root node
+                if (!this.parent && !recursive) {
+
+                    //set first child as new root
+                    this.canvasRef.canvasData.rootElement = this.children[0];
+                    this.children[0].parent = null;
+
+                    //make previous siblings children of the new root
+                    if (this.children.length > 1) {
+                        for (let i = 1; i < this.children.length; i++) {
+                            let child = this.children[i];
+                            this.children[0].addChild(child);
+                        }
+                    }
+
+                }
+
+                //update children
+                for (let i = 0; i < this.children.length; i++) {
+                    let child = this.children[i];
+                    if (recursive) {
+                        child.destroy0(null, true);
+                    }
+                    else if (!!this.parent) {
+                        this.parent.addChild(child, i + parentIndex);
+                    }
+                }
+                this.children = [];
+            }
+
+
+
+            this.parent = null;
         }
     }
 

@@ -18,6 +18,10 @@
   transition: all 0.2s;
 }
 
+.arrow-section {
+  border-color: #b4b4b4;
+}
+
 .ngflowchart-canvas-step[ngflowchart-drop-hover]::before {
   content: "";
   width: 12px;
