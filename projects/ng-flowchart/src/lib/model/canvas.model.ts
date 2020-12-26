@@ -9,11 +9,11 @@ export namespace NgFlowCanvas {
         allElements: CanvasElement[] = [];
 
         constructor() {
-            
+
         }
 
         findElement(id: string) {
-            
+
         }
     }
 
@@ -86,6 +86,26 @@ export namespace NgFlowCanvas {
             }
         }
 
+        getNodeTreeWidth() {
+            return this._getNodeTreeWidth();
+        }
+
+
+        private _getNodeTreeWidth(extent = 0) {
+            const currentNodeWidth = this.html.getBoundingClientRect().width;
+
+            if (!this.children || this.children.length == 0) {
+                return extent + (this.html.getBoundingClientRect().width);
+            }
+
+            this.children.forEach(child => {
+                extent = child._getNodeTreeWidth(extent);
+            })
+            extent += this.canvasRef.options.stepGap * (this.children.length - 1);
+
+            return Math.max(currentNodeWidth, extent);
+        }
+
         isRootElement(): boolean {
             return !this.parent;
         }
@@ -153,8 +173,8 @@ export namespace NgFlowCanvas {
 
         destroy(recursive: boolean = true): boolean {
 
-            if(this.canvasRef.callbacks.canDeleteStep) {
-                if(!this.canvasRef.callbacks.canDeleteStep(this.getFlowStep())) {
+            if (this.canvasRef.callbacks.canDeleteStep) {
+                if (!this.canvasRef.callbacks.canDeleteStep(this.getFlowStep())) {
                     //TODO show the cancel anim here
                     console.log('User override for delete');
                     return false;
@@ -218,13 +238,13 @@ export namespace NgFlowCanvas {
         }
     }
 
-    
+
 
     export type CanvasPosition = {
         x: number,
         y: number
     }
 
-   
+
 }
 

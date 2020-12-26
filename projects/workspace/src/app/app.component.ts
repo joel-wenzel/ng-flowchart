@@ -22,7 +22,7 @@ export class AppComponent {
       condition: ''
     },
     {
-      name: 'Notification',
+      name: 'Notification Really Long Title',
       inputs: [
         {
           name: 'Address',

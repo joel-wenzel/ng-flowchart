@@ -64,7 +64,7 @@ export class NgFlowchartCanvasService {
   }
 
   public dropPaletteStep(drag: DragEvent) {
-   
+
     let relativeDropLoc = this.getRelativeDropLocation(drag, this.canvasData.allElements.length == 0);
 
     if (relativeDropLoc) {
@@ -109,64 +109,73 @@ export class NgFlowchartCanvasService {
     return [extent, count];
   }
 
-  private renderChildren(element: NgFlowCanvas.CanvasElement, currentRect: DOMRect) {
-    let childrenDisplay = {};
-    if (element.hasChildren()) {
-      const canvasRect = this.getCanvasRect();
-      const rootParentCenterX = currentRect.left - canvasRect.left;
-      const rootParentBottomY = currentRect.bottom - canvasRect.top;
-      let totalChildExtent = 0;
+  private renderChildTree(rootNode: NgFlowCanvas.CanvasElement, rootRect: DOMRect) {
+    //the rootNode passed in is already rendered. just need to render its children /subtree
 
-      element.children.forEach(
-        child => {
-          const [extent, count] = this.getLeafNodeExtent(child);
-          totalChildExtent += extent;
-          childrenDisplay[child.html.id] = {
-            extent: extent,
-            count: count
-          }
-        }
-      )
+    if (!rootNode.hasChildren()) {
+      return;
+    }
+    const canvasRect = this.getCanvasRect();
 
-      //regardless of the number of children we always want half the content on the left and half on the right
-      let childXPos = rootParentCenterX - (totalChildExtent / 2);
-      const childYPos = rootParentBottomY + this.options.stepGap;
+    //top of the child row is simply the relative bottom of the root + stepGap
+    const childYTop = (rootRect.bottom - canvasRect.top) + this.options.stepGap;
 
-      for (let i = 0; i < element.children.length; i++) {
-        let child = element.children[i];
-        let childrect = child.html.getBoundingClientRect();
-        let childExtent = childrenDisplay[child.html.id].extent;
-        let childLeft = childXPos + childExtent / 2;
+    const rootXCenter = (rootRect.left - canvasRect.left) + (rootRect.width / 2);
 
-        child.setPosition(childLeft, childYPos);
+    //get the width of the child trees
+    let childTreeWidths = {};
+    let totalTreeWidth = 0;
 
-        //check for canvas height/width adjustments
-        //TODO possibly resize to smaller if elements are removed
-        if (childYPos + childrect.height > (canvasRect.height - childrect.height)) {
-          this.getCanvasContentElement().style.height = `${canvasRect.height + childrect.height * 2}px`;
-        }
+    rootNode.children.forEach(child => {
+      let totalChildWidth = child.getNodeTreeWidth();
+      childTreeWidths[child.html.id] = totalChildWidth ;
+      
+      totalTreeWidth += totalChildWidth;
+    });
 
-        if (childLeft + childrect.width + this.options.stepGap > canvasRect.width - childrect.width / 2) {
-          this.getCanvasContentElement().style.width = `${canvasRect.width + childrect.width}px`;
-        }
+    //add length for stepGaps between child trees
+    totalTreeWidth += (rootNode.children.length - 1) * this.options.stepGap;
 
-        childXPos += childExtent;
+    
 
-        const mockRect = {
-          bottom: childYPos + childrect.height + canvasRect.top,
-          left: childLeft + canvasRect.left,
-          width: childrect.width
-        } as DOMRect;
+    //if we only have one child, then center everything
+    if (rootNode.children.length == 1) {
+      let onlyChild = rootNode.children[0];
+      let rect = onlyChild.html.getBoundingClientRect();
+      onlyChild.setPosition(rootXCenter - (rect.width / 2), childYTop);
 
-        this.addArrow(element.html.id, currentRect, mockRect, canvasRect);
+      let childRect = {
+        bottom: childYTop + rect.height,
+        left: rootXCenter - (rect.width / 2),
+        width: rect.width
+      } as DOMRect
 
+      this.addArrow(rootNode.html.id, rootRect, childRect, canvasRect);
+      this.renderChildTree(onlyChild, childRect);
+    }
+    else {
+      //if we have more than 1 child, we want half the extent on the left and half on the right
+      let leftXTree = rootXCenter - (totalTreeWidth / 2);
+      
+      rootNode.children.forEach(child => {
+        let rect = child.html.getBoundingClientRect();
+        let childExtent = childTreeWidths[child.html.id];
 
+        let childLeft = leftXTree + (childExtent / 2) - (rect.width / 2);
+        child.setPosition(childLeft, childYTop);
 
-        //since the element hasnt actually updated position yet, we need to create a fake DOMRect and pass it
-        //otherwise we could just refetch the bounding rect
-        this.renderChildren(child, mockRect);
-      }
+        let childRect = {
+          bottom: childYTop + rect.height,
+          left: childLeft,
+          width: rect.width
+        } as DOMRect
 
+        this.addArrow(rootNode.html.id, rootRect, childRect, canvasRect);
+
+        this.renderChildTree(child, childRect);
+
+        leftXTree += childExtent + this.options.stepGap;
+      })
     }
   }
 
@@ -246,7 +255,7 @@ export class NgFlowchartCanvasService {
 
     const rootRect = root.html.getBoundingClientRect();
 
-    this.renderChildren(root, rootRect);
+    this.renderChildTree(root, rootRect);
 
     root.showTree();
   }

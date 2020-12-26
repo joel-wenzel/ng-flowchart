@@ -40,6 +40,7 @@ export namespace NgFlowchart {
         render() {
             this.canvas.reRender();
         }
+
     }
 
     export class Step {
