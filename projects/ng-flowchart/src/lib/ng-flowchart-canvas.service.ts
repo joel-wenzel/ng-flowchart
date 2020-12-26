@@ -96,19 +96,6 @@ export class NgFlowchartCanvasService {
     view.destroy();
   }
 
-  private getLeafNodeExtent(element: NgFlowCanvas.CanvasElement, extent = 0, count = 0) {
-    if (!element.children || element.children.length == 0) {
-      return [extent + (element.html.getBoundingClientRect().width + this.options.stepGap), ++count];
-    }
-
-    element.children.forEach(child => {
-      let ret = this.getLeafNodeExtent(child, extent, count);
-      extent = ret[0];
-      count = ret[1];
-    })
-    return [extent, count];
-  }
-
   private renderChildTree(rootNode: NgFlowCanvas.CanvasElement, rootRect: DOMRect) {
     //the rootNode passed in is already rendered. just need to render its children /subtree
 
@@ -119,8 +106,8 @@ export class NgFlowchartCanvasService {
 
     //top of the child row is simply the relative bottom of the root + stepGap
     const childYTop = (rootRect.bottom - canvasRect.top) + this.options.stepGap;
-
     const rootXCenter = (rootRect.left - canvasRect.left) + (rootRect.width / 2);
+
 
     //get the width of the child trees
     let childTreeWidths = {};
@@ -128,55 +115,38 @@ export class NgFlowchartCanvasService {
 
     rootNode.children.forEach(child => {
       let totalChildWidth = child.getNodeTreeWidth();
-      childTreeWidths[child.html.id] = totalChildWidth ;
-      
+      childTreeWidths[child.html.id] = totalChildWidth;
+      child.html.innerText = totalChildWidth + "";
       totalTreeWidth += totalChildWidth;
     });
 
     //add length for stepGaps between child trees
     totalTreeWidth += (rootNode.children.length - 1) * this.options.stepGap;
 
-    
 
-    //if we only have one child, then center everything
-    if (rootNode.children.length == 1) {
-      let onlyChild = rootNode.children[0];
-      let rect = onlyChild.html.getBoundingClientRect();
-      onlyChild.setPosition(rootXCenter - (rect.width / 2), childYTop);
+    //if we have more than 1 child, we want half the extent on the left and half on the right
+    let leftXTree = rootXCenter - (totalTreeWidth / 2);
 
+    rootNode.children.forEach(child => {
+      let rect = child.html.getBoundingClientRect();
+      let childExtent = childTreeWidths[child.html.id];
+
+      let childLeft = leftXTree + (childExtent / 2) - (rect.width / 2);
+      child.setPosition(childLeft, childYTop);
+
+      //need to offset the rects from the canvas since the beginning will offset them
       let childRect = {
-        bottom: childYTop + rect.height,
-        left: rootXCenter - (rect.width / 2),
+        bottom: childYTop + rect.height + canvasRect.top,
+        left: childLeft + canvasRect.left,
         width: rect.width
       } as DOMRect
 
       this.addArrow(rootNode.html.id, rootRect, childRect, canvasRect);
-      this.renderChildTree(onlyChild, childRect);
-    }
-    else {
-      //if we have more than 1 child, we want half the extent on the left and half on the right
-      let leftXTree = rootXCenter - (totalTreeWidth / 2);
-      
-      rootNode.children.forEach(child => {
-        let rect = child.html.getBoundingClientRect();
-        let childExtent = childTreeWidths[child.html.id];
 
-        let childLeft = leftXTree + (childExtent / 2) - (rect.width / 2);
-        child.setPosition(childLeft, childYTop);
+      this.renderChildTree(child, childRect);
+      leftXTree += childExtent + this.options.stepGap;
+    })
 
-        let childRect = {
-          bottom: childYTop + rect.height,
-          left: childLeft,
-          width: rect.width
-        } as DOMRect
-
-        this.addArrow(rootNode.html.id, rootRect, childRect, canvasRect);
-
-        this.renderChildTree(child, childRect);
-
-        leftXTree += childExtent + this.options.stepGap;
-      })
-    }
   }
 
   addArrow(parentId, parentRect: DOMRect, childRect: DOMRect, canvasRect: DOMRect) {
@@ -256,8 +226,37 @@ export class NgFlowchartCanvasService {
     const rootRect = root.html.getBoundingClientRect();
 
     this.renderChildTree(root, rootRect);
-
     root.showTree();
+
+    this.adjustDimensions();
+
+  }
+
+  private adjustDimensions() {
+    const canvasRect = this.getCanvasRect();
+   
+    let maxRight = 0;
+    let maxBottom = 0;
+  
+    //TODO this can be better
+    this.canvasData.allElements.forEach(
+      ele => {
+        let rect = ele.html.getBoundingClientRect()
+        maxRight = Math.max(rect.right, maxRight);
+        maxBottom = Math.max(rect.bottom, maxBottom);
+      }
+    );
+    
+    const widthDiff = canvasRect.width - (maxRight - canvasRect.left);
+    if(widthDiff < 100) {
+      this.getCanvasContentElement().style.width = `${canvasRect.width + 200}px`;
+    }
+
+    const heightDiff = canvasRect.height - (maxBottom - canvasRect.top);
+    if(heightDiff < 100) {
+      this.getCanvasContentElement().style.height = `${canvasRect.height + 200}px`;
+    }
+    
   }
 
   private findDropLocationForHover(mouseLocation: NgFlowCanvas.CanvasPosition, targetStep: NgFlowCanvas.CanvasElement, canvasRect: DOMRect): [NgFlowchart.DropPosition, number] | 'deadzone' | null {

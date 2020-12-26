@@ -11,16 +11,54 @@
     <div
       class="plugin-op"
       *ngFor="let op of pluginOps"
-      [ngFlowchartStep]="canvasContent"
+      [ngFlowchartStep]="normalStep"
       [ngFlowchartStepData]="op"
     >
       <span>{{ op.name }}</span>
     </div>
+    <div
+      class="plugin-op"
+      *ngFor="let op of wideOps"
+      [ngFlowchartStep]="wideStep"
+      [ngFlowchartStepData]="op"
+    >
+      <span>{{ op.name }}</span>
+    </div>
+    <div
+      class="plugin-op"
+      *ngFor="let op of tallOps"
+      [ngFlowchartStep]="tallStep"
+      [ngFlowchartStepData]="op"
+    >
+      <span>{{ op.name }}</span>
+    </div>
+
     <button (click)="printFlowData()">Get Flow Data</button>
-    <ng-template #canvasContent let-data="data">
-      <div class="card" [attr.name]="data.name" #card>
+    <ng-template #normalStep let-data="data">
+      <div class="card" [attr.name]="data.name" #card (click)="onClick(card.id)">
         <span>{{ data.name }}</span>
-        <button (click)="onClick(card.id)"></button>
+    
+      </div>
+    </ng-template>
+    <ng-template #wideStep let-data="data">
+      <div
+        class="card wide"
+        [attr.name]="data.name"
+        #wide
+        (click)="onClick(wide.id)"
+      >
+        <span>{{ data.name }}</span>
+      
+      </div>
+    </ng-template>
+    <ng-template #tallStep let-data="data">
+      <div
+        class="card tall"
+        [attr.name]="data.name"
+        #tall
+        (click)="onClick(tall.id)"
+      >
+        <span>{{ data.name }}</span>
       </div>
     </ng-template>
   </div>

@@ -12,12 +12,11 @@ main {
     height: 100%;
     background: #f0f0f0;
     flex: 1;
-
+    margin: 100px 0 0 100px;
     background-size: 30px 30px;
     background-image: linear-gradient(to right, #d9d9d9 1px, transparent 1px),
         linear-gradient(to bottom, #d9d9d9 1px, transparent 1px);
 }
-
 
 #palette {
     width: 300px;
@@ -43,4 +42,13 @@ main {
     height: 4em;
 
     cursor: pointer;
+
+    &.tall {
+        height: 8em;
+    }
+
+    &.wide {
+        width: 16em;
+    }
 }
+

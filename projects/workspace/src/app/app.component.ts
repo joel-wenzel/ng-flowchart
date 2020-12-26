@@ -20,15 +20,26 @@ export class AppComponent {
     {
       name: 'Router',
       condition: ''
-    },
+    }
+    
+  ]
+
+  wideOps = [
     {
-      name: 'Notification Really Long Title',
+      name: 'Wide Step',
       inputs: [
         {
           name: 'Address',
           value: null
         }
       ]
+    }
+  ]
+
+  tallOps = [
+    {
+      name: 'Tall Step',
+      inputs: []
     }
   ]
 

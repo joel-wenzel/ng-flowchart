@@ -87,23 +87,19 @@ export namespace NgFlowCanvas {
         }
 
         getNodeTreeWidth() {
-            return this._getNodeTreeWidth();
-        }
-
-
-        private _getNodeTreeWidth(extent = 0) {
             const currentNodeWidth = this.html.getBoundingClientRect().width;
 
             if (!this.children || this.children.length == 0) {
-                return extent + (this.html.getBoundingClientRect().width);
+                return this.html.getBoundingClientRect().width;
             }
 
-            this.children.forEach(child => {
-                extent = child._getNodeTreeWidth(extent);
-            })
-            extent += this.canvasRef.options.stepGap * (this.children.length - 1);
+            let childWidth = this.children.reduce((childTreeWidth, child) => {
+                return childTreeWidth += child.getNodeTreeWidth();
+            }, 0)
 
-            return Math.max(currentNodeWidth, extent);
+            childWidth += this.canvasRef.options.stepGap * (this.children.length - 1);
+
+            return Math.max(currentNodeWidth, childWidth);
         }
 
         isRootElement(): boolean {
