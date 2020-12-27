@@ -180,7 +180,7 @@ flow.getRoot().getChildren()
 - #### **delete(recursive = false)**
     Deletes this node from the tree. Returns true or false if delete was a success.
 
-- #### **addChild(template, data?, index?)**
+- #### **addChild(template, options?)**
     Adds a direct child of this step using the templateRef content and data
 
 ## Generating Output
