@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
 import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src/public-api';
 
@@ -11,6 +11,9 @@ export class AppComponent {
   title = 'workspace';
 
   callbacks: NgFlowchart.Callbacks = {};
+
+  @ViewChild('normalStep')
+  normalStepTemplate: TemplateRef<any>;
 
   pluginOps = [
     {
@@ -72,5 +75,28 @@ export class AppComponent {
 
   printFlowData() {
     console.log(this.canvasElement.getFlowJSON());    
+  }
+
+  addChild(id) {
+    const options: NgFlowchart.AddChildOptions = {
+      asSibling: true,
+      data: {
+        name: 'Do Action',
+        inputs: []
+      }
+    }
+    this.canvasElement.getFlow().getStep(id).addChild(this.normalStepTemplate, options);
+  }
+
+  addChildAtIndex(id) {
+    const options: NgFlowchart.AddChildOptions = {
+      asSibling: true,
+      index: 0,
+      data: {
+        name: 'Do Action',
+        inputs: []
+      }
+    }
+    this.canvasElement.getFlow().getStep(id).addChild(this.normalStepTemplate, options);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, ViewContainerRef } from '@angular/core';
+import { Injectable, TemplateRef, ViewContainerRef } from '@angular/core';
 import { NgFlowCanvas } from './model/canvas.model';
 import { NgFlowchart } from './model/flow.model';
 import { CONSTANTS } from './model/flowchart.constants';
@@ -63,22 +63,34 @@ export class NgFlowchartCanvasService {
 
   }
 
+  public addStep(template: TemplateRef<any>, data: any, adjacent: NgFlowCanvas.CanvasElement, position: NgFlowchart.DropPosition, relativeDropLoc): NgFlowCanvas.CanvasElement {
+    let view = this.createCanvasElement(template, data, relativeDropLoc);
+
+    if (!this.canDropElement(view, this.dragHover?.adjacentElement)) {
+      this.cancelDrop(view, this.dragHover?.adjacentElement);
+      this.destroyStep(view);
+      return;
+    }
+
+    this.addCanvasElement(view, adjacent, position);
+    return view;
+  }
+
   public dropPaletteStep(drag: DragEvent) {
 
     let relativeDropLoc = this.getRelativeDropLocation(drag, this.canvasData.allElements.length == 0);
 
     if (relativeDropLoc) {
       //create the template
-      let view = this.createCanvasElement(relativeDropLoc);
+      let view = this.addStep(
+        this.data.getTemplateRef().template, 
+        this.data.getTemplateRef().data, 
+        this.dragHover?.adjacentElement, 
+        this.dragHover?.relativePosition, 
+        relativeDropLoc
+      );
+
       view.setPosition(relativeDropLoc.x - view.html.offsetWidth / 2, relativeDropLoc.y - (view.html.offsetHeight / 2));
-
-      if (!this.canDropElement(view, this.dragHover?.adjacentElement)) {
-        this.cancelDrop(view, this.dragHover?.adjacentElement);
-        this.destroyStep(view);
-        return;
-      }
-
-      this.addCanvasElement(view);
 
       this.render();
     }
@@ -116,7 +128,7 @@ export class NgFlowchartCanvasService {
     rootNode.children.forEach(child => {
       let totalChildWidth = child.getNodeTreeWidth();
       childTreeWidths[child.html.id] = totalChildWidth;
-      child.html.innerText = totalChildWidth + "";
+
       totalTreeWidth += totalChildWidth;
     });
 
@@ -234,10 +246,10 @@ export class NgFlowchartCanvasService {
 
   private adjustDimensions() {
     const canvasRect = this.getCanvasRect();
-   
+
     let maxRight = 0;
     let maxBottom = 0;
-  
+
     //TODO this can be better
     this.canvasData.allElements.forEach(
       ele => {
@@ -246,17 +258,17 @@ export class NgFlowchartCanvasService {
         maxBottom = Math.max(rect.bottom, maxBottom);
       }
     );
-    
+
     const widthDiff = canvasRect.width - (maxRight - canvasRect.left);
-    if(widthDiff < 100) {
+    if (widthDiff < 100) {
       this.getCanvasContentElement().style.width = `${canvasRect.width + 200}px`;
     }
 
     const heightDiff = canvasRect.height - (maxBottom - canvasRect.top);
-    if(heightDiff < 100) {
+    if (heightDiff < 100) {
       this.getCanvasContentElement().style.height = `${canvasRect.height + 200}px`;
     }
-    
+
   }
 
   private findDropLocationForHover(mouseLocation: NgFlowCanvas.CanvasPosition, targetStep: NgFlowCanvas.CanvasElement, canvasRect: DOMRect): [NgFlowchart.DropPosition, number] | 'deadzone' | null {
@@ -374,18 +386,18 @@ export class NgFlowchartCanvasService {
   }
 
 
-  private createCanvasElement(location: { x: number, y: number }): NgFlowCanvas.CanvasElement {
+  private createCanvasElement(template: TemplateRef<any>, data: any, location: { x: number, y: number }): NgFlowCanvas.CanvasElement {
 
-    const view: NgFlowchart.StepView = this.viewContainer.createEmbeddedView(this.data.getTemplateRef().template, {
-      data: this.data.getTemplateRef().data
+    const view: NgFlowchart.StepView = this.viewContainer.createEmbeddedView(template, {
+      data: data
     });
 
-    view.data = this.data.getTemplateRef().data;
+    view.data = data;
 
     this.getCanvasContentElement().appendChild((view.rootNodes[0] as HTMLElement));
 
     let canvasEle = new NgFlowCanvas.CanvasElement(view, this);
-    canvasEle.setPosition(location.x, location.y);
+    canvasEle.setPosition(location?.x || '50%', location?.y || '50%');
 
     return canvasEle;
   }
@@ -468,16 +480,14 @@ export class NgFlowchartCanvasService {
     }
   }
 
-  private addCanvasElement(element: NgFlowCanvas.CanvasElement) {
+  private addCanvasElement(element: NgFlowCanvas.CanvasElement, adjacent: NgFlowCanvas.CanvasElement, position: NgFlowchart.DropPosition) {
 
-    if (this.dragHover) {
-
-      let adjacent = this.dragHover.adjacentElement;
+    if (adjacent && position) {
 
       this.canvasData.allElements.push(element);
       element.html.classList.add('placed');
 
-      switch (this.dragHover.relativePosition) {
+      switch (position) {
         case 'ABOVE':
           this.placeStepAbove(element, adjacent);
           break;
@@ -491,7 +501,7 @@ export class NgFlowchartCanvasService {
           this.placeStepAdjacent(element, adjacent, false);
           break;
         default:
-          console.error('invalid position', this.dragHover.relativePosition);
+          console.error('invalid position', position);
       }
 
 

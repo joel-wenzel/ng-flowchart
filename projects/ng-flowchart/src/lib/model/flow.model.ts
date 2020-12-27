@@ -28,7 +28,7 @@ export namespace NgFlowchart {
          */
         getStep(id): Step {
             let ele = this.canvas.canvasData.allElements.find(child => child.html.id == id);
-            if(ele) {
+            if (ele) {
                 return new Step(ele, this.canvas);
             }
             else return null;
@@ -106,21 +106,44 @@ export namespace NgFlowchart {
          */
         delete(recursive: boolean = false): boolean {
             let result = this.canvasElement.destroy(recursive);
-            if(result) {
+            if (result) {
                 this.canvas.reRender();
             }
             return result;
         }
 
         /**
-         * Adds a direct child of this step
+         * Adds a direct child to this step
          * @param template Ng Template Ref containing the content to display
-         * @param data Optional data to pass to the step
-         * @param index Optional index at which to create the child. By default the child will be pushed to the end
+         * @param options Child options when adding
          */
-        addChild(template: TemplateRef<any>, data?: any,  index?: number) {
-            throw 'Not yet implemented';
+        addChild(template: TemplateRef<any>, options?: AddChildOptions) {
+            if (options && options.asSibling && this.canvasElement.hasChildren()) {
+                let child;
+                if(options.index > -1) {
+                    child = this.canvasElement.children[options.index];
+                    this.canvas.addStep(template, options.data, child, 'LEFT', null);
+                }
+                else {
+                    child = this.canvasElement.children[this.canvasElement.children.length - 1];
+                    this.canvas.addStep(template, options.data, child, 'RIGHT', null);
+                }
+            }
+            else {
+                this.canvas.addStep(template, options.data, this.canvasElement, 'BELOW', null);
+            }
+
+            this.canvas.reRender();
         }
+    }
+
+    export type AddChildOptions = {
+        /** Optional data to pass to the step */
+        data?: any,
+        /** Should this child be added as a sibling of any existing children?  If false then existing children will be re-parented to this new child*/
+        asSibling?: boolean,
+        /** Optional index at which to create the child. By default the child will be pushed to the end */
+        index?: number
     }
 
     export interface StepView extends EmbeddedViewRef<any> {

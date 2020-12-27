@@ -112,8 +112,8 @@ export namespace NgFlowCanvas {
 
         setPosition(x, y): void {
             this.html.style.position = 'absolute';
-            this.html.style.left = `${x}px`;
-            this.html.style.top = `${y}px`;
+            this.html.style.left = `${x}${Number.isFinite(x)? 'px' : ''}`;
+            this.html.style.top = `${y}${Number.isFinite(y)? 'px' : ''}`;
 
         }
 

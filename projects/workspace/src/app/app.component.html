@@ -56,9 +56,10 @@
         class="card tall"
         [attr.name]="data.name"
         #tall
-        (click)="onClick(tall.id)"
       >
         <span>{{ data.name }}</span>
+        <button (click)="addChild(tall.id)"></button>
+        <button (click)="addChildAtIndex(tall.id)"></button>
       </div>
     </ng-template>
   </div>
