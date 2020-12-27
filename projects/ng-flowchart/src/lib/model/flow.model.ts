@@ -19,7 +19,7 @@ export namespace NgFlowchart {
          * Returns the root step of the flow chart
          */
         getRoot(): Step {
-            return this.canvas.canvasData.rootElement.getFlowStep();
+            return this.canvas.canvasData.rootElement?.getFlowStep();
         }
 
         /**
@@ -45,8 +45,11 @@ export namespace NgFlowchart {
          * Clears all flow chart, reseting the current canvas
          */
         clear() {
-            this.canvas.canvasData.rootElement.destroy(true, false);
-            this.canvas.reRender();
+            if (this.canvas.canvasData?.rootElement) {
+                this.canvas.canvasData.rootElement.destroy(true, false);
+                this.canvas.reRender();
+            }
+
         }
 
     }
@@ -128,7 +131,7 @@ export namespace NgFlowchart {
         addChild(template: TemplateRef<any>, options?: AddChildOptions) {
             if (options && options.asSibling && this.canvasElement.hasChildren()) {
                 let child;
-                if(options.index > -1) {
+                if (options.index > -1) {
                     child = this.canvasElement.children[options.index];
                     this.canvas.addStep(template, options.data, child, 'LEFT', null);
                 }
@@ -160,16 +163,16 @@ export namespace NgFlowchart {
 
     export class Options {
         /** The gap (in pixels) between flow steps*/
-        stepGap: number = 40;
+        stepGap?: number = 40;
 
         /** An inner deadzone radius (in pixels) that will not register the hover icon  */
-        hoverDeadzoneRadius: number = 20;
+        hoverDeadzoneRadius?: number = 20;
 
         /** Is the flow sequential? If true, then you will not be able to drag parallel steps */
-        isSequential: boolean = false;
+        isSequential?: boolean = false;
 
         /** Should all children of a step be deleted along with the step. If false, the nodes will be reparented */
-        recursiveDelete: boolean = true;
+        recursiveDelete?: boolean = true;
     }
 
     export type DropEvent = {
