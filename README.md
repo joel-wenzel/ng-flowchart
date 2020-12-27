@@ -1,7 +1,7 @@
 
 # NgFlowchart
 
-[Demo](https://joelwenzel.com/projects/flowchart) | [Npm](https://www.npmjs.com/package/@joelwenzel/ng-flowchart) | [Getting started](#getting-started)
+[Demo](https://joelwenzel.com/projects/flowchart?palette=standard) | [Npm](https://www.npmjs.com/package/@joelwenzel/ng-flowchart) | [Getting started](#getting-started)
 
 An Angular Library for building drag and drop flow charts. Chart behavior is customizable. Data can be exported or uploaded in json or yaml format.
 
@@ -9,7 +9,7 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 
 # Contents
 
-- [Demo](https://joelwenzel.com/projects/flowchart)
+- [Demo](https://joelwenzel.com/projects/flowchart?palette=standard)
 - [Features](#features)
 - [Getting started](#getting-started)
 - [Supported Angular versions](#supported-angular-versions)
