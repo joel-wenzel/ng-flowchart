@@ -90,9 +90,11 @@ export class NgFlowchartCanvasService {
         relativeDropLoc
       );
 
-      view.setPosition(relativeDropLoc.x - view.html.offsetWidth / 2, relativeDropLoc.y - (view.html.offsetHeight / 2));
-
-      this.render();
+      if(view) {
+        view.setPosition(relativeDropLoc.x - view.html.offsetWidth / 2, relativeDropLoc.y - (view.html.offsetHeight / 2));
+        this.render();
+      }
+      
     }
   }
 

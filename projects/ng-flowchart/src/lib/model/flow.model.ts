@@ -41,6 +41,14 @@ export namespace NgFlowchart {
             this.canvas.reRender();
         }
 
+        /**
+         * Clears all flow chart, reseting the current canvas
+         */
+        clear() {
+            this.canvas.canvasData.rootElement.destroy(true, false);
+            this.canvas.reRender();
+        }
+
     }
 
     export class Step {

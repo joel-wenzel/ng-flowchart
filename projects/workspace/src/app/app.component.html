@@ -34,8 +34,9 @@
     </div>
 
     <button (click)="printFlowData()">Get Flow Data</button>
+    <button (click)="clearData()">Clear Flow</button>
     <ng-template #normalStep let-data="data">
-      <div class="card" [attr.name]="data.name" #card (click)="onClick(card.id)">
+      <div class="card" [attr.name]="data.name" #card (click)="onDelete(card.id)">
         <span>{{ data.name }}</span>
     
       </div>
@@ -45,9 +46,13 @@
         class="card wide"
         [attr.name]="data.name"
         #wide
-        (click)="onClick(wide.id)"
+        
       >
         <span>{{ data.name }}</span>
+        <div>
+          <button (click)="onDelete(wide.id)">Delete</button>
+          <button (click)="onEdit(wide.id)">Edit</button>
+        </div>
       
       </div>
     </ng-template>

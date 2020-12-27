@@ -57,9 +57,15 @@ export class AppComponent {
   }
 
 
-  onClick(id) {
+  onDelete(id) {
     this.canvasElement.getFlow().getStep(id).delete();
    
+  }
+
+  onEdit(id) {
+    let data = this.canvasElement.getFlow().getStep(id).getData();
+    data.name = Date.now();
+    data.inputs[0].value = Date.now();
   }
 
   canMoveStep(dropEvent: NgFlowchart.DropEvent): boolean {
@@ -69,12 +75,15 @@ export class AppComponent {
   }
 
   canAddStep(dropEvent: NgFlowchart.DropEvent): boolean {
-    console.log(dropEvent);
     return true;
   }
 
   printFlowData() {
     console.log(this.canvasElement.getFlowJSON());    
+  }
+
+  clearData() {
+    this.canvasElement.getFlow().clear();
   }
 
   addChild(id) {

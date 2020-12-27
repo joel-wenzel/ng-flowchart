@@ -167,9 +167,9 @@ export namespace NgFlowCanvas {
             return this.children && this.children.length >= numChildren;
         }
 
-        destroy(recursive: boolean = true): boolean {
+        destroy(recursive: boolean = true, checkCallbacks: boolean = true): boolean {
 
-            if (this.canvasRef.callbacks.canDeleteStep) {
+            if (this.canvasRef.callbacks.canDeleteStep && checkCallbacks) {
                 if (!this.canvasRef.callbacks.canDeleteStep(this.getFlowStep())) {
                     //TODO show the cancel anim here
                     console.log('User override for delete');

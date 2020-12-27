@@ -155,6 +155,9 @@ flow.getRoot().getChildren()
 - #### **getStep(id)**
     Returns a step in the flowchart with the given id. Steps are created with the id of the html element id.
 
+- #### **clear()**
+    Clears the current flow, reseting the canvas. canDeleteStep callbacks will not be called from this method.
+
 ## Step Object Methods
 - #### **toJSON()**
     Returns the JSON representation of this step.
@@ -283,8 +286,9 @@ Callbacks are passed via the **ngFlowchartCallbacks** input on the **ngFlowchart
 callbacks: NgFlowchart.Callbacks = {};
 
 constructor() {
-   this.callbacks.canMoveStep = this.canMoveStep;
-   this.callbacks.canAddStep = this.canAddStep; 
+  //be sure to bind this to the callback if you want to access this classes context
+   this.callbacks.canMoveStep = this.canMoveStep.bind(this);
+   this.callbacks.canAddStep = this.canAddStep.bind(this); 
 }
 
 canMoveStep(dropEvent: NgFlowchart.DropEvent): boolean {
@@ -309,3 +313,9 @@ canAddStep(dropEvent: NgFlowchart.DropEvent): boolean {
 
 ### My step isnt dropping in the correct spot
 The most common reason your step isnt dropping correctly is that you forgot to [include the stylesheet](#getting-started) for the module.
+
+### Undefined variables in a callback
+If you are trying to access your component variables and functions inside a callback be sure that you bound the "this" object when assigning the callback.
+```
+this.callbacks.canMoveStep = this.canMoveStep.bind(this);
+```
