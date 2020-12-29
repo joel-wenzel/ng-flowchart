@@ -26,9 +26,23 @@ export class NgFlowchartCanvasService {
     window['canvas'] = this.canvasData;
   }
 
-  public init(view: ViewContainerRef, callbacks?: NgFlowchart.Callbacks, options?: NgFlowchart.Options) {
+  public init(view: ViewContainerRef) {
     this.viewContainer = view;
-    this.options = options || new NgFlowchart.Options();
+  }
+
+  public setOptions(options?: NgFlowchart.Options) {
+    this.options = options;
+
+    document.styleSheets[0].addRule('.ngflowchart-canvas-step[ngflowchart-drop-hover]::before', `
+      background: ${this.options.theme.dropIcon}
+    `)
+
+    document.styleSheets[0].addRule('.ngflowchart-canvas-step[ngflowchart-drop-hover]::after', `
+      background: ${this.options.theme.dropIconBackground}
+    `)
+  }
+
+  public setCallbacks(callbacks?: NgFlowchart.Callbacks) {
     this.callbacks = callbacks || {};
   }
 
@@ -83,18 +97,18 @@ export class NgFlowchartCanvasService {
     if (relativeDropLoc) {
       //create the template
       let view = this.addStep(
-        this.data.getTemplateRef().template, 
-        this.data.getTemplateRef().data, 
-        this.dragHover?.adjacentElement, 
-        this.dragHover?.relativePosition, 
+        this.data.getTemplateRef().template,
+        this.data.getTemplateRef().data,
+        this.dragHover?.adjacentElement,
+        this.dragHover?.relativePosition,
         relativeDropLoc
       );
 
-      if(view) {
+      if (view) {
         view.setPosition(relativeDropLoc.x - view.html.offsetWidth / 2, relativeDropLoc.y - (view.html.offsetHeight / 2));
         this.render();
       }
-      
+
     }
   }
 
@@ -183,7 +197,7 @@ export class NgFlowchartCanvasService {
     bottom.classList.add('arrow-section');
     bottom.setAttribute('style', `width: 100%; height: 50%;`);
 
-    const border = '2px solid #b4b4b4';
+    const border = '2px solid ' + this.options.theme.connectors;
 
     //child is to the right
     if (parentRect.left < childRect.left) {
@@ -207,7 +221,7 @@ export class NgFlowchartCanvasService {
     else {
       div.style.width = '2px';
       div.style.left = `${(parentRect.left - canvasRect.left) + parentRect.width / 2}px`;
-      div.style.background = '#b4b4b4';
+      div.style.background = this.options.theme.connectors;
 
     }
 

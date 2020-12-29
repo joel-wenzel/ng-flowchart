@@ -26,24 +26,23 @@
   content: "";
   width: 12px;
   height: 12px;
-  background: darkred;
   border-radius: 100%;
   position: absolute;
   z-index: 1;
-
 }
+
+
 
 .ngflowchart-canvas-step[ngflowchart-drop-hover]::after {
   content: "";
   width: 20px;
   height: 20px;
-  background: rgb(192, 123, 123);
   border-radius: 100%;
   position: absolute;
   z-index: 0;
 
   //TODO mixin so theme can be set
-  animation: backgroundAnim 2s linear infinite;
+  animation: backgroundOpacity 2s linear infinite;
 }
 
 .ngflowchart-canvas-step[ngflowchart-drop-hover="above"]::before,
@@ -79,7 +78,7 @@
 @keyframes wiggle {
   0% {
     transform: translateX(0);
-    border: 2px solid darkred;
+    border: 2px solid red;
   }
   25% {
     transform: translateX(-10px);
@@ -92,18 +91,18 @@
   }
   100% {
     transform: translateX(0);
-    border: 2px solid darkred;
+    border: 2px solid red;
   }
 }
 
-@keyframes backgroundAnim {
+@keyframes backgroundOpacity {
   0% {
-    background: rgb(192, 123, 123);
+    opacity: .8
   }
   50% {
-    background: rgb(194, 163, 163);
+    opacity: .3
   }
   100% {
-    background: rgb(192, 123, 123);
+    opacity: .8
   }
 }

@@ -171,8 +171,17 @@ export namespace NgFlowchart {
         /** Is the flow sequential? If true, then you will not be able to drag parallel steps */
         isSequential?: boolean = false;
 
-        /** Should all children of a step be deleted along with the step. If false, the nodes will be reparented */
-        recursiveDelete?: boolean = true;
+        /** Theme/color of the drop icons and connectors */
+        theme?: {
+            connectors?: string,
+            dropIcon?: string,
+            dropIconBackground?: string
+        } = {
+            connectors: 'lightgrey',
+            dropIcon: 'darkred',
+            dropIconBackground: 'rgb(192, 123, 123)'
+        }
+
     }
 
     export type DropEvent = {
