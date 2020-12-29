@@ -29,6 +29,7 @@
   border-radius: 100%;
   position: absolute;
   z-index: 1;
+  background: darkred;
 }
 
 
@@ -40,7 +41,7 @@
   border-radius: 100%;
   position: absolute;
   z-index: 0;
-
+  background: rgb(192, 123, 123);
   //TODO mixin so theme can be set
   animation: backgroundOpacity 2s linear infinite;
 }
