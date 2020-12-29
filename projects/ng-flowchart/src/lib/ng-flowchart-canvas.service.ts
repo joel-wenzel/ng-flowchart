@@ -26,20 +26,36 @@ export class NgFlowchartCanvasService {
     window['canvas'] = this.canvasData;
   }
 
-  public init(view: ViewContainerRef) {
+  public init(view: ViewContainerRef, options?: NgFlowchart.Options) {
     this.viewContainer = view;
+    this.setOptions(options);
   }
 
   public setOptions(options?: NgFlowchart.Options) {
+    const defaultOpts = new NgFlowchart.Options();
+
+    options = {
+      ...defaultOpts,
+      ...options,
+      theme: {
+        ...defaultOpts.theme,
+        ...options?.theme
+      }
+    };
+
+    options.stepGap = Math.max(options.stepGap, 20);
+    options.hoverDeadzoneRadius = Math.max(options.hoverDeadzoneRadius, 0);
+    
     this.options = options;
 
-    document.styleSheets[0].addRule('.ngflowchart-canvas-step[ngflowchart-drop-hover]::before', `
-      background: ${this.options.theme.dropIcon}
-    `)
 
-    document.styleSheets[0].addRule('.ngflowchart-canvas-step[ngflowchart-drop-hover]::after', `
-      background: ${this.options.theme.dropIconBackground}
-    `)
+    // document.styleSheets[0].addRule('.ngflowchart-canvas-step[ngflowchart-drop-hover]::before', `
+    //   background: ${this.options.theme.dropIcon}
+    // `)
+
+    // document.styleSheets[0].addRule('.ngflowchart-canvas-step[ngflowchart-drop-hover]::after', `
+    //   background: ${this.options.theme.dropIconBackground}
+    // `)
   }
 
   public setCallbacks(callbacks?: NgFlowchart.Callbacks) {
