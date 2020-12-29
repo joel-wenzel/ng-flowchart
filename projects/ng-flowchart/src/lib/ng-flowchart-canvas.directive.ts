@@ -36,16 +36,33 @@ export class NgFlowchartCanvasDirective implements OnInit {
 
     }
 
+    _options: NgFlowchart.Options;
+    _callbacks: NgFlowchart.Callbacks;
+
     @HostListener('window:resize', ['$event'])
     protected onResize(event) {
         this.canvas.reRender();
     }
 
     @Input('ngFlowchartCallbacks')
-    callbacks: NgFlowchart.Callbacks;
+    set callbacks(callbacks: NgFlowchart.Callbacks) {
+        this._callbacks = callbacks;
+        if(!!this.canvas) {
+            this.canvas.setCallbacks(this._callbacks);
+        }
+    }
 
     @Input('ngFlowchartOptions')
-    options: NgFlowchart.Options;
+    set options(options: NgFlowchart.Options) {
+        this._options = this.sanitizeOptions(options);
+        if(!!this.canvas) {
+            
+            this.canvas.setOptions(this._options);
+            this.canvas.reRender();
+        }
+    }
+
+
 
     constructor(
         protected canvasEle: ElementRef<HTMLElement>,
@@ -60,7 +77,7 @@ export class NgFlowchartCanvasDirective implements OnInit {
     }
 
     ngOnInit() {
-        this.canvas.init(this.viewContainer, this.callbacks, this.options);
+        this.canvas.init(this.viewContainer);
     }
 
     private createCanvasContent(viewContainer: ViewContainerRef) {
@@ -68,13 +85,24 @@ export class NgFlowchartCanvasDirective implements OnInit {
         let canvasContent = document.createElement('div');
         canvasContent.classList.add(CONSTANTS.CANVAS_CONTENT_CLASS);
         canvasEle.appendChild(canvasContent);
-
-        canvasEle.onresize = event => {
-            
-        }
     }
 
-    
+    private sanitizeOptions(options: NgFlowchart.Options) {
+        const defaultOpts = new NgFlowchart.Options();
+        
+        options = {
+            ...defaultOpts,
+            ...options,
+            theme: {
+                ...defaultOpts.theme,
+                ...options.theme
+            }
+        };
+        
+        options.stepGap = Math.max(options.stepGap, 20);
+        options.hoverDeadzoneRadius = Math.abs(options.hoverDeadzoneRadius);
+        return options;
+    }
 
     public getFlow(): NgFlowchart.Flow {
         return new NgFlowchart.Flow(this.canvas);

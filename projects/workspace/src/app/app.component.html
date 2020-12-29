@@ -2,9 +2,7 @@
   <div
     id="canvas"
     ngFlowchartCanvas
-    [ngFlowchartOptions]="{
-      stepGap: 40
-    }"
+    [ngFlowchartOptions]="options"
     [ngFlowchartCallbacks]="callbacks"
   ></div>
   <div id="palette">
@@ -35,6 +33,8 @@
 
     <button (click)="printFlowData()">Get Flow Data</button>
     <button (click)="clearData()">Clear Flow</button>
+    
+    <input type="number" id="step-gap" (change)="stepGapChanged($event)">
     <ng-template #normalStep let-data="data">
       <div class="card" [attr.name]="data.name" #card (click)="onDelete(card.id)">
         <span>{{ data.name }}</span>

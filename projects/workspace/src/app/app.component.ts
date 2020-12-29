@@ -1,4 +1,4 @@
-import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, TemplateRef, ViewChild } from '@angular/core';
 import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
 import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src/public-api';
 
@@ -11,6 +11,12 @@ export class AppComponent {
   title = 'workspace';
 
   callbacks: NgFlowchart.Callbacks = {};
+  options: NgFlowchart.Options = {
+    stepGap: 40,
+    theme: {
+      connectors: 'pink'
+    }
+  }
 
   @ViewChild('normalStep')
   normalStepTemplate: TemplateRef<any>;
@@ -51,7 +57,7 @@ export class AppComponent {
 
 
 
-  constructor() {
+  constructor(private change: ChangeDetectorRef) {
     this.callbacks.canMoveStep = this.canMoveStep;
     this.callbacks.canAddStep = this.canAddStep;
   }
@@ -107,5 +113,14 @@ export class AppComponent {
       }
     }
     this.canvasElement.getFlow().getStep(id).addChild(this.normalStepTemplate, options);
+  }
+
+  stepGapChanged(event) {
+    this.options = {
+      ...this.options,
+      stepGap:  parseInt(event.target.value)
+    };
+    
+    
   }
 }
