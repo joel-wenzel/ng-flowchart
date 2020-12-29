@@ -3,7 +3,7 @@
 
 [Demo](https://joelwenzel-45c43.web.app/projects/flowchart) | [Npm](https://www.npmjs.com/package/@joelwenzel/ng-flowchart) | [Getting started](#getting-started)
 
-An Angular Library for building drag and drop flow charts. Chart behavior is customizable. Data can be exported or uploaded in json or yaml format.
+An Angular Library for building drag and drop flow charts. Chart behavior is customizable. Data can be exported or uploaded in json format.
 
 Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 
@@ -15,7 +15,6 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 - [Supported Angular versions](#supported-angular-versions)
 - [FAQ](#faq)
 - [Docs]()
-- [Theming]()
 
 ## Supported Angular versions
 
@@ -26,7 +25,7 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 - [Chart API](#chart-api) 
 - [Generating Output](#generating-output)
 - [Controlling Behavior](#controlling-behavior)
-- Theming
+- [Theming](#theming)
 - Custom Error Messages
 
 - Reading from Input
@@ -267,6 +266,8 @@ Options are passed via the **ngFlowchartOptions** input on the **ngFlowchartCanv
     An inner deadzone radius (in pixels) that will not register the hover icon. The default is 20.
 - #### **isSequential**
     Is the flow sequential? If true, then you will not be able to drag parallel steps.
+- #### **theme**
+    Control the general theme of the flow chart. See [theming](#theming) for more info.
 
 ### Callbacks
 Callbacks are passed via the **ngFlowchartCallbacks** input on the **ngFlowchartCanvas** directive.
@@ -309,6 +310,31 @@ canAddStep(dropEvent: NgFlowchart.DropEvent): boolean {
 - #### **onDropError?**: (drop: DropEvent) => void;
 - #### **onDropStep?**: (drop: DropEvent) => void;
 - #### **onMoveStep?**: (drop: DropEvent) => void;
+# Theming
+For the most part, the theme is left to the user given they have complete control over the canvas content via the step templates. **However, connectors and drop icons can be styled via the options input object.**
+```
+<div
+    id="canvas"
+    ngFlowchartCanvas
+    [ngFlowchartOptions]="{
+      stepGap: 40,
+      theme: {
+        dropIcon: 'my valid css color string',
+        dropIconBackground: 'blue',
+        connectors: '#606060'
+      }
+    }"
+    [ngFlowchartCallbacks]="callbacks"
+></div>
+```
+Additionally, if you want to completely override the style of the drop icons you can override the following css selectors:
+```
+/** The drop icon outer circle */
+.ngflowchart-canvas-step[ngflowchart-drop-hover]::after
+
+/** The drop icon inner circle */
+.ngflowchart-canvas-step[ngflowchart-drop-hover]::before
+```
 ## FAQ
 
 ### My step isnt dropping in the correct spot
