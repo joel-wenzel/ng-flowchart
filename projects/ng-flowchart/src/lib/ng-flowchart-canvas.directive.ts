@@ -54,7 +54,7 @@ export class NgFlowchartCanvasDirective implements OnInit {
 
     @Input('ngFlowchartOptions')
     set options(options: NgFlowchart.Options) {
-        this._options = this.sanitizeOptions(options);
+        this._options = options;
         if(!!this.canvas) {
             
             this.canvas.setOptions(this._options);
@@ -77,7 +77,7 @@ export class NgFlowchartCanvasDirective implements OnInit {
     }
 
     ngOnInit() {
-        this.canvas.init(this.viewContainer);
+        this.canvas.init(this.viewContainer, this.options);
     }
 
     private createCanvasContent(viewContainer: ViewContainerRef) {
@@ -85,23 +85,6 @@ export class NgFlowchartCanvasDirective implements OnInit {
         let canvasContent = document.createElement('div');
         canvasContent.classList.add(CONSTANTS.CANVAS_CONTENT_CLASS);
         canvasEle.appendChild(canvasContent);
-    }
-
-    private sanitizeOptions(options: NgFlowchart.Options) {
-        const defaultOpts = new NgFlowchart.Options();
-        
-        options = {
-            ...defaultOpts,
-            ...options,
-            theme: {
-                ...defaultOpts.theme,
-                ...options.theme
-            }
-        };
-        
-        options.stepGap = Math.max(options.stepGap, 20);
-        options.hoverDeadzoneRadius = Math.abs(options.hoverDeadzoneRadius);
-        return options;
     }
 
     public getFlow(): NgFlowchart.Flow {
