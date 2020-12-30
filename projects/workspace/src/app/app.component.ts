@@ -14,7 +14,8 @@ export class AppComponent {
   options: NgFlowchart.Options = {
     stepGap: 40,
     theme: {
-      connectors: 'pink'
+      connectors: 'pink',
+      dropIcon: 'blue'
     }
   }
 

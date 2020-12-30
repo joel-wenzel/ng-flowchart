@@ -77,7 +77,7 @@ export class NgFlowchartCanvasDirective implements OnInit {
     }
 
     ngOnInit() {
-        this.canvas.init(this.viewContainer, this.options);
+        this.canvas.init(this.viewContainer, this._options);
     }
 
     private createCanvasContent(viewContainer: ViewContainerRef) {
@@ -87,12 +87,26 @@ export class NgFlowchartCanvasDirective implements OnInit {
         canvasEle.appendChild(canvasContent);
     }
 
+    /**
+     * Returns the Flow object representing this flow chart.
+     */
     public getFlow(): NgFlowchart.Flow {
         return new NgFlowchart.Flow(this.canvas);
     }
 
+    /**
+     * Returns the json representing this flow chart
+     */
     public getFlowJSON(): string {
         return new NgFlowchart.Flow(this.canvas).toJSON();
     }
+
+    // /**
+    //  * Sets the flow object from the given json string. Typically used to reload a saved flow.
+    //  * @param flow -Json representation of the flow. See getFlowJSON()
+    //  */
+    // public setFlow(flow: string) {
+
+    // }
 
 }

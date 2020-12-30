@@ -20,6 +20,8 @@ export class NgFlowchartCanvasService {
     relativePosition: NgFlowchart.DropPosition
   };
 
+  themeStyleSheet: CSSStyleSheet;
+
   constructor(private data: NgFlowchartDataService) {
     this.canvasData = new NgFlowCanvas.Canvas();
 
@@ -43,19 +45,30 @@ export class NgFlowchartCanvasService {
       }
     };
 
-    options.stepGap = Math.max(options.stepGap, 20);
-    options.hoverDeadzoneRadius = Math.max(options.hoverDeadzoneRadius, 0);
-    
+    options.stepGap = Math.max(options.stepGap, 20) || 40;
+    options.hoverDeadzoneRadius = Math.max(options.hoverDeadzoneRadius, 0) || 20;
+
     this.options = options;
 
+    this.updateTheme(this.options.theme);
+  }
 
-    // document.styleSheets[0].addRule('.ngflowchart-canvas-step[ngflowchart-drop-hover]::before', `
-    //   background: ${this.options.theme.dropIcon}
-    // `)
+  private updateTheme(theme) {
+    if(!this.themeStyleSheet) {
+      let style = document.createElement('style');
+      style.appendChild(document.createTextNode(''));
+      document.head.appendChild(style);
 
-    // document.styleSheets[0].addRule('.ngflowchart-canvas-step[ngflowchart-drop-hover]::after', `
-    //   background: ${this.options.theme.dropIconBackground}
-    // `)
+      this.themeStyleSheet = style.sheet;
+    }
+    
+    this.themeStyleSheet.addRule('.ngflowchart-canvas-step[ngflowchart-drop-hover]::before', `
+      background: ${this.options.theme.dropIcon}
+    `)
+
+    this.themeStyleSheet.addRule('.ngflowchart-canvas-step[ngflowchart-drop-hover]::after', `
+      background: ${this.options.theme.dropIconBackground}
+    `)
   }
 
   public setCallbacks(callbacks?: NgFlowchart.Callbacks) {
