@@ -2,7 +2,7 @@
   <div
     id="canvas"
     ngFlowchartCanvas
-   
+    [ngFlowchartOptions]="options"
     [ngFlowchartCallbacks]="callbacks"
   ></div>
   <div id="palette">
@@ -33,35 +33,29 @@
 
     <button (click)="printFlowData()">Get Flow Data</button>
     <button (click)="clearData()">Clear Flow</button>
-    
-    <input type="number" id="step-gap" (change)="stepGapChanged($event)">
+
+    <input type="number" id="step-gap" (change)="stepGapChanged($event)" />
     <ng-template #normalStep let-data="data">
-      <div class="card" [attr.name]="data.name" #card (click)="onDelete(card.id)">
+      <div
+        class="card"
+        [attr.name]="data.name"
+        #card
+        (click)="onDelete(card.id)"
+      >
         <span>{{ data.name }}</span>
-    
       </div>
     </ng-template>
     <ng-template #wideStep let-data="data">
-      <div
-        class="card wide"
-        [attr.name]="data.name"
-        #wide
-        
-      >
+      <div class="card wide" [attr.name]="data.name" #wide>
         <span>{{ data.name }}</span>
         <div>
           <button (click)="onDelete(wide.id)">Delete</button>
           <button (click)="onEdit(wide.id)">Edit</button>
         </div>
-      
       </div>
     </ng-template>
     <ng-template #tallStep let-data="data">
-      <div
-        class="card tall"
-        [attr.name]="data.name"
-        #tall
-      >
+      <div class="card tall" [attr.name]="data.name" #tall>
         <span>{{ data.name }}</span>
         <button (click)="addChild(tall.id)"></button>
         <button (click)="addChildAtIndex(tall.id)"></button>
