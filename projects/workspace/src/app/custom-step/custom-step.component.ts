@@ -1,16 +1,18 @@
 import { Component } from '@angular/core';
-import { NgFlowchartAbstractStep } from 'projects/ng-flowchart/src/lib/ng-flowchart-step/ng-flowchart-abstract-step';
+import { NgFlowchartStepComponent } from 'projects/ng-flowchart/src/lib/ng-flowchart-step/ng-flowchart-step.component';
 import { DragStep } from 'projects/ng-flowchart/src/lib/services/dropdata.service';
 import { NgFlowchart } from 'projects/ng-flowchart/src/public-api';
+import { RouteStepComponent } from './route-step/route-step.component';
 
 @Component({
   selector: 'app-custom-step',
   templateUrl: './custom-step.component.html',
   styleUrls: ['./custom-step.component.scss']
 })
-export class CustomStepComponent extends NgFlowchartAbstractStep {
+export class CustomStepComponent extends NgFlowchartStepComponent {
   
- 
+  routes = [];
+
   ngOnInit(): void {
   }
 
@@ -24,6 +26,19 @@ export class CustomStepComponent extends NgFlowchartAbstractStep {
 
   getDropPositionsForStep(pendingStep: DragStep): NgFlowchart.DropPosition[] {
     return ['ABOVE', 'BELOW', 'LEFT', 'RIGHT'];
+  }
+
+  onAddRoute() {
+    let route = {
+      name: 'New Route',
+      condition: '',
+      sequence: null
+    }
+    this.routes.push(route);
+    this.addChild(RouteStepComponent, {
+      sibling: true,
+      data: route
+    });
   }
 
 }

@@ -1,5 +1,21 @@
-.ngflowchart-step-wrapper {
-    height: auto;
-    width: auto;
-    position: absolute;
+.if-step {
+    background: #444;
+    color: white;
+    height: 125px;
+    width: 250px;
+    border-radius: 4px;
+    padding: 1em;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.btn {
+    background: #6c5ce7;
+    padding: .4em;
+    outline: none;
+    border: none;
+    border-radius: 3px;
+    color: white;
 }

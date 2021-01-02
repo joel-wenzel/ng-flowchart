@@ -1,22 +1,8 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, Type, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { CONSTANTS } from '../model/flowchart.constants';
+import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
 import { DragStep } from '../services/dropdata.service';
-import { StepManagerService } from '../services/step-manager.service';
-
-export type AddChildOptions = {
-  /** Should the child be added as a sibling to existing children, if false the existing children will be reparented to this new child.
-   * Default is true.
-   * */
-  sibling?: boolean,
-  /** The index of the child. Only used when sibling is true.
-   * Defaults to the end of the child array. 
-   */
-  index?: number,
-
-  /** Optional data to assign to the component */
-  data?: any
-}
 
 @Component({
   template: ''
@@ -37,27 +23,28 @@ export abstract class NgFlowchartAbstractStep implements OnInit, AfterViewInit {
   }
 
   //could potentially try to make this abstract
-  @ViewChild('html')
+  @ViewChild('canvasContent')
   view: ElementRef;
 
   @Input()
   data: any;
 
+  @Input()
+  canvas: NgFlowchartCanvasService;
+
   @Output()
   viewInit = new EventEmitter();
 
-  private id: any;
-  private parent: NgFlowchartAbstractStep;
-  private children: Array<NgFlowchartAbstractStep>;
-
-  private currentPos = [0, 0];
+  private _id: any;
+  private _currentPosition = [0, 0];
 
   //only used if something tries to set the position before view has been initialized
   private _initPosition;
-
   private _isHidden = false;
+  private parent: NgFlowchartAbstractStep;
+  private children: Array<NgFlowchartAbstractStep>;
 
-  constructor(private stepmanager: StepManagerService) {
+  constructor() {
     this.children = [];
   }
 
@@ -71,12 +58,27 @@ export abstract class NgFlowchartAbstractStep implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
+    if(!this.nativeElement) {
+      throw 'Missing canvasContent ViewChild. Be sure to add #canvasContent to your root html element.'
+    }
+
+    this.nativeElement.classList.add('ngflowchart-step-wrapper');
+    this.nativeElement.setAttribute('draggable', 'true');
+    
     if (this._initPosition) {
       this.setPosition(this._initPosition[0], this._initPosition[1]);
     }
     this.nativeElement.id = 's' + Date.now();
-    this.id = this.nativeElement.id;
+    this._id = this.nativeElement.id;
     this.viewInit.emit();
+  }
+
+  get id() {
+    return this._id;
+  }
+
+  get currentPosition() {
+    return this._currentPosition;
   }
 
   setPosition(x: number, y: number, offsetCenter: boolean = false) {
@@ -93,63 +95,57 @@ export abstract class NgFlowchartAbstractStep implements OnInit, AfterViewInit {
     this.nativeElement.style.left = `${adjustedX}px`;
     this.nativeElement.style.top = `${adjustedY}px`;
 
-    this.currentPos = [adjustedX, adjustedY];
+    this._currentPosition = [adjustedX, adjustedY];
   }
 
+  addChildSibling0(child: NgFlowchartAbstractStep, index?: number): void {
+    if (child.getParent()) {
+      child.getParent().removeChild(child);
+    }
 
-
-  /**
-   * 
-   * @param child 
-   * @param options 
-   */
-  addChild(child: NgFlowchartAbstractStep | Type<NgFlowchartAbstractStep>, options?: AddChildOptions) {
-
-    let newChild: NgFlowchartAbstractStep;
-    if (!(child instanceof NgFlowchartAbstractStep)) {
-      newChild = this.stepmanager.createStepFromComponent(child, options?.data).instance;
+    if (!this.children) {
+      this.children = [];
+    }
+    if (index == null) {
+      this.children.push(child);
     }
     else {
-      newChild = child;
-      newChild.data = newChild.data || options?.data;
+      this.children.splice(index, 0, child);
     }
+
+    //since we are adding a new child here, it is safe to force set the parent
+    child.setParent(this, true);
+  }
+
+  addChild0(newChild: NgFlowchartAbstractStep): boolean {
 
     if (newChild.getParent()) {
       newChild.getParent().removeChild(newChild);
     }
 
-    if (options?.sibling) {
-      this.addChildSibling(newChild, options.index)
-    }
-    else {
-      if (this.hasChildren()) {
-        if (newChild.hasChildren()) {
-          //if we have children and the child has children we need to confirm the child doesnt have multiple children at any point
-          let newChildLastChild = newChild.findLastSingleChild();
-          if (!newChildLastChild) {
-            console.error('Invalid move');
-            return false;
-          }
-          //move the this nodes children to last child of the step arg
-          newChildLastChild.setChildren(this.getChildren().slice());
+    if (this.hasChildren()) {
+      if (newChild.hasChildren()) {
+        //if we have children and the child has children we need to confirm the child doesnt have multiple children at any point
+        let newChildLastChild = newChild.findLastSingleChild();
+        if (!newChildLastChild) {
+          console.error('Invalid move. A node cannot have multiple parents');
+          return false;
         }
-        else {
-          //move adjacent's children to newStep
-          newChild.setChildren(this.getChildren().slice());
-        }
-
+        //move the this nodes children to last child of the step arg
+        newChildLastChild.setChildren(this.getChildren().slice());
       }
-      //finally reset this nodes to children to the single new child
-      this.setChildren([newChild]);
-      return true;
-    }
+      else {
+        //move adjacent's children to newStep
+        newChild.setChildren(this.getChildren().slice());
+      }
 
+    }
+    //finally reset this nodes to children to the single new child
+    this.setChildren([newChild]);
+    return true;
   }
 
-  /**
-   * 
-   * @param childToRemove 
-   */
+
   removeChild(childToRemove: NgFlowchartAbstractStep): number {
     if (!this.children) {
       return -1;
@@ -240,12 +236,12 @@ export abstract class NgFlowchartAbstractStep implements OnInit, AfterViewInit {
     let clientRect = this.nativeElement.getBoundingClientRect();
 
     return {
-      bottom: this.currentPos[1] + clientRect.height + (canvasRect?.top || 0),
-      left: this.currentPos[0] + (canvasRect?.left || 0),
+      bottom: this._currentPosition[1] + clientRect.height + (canvasRect?.top || 0),
+      left: this._currentPosition[0] + (canvasRect?.left || 0),
       height: clientRect.height,
       width: clientRect.width,
-      right: this.currentPos[0] + clientRect.width + (canvasRect?.left || 0),
-      top: this.currentPos[1] + (canvasRect?.top || 0)
+      right: this._currentPosition[0] + clientRect.width + (canvasRect?.left || 0),
+      top: this._currentPosition[1] + (canvasRect?.top || 0)
     }
   }
 
@@ -260,11 +256,11 @@ export abstract class NgFlowchartAbstractStep implements OnInit, AfterViewInit {
   }
 
   get nativeElement(): HTMLElement {
-    return this.view.nativeElement;
+    return this.view?.nativeElement;
   }
 
   protected setId(id) {
-    this.id = id;
+    this._id = id;
   }
 
 
@@ -315,20 +311,6 @@ export abstract class NgFlowchartAbstractStep implements OnInit, AfterViewInit {
   }
 
 
-  private addChildSibling(child: NgFlowchartAbstractStep, index?: number): void {
-    if (!this.children) {
-      this.children = [];
-    }
-    if (index == null) {
-      this.children.push(child);
-    }
-    else {
-      this.children.splice(index, 0, child);
-    }
-
-    //since we are adding a new child here, it is safe to force set the parent
-    child.setParent(this, true);
-  }
 
 
   private setChildren(children: Array<NgFlowchartAbstractStep>): void {

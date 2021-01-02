@@ -35,26 +35,17 @@ export class AppComponent {
 
   ]
 
-  customStep = CustomStepComponent;
-
-  wideOps = [
+  customOps = [
     {
-      name: 'Wide Step',
-      inputs: [
-        {
-          name: 'Address',
-          value: null
-        }
-      ]
+      paletteName: 'Custom Step',
+      component: CustomStepComponent,
+      data: {
+        name: 'Routing Block'
+      }
     }
   ]
 
-  tallOps = [
-    {
-      name: 'Tall Step',
-      inputs: []
-    }
-  ]
+  
 
   @ViewChild(NgFlowchartCanvasDirective)
   canvasElement: NgFlowchartCanvasDirective;
@@ -62,69 +53,26 @@ export class AppComponent {
 
 
   constructor(private change: ChangeDetectorRef) {
-    this.callbacks.canMoveStep = this.canMoveStep;
-    this.callbacks.canAddStep = this.canAddStep;
+    // this.callbacks.canMoveStep = this.canMoveStep;
+    // this.callbacks.canAddStep = this.canAddStep;
 
 
   }
 
-
-  onDelete(id) {
-    //this.canvasElement.getFlow().getStep(id).delete();
-
-  }
-
-  onEdit(id) {
-    // let data = this.canvasElement.getFlow().getStep(id).getData();
-    // data.name = Date.now();
-    // data.inputs[0].value = Date.now();
-  }
-
-  canMoveStep(dropEvent: NgFlowchart.DropEvent): boolean {
-    console.log(dropEvent);
-
-    return true;
-  }
-
-  canAddStep(dropEvent: NgFlowchart.DropEvent): boolean {
-    return true;
-  }
+  
 
   printFlowData() {
     console.log(this.canvasElement.getFlowJSON());
   }
 
   clearData() {
-    //this.canvasElement.getFlow().clear();
-    this.canvasElement.getFlow().root.addChild(CustomStepComponent, {
+    this.canvasElement.getFlow().getRoot().addChild(CustomStepComponent, {
       sibling: false,
       data: {
         name: 'custom step'
-      } 
+      }
     })
-  }
-
-  addChild(id) {
-    const options: NgFlowchart.AddChildOptions = {
-      asSibling: true,
-      data: {
-        name: 'Do Action',
-        inputs: []
-      }
-    }
-    //this.canvasElement.getFlow().getStep(id).addChild(this.normalStepTemplate, options);
-  }
-
-  addChildAtIndex(id) {
-    const options: NgFlowchart.AddChildOptions = {
-      asSibling: true,
-      index: 0,
-      data: {
-        name: 'Do Action',
-        inputs: []
-      }
-    }
-    // this.canvasElement.getFlow().getStep(id).addChild(this.normalStepTemplate, options);
+ 
   }
 
   stepGapChanged(event) {
