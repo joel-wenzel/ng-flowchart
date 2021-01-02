@@ -3,7 +3,6 @@ import { NgFlowchart } from './model/flow.model';
 import { CONSTANTS } from './model/flowchart.constants';
 import { NgFlowchartCanvasService } from './ng-flowchart-canvas.service';
 import { CanvasRendererService } from './services/canvas-renderer.service';
-import { CanvasDataService } from './services/canvasdata.service';
 import { OptionsService } from './services/options.service';
 
 
@@ -13,8 +12,7 @@ import { OptionsService } from './services/options.service';
     providers: [
         NgFlowchartCanvasService,
         OptionsService,
-        CanvasRendererService,
-        CanvasDataService
+        CanvasRendererService
     ]
 })
 export class NgFlowchartCanvasDirective implements OnInit {
@@ -66,8 +64,7 @@ export class NgFlowchartCanvasDirective implements OnInit {
         protected canvasEle: ElementRef<HTMLElement>,
         private viewContainer: ViewContainerRef,
         private canvas: NgFlowchartCanvasService,
-        private optionService: OptionsService,
-        private flow: CanvasDataService
+        private optionService: OptionsService
     ) {
             
         this.canvasEle.nativeElement.classList.add(CONSTANTS.CANVAS_CLASS);
@@ -92,20 +89,14 @@ export class NgFlowchartCanvasDirective implements OnInit {
      * Returns the Flow object representing this flow chart.
      */
     public getFlow() {
-        return {
-            name: 'Sample Flow',
-            root: this.flow.root
-        }
+        return new NgFlowchart.Flow(this.canvas);
     }
 
     /**
      * Returns the json representing this flow chart
      */
     public getFlowJSON() {
-      return JSON.stringify({
-          name: 'Sample Flow',
-          root: this.flow.root.toJSON()
-      })
+      return new NgFlowchart.Flow(this.canvas).toJSON();
     }
 
     // /**

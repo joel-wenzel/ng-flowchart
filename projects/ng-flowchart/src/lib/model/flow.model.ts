@@ -1,6 +1,6 @@
-import { EmbeddedViewRef, TemplateRef } from '@angular/core';
+import { EmbeddedViewRef } from '@angular/core';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
-import { NgFlowchartAbstractStep } from '../ng-flowchart-step/ng-flowchart-abstract-step';
+import { NgFlowchartStepComponent } from '../ng-flowchart-step/ng-flowchart-step.component';
 
 export namespace NgFlowchart {
     export class Flow {
@@ -9,17 +9,16 @@ export namespace NgFlowchart {
         }
 
         toJSON() {
-            // return JSON.stringify({
-            //     name: this.canvas.canvasData.name,
-            //     root: this.canvas.canvasData.rootElement?.getStepJSON()
-            // });
+            return JSON.stringify({
+                root: this.canvas.flow.rootStep.toJSON()
+            });
         }
 
         /**
          * Returns the root step of the flow chart
          */
         getRoot() {
-            //return this.canvas.canvasData.rootElement?.getFlowStep();
+            return this.canvas.flow.rootStep;
         }
 
         /**
@@ -54,108 +53,72 @@ export namespace NgFlowchart {
 
     }
 
-    export class Step {
-        private id: string;
+    // export class Step {
+    //     constructor(private canvas: NgFlowchartCanvasService, private step: NgFlowchartAbstractStep) {
 
-        constructor(private canvas: NgFlowchartCanvasService) {
-   
-        }
+    //     }
 
-        // toJSON() {
-        //     return {
-        //         id: this.id,
-        //         data: this.getData(),
-        //         children: this.hasChildren() ? this.getChildren().map(child => {
-        //             return child.toJSON()
-        //         }) : []
-        //     }
-        // }
+    //     toJSON() {
+    //         return this.step.toJSON();
+    //     }
 
-        /**
-         * Returns the id of this step. This is the same as the html id of the element.
-         * To make modifications to the view you can getElementById
-         */
-        getId() {
-            return this.id;
-        }
+    //     /**
+    //      * Returns the id of this step. This is the same as the html id of the element.
+    //      * To make modifications to the view you can getElementById
+    //      */
+    //     get id() {
+    //         return this.step.id;
+    //     }
 
-        /**
-         * Returns the referenced data object passed via the ngFlowchartStepData input
-         */
-        getData() {
-            //return this.canvasElement.view.data;
-        }
+    //     /**
+    //      * Returns the referenced data object passed via the ngFlowchartStepData input
+    //      */
+    //     get data() {
+    //         return this.step.data;
+    //     }
 
-        /**
-         * Returns the parent step. This can be null if this is the root node.
-         */
-        getParent() {
-            //return this.canvasElement.parent?.getFlowStep();
-        }
+    //     /**
+    //      * Returns the parent step. This can be null if this is the root node.
+    //      */
+    //     getParent() {
+    //         return new Step(this.canvas, this.step.getParent());
+    //     }
 
-        hasChildren() {
-            // return this.canvasElement.children && this.canvasElement.children.length > 0;
-        }
+    //     hasChildren() {
+    //         return this.step.hasChildren();
+    //     }
 
-        isRootStep() {
-            //return !this.getParent();
-        }
+    //     isRootStep() {
+    //         return !this.getParent();
+    //     }
 
-        /**
-         * Returns all direct children of this step. 
-         * To get all descendants you can recursively keep calling getChildren
-         */
-        // getChildren(): Array<Step> {
-        //     return this.canvasElement.children ? this.canvasElement.children.map(child => {
-        //         return child.getFlowStep()
-        //     }) : []
-        // }
+    //     /**
+    //      * Returns all direct children of this step. 
+    //      * To get all descendants you can recursively keep calling getChildren
+    //      */
+    //     getChildren(): Array<Step> {
+    //         return this.step.getChildren().map(child => {
+    //             return new Step(this.canvas, child)
+    //         })
+    //     }
 
-        /**
-         * Deletes this node from the tree. Returns true or false if delete was a success
-         * @param recursive Should its children also be deleted? (default is false)
-         */
-        delete(recursive: boolean = false) {
-            // let result = this.canvasElement.destroy(recursive);
-            // if (result) {
-            //     this.canvas.reRender();
-            // }
-            // return result;
-        }
+    //     /**
+    //      * Deletes this node from the tree. Returns true or false if delete was a success
+    //      * @param recursive Should its children also be deleted? (default is false)
+    //      */
+    //     delete(recursive: boolean = false) {
+    //         // let result = this.canvasElement.destroy(recursive);
+    //         // if (result) {
+    //         //     this.canvas.reRender();
+    //         // }
+    //         // return result;
+    //     }
 
-        /**
-         * Adds a direct child to this step
-         * @param template Ng Template Ref containing the content to display
-         * @param options Child options when adding
-         */
-        addChild(template: TemplateRef<any>, options?: AddChildOptions) {
-            // if (options && options.asSibling && this.canvasElement.hasChildren()) {
-            //     let child;
-            //     if (options.index > -1) {
-            //         child = this.canvasElement.children[options.index];
-            //         this.canvas.addStep(template, options.data, child, 'LEFT', null);
-            //     }
-            //     else {
-            //         child = this.canvasElement.children[this.canvasElement.children.length - 1];
-            //         this.canvas.addStep(template, options.data, child, 'RIGHT', null);
-            //     }
-            // }
-            // else {
-            //     this.canvas.addStep(template, options.data, this.canvasElement, 'BELOW', null);
-            // }
+        
+        
+    // }
 
-            // this.canvas.reRender();
-        }
-    }
-
-    export type AddChildOptions = {
-        /** Optional data to pass to the step */
-        data?: any,
-        /** Should this child be added as a sibling of any existing children?  If false then existing children will be re-parented to this new child*/
-        asSibling?: boolean,
-        /** Optional index at which to create the child. By default the child will be pushed to the end */
-        index?: number
-    }
+    
 
     export interface StepView extends EmbeddedViewRef<any> {
         data?: any
@@ -182,23 +145,23 @@ export namespace NgFlowchart {
             dropIcon?: string,
             dropIconBackground?: string
         } = {
-            connectors: 'lightgrey',
-            dropIcon: 'darkred',
-            dropIconBackground: 'rgb(192, 123, 123)'
-        }
+                connectors: 'lightgrey',
+                dropIcon: 'darkred',
+                dropIconBackground: 'rgb(192, 123, 123)'
+            }
 
     }
 
-    export type DropEvent = {
-        step: Step,
-        adjacent?: Step,
-        position?: DropPosition,
-        status: DropStatus,
-        error?: string
-    }
+    // export type DropEvent = {
+    //     step: Step,
+    //     adjacent?: Step,
+    //     position?: DropPosition,
+    //     status: DropStatus,
+    //     error?: string
+    // }
 
     export type DropTarget = {
-        step: NgFlowchartAbstractStep,
+        step: NgFlowchartStepComponent,
         position: DropPosition
     }
 
@@ -206,14 +169,14 @@ export namespace NgFlowchart {
     export type DropPosition = 'RIGHT' | 'LEFT' | 'BELOW' | 'ABOVE';
 
     export type Callbacks = {
-        canAddStep?: (dropCandidate: DropEvent) => boolean;
-        canMoveStep?: (moveCandidate: DropEvent) => boolean;
-        canDeleteStep?: (step: Step) => boolean;
-        onDropError?: (drop: DropEvent) => void;
+        // canAddStep?: (dropCandidate: DropEvent) => boolean;
+        // canMoveStep?: (moveCandidate: DropEvent) => boolean;
+        // // canDeleteStep?: (step: Step) => boolean;
+        // onDropError?: (drop: DropEvent) => void;
 
-        //TODO
-        onDropStep?: (drop: DropEvent) => void;
-        onMoveStep?: (drop: DropEvent) => void;
+        // //TODO
+        // onDropStep?: (drop: DropEvent) => void;
+        // onMoveStep?: (drop: DropEvent) => void;
     };
 }
 

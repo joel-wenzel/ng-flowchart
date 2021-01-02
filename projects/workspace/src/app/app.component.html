@@ -13,6 +13,14 @@
     >
       <span>{{ op.name }}</span>
     </div>
+    <div
+      class="plugin-op"
+      *ngFor="let op of customOps"
+      [ngFlowchartStep]="op.component"
+      [ngFlowchartStepData]="op.data"
+    >
+      <span>{{ op.paletteName }}</span>
+    </div>
     <!-- <div
       class="plugin-op"
       *ngFor="let op of wideOps"

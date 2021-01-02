@@ -2,12 +2,12 @@ import { ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { CONSTANTS } from '../model/flowchart.constants';
 import { NgFlowchartAbstractStep } from '../ng-flowchart-step/ng-flowchart-abstract-step';
-import { CanvasDataService } from './canvasdata.service';
+import { NgFlowchartStepComponent } from '../ng-flowchart-step/ng-flowchart-step.component';
 import { DragStep } from './dropdata.service';
 import { OptionsService } from './options.service';
 
 export type DropProximity = {
-    step: NgFlowchartAbstractStep,
+    step: NgFlowchartStepComponent,
     position: NgFlowchart.DropPosition,
     proximity: number
 };
@@ -17,8 +17,7 @@ export class CanvasRendererService {
     private viewContainer: ViewContainerRef;
 
     constructor(
-        private options: OptionsService,
-        private data: CanvasDataService
+        private options: OptionsService
     ) {
 
     }
@@ -27,35 +26,19 @@ export class CanvasRendererService {
         this.viewContainer = viewContainer;
     }
 
-    public renderDrop(step: ComponentRef<NgFlowchartAbstractStep>, dragEvent: DragEvent, dropTarget: NgFlowchart.DropTarget) {
+    public renderRoot(step: ComponentRef<NgFlowchartAbstractStep>, dragEvent: DragEvent) {
         this.getCanvasContentElement().appendChild((step.location.nativeElement));
-
         const relativeXY = this.getRelativeXY(dragEvent);
-
-        if (!this.data.hasRoot()) {
-            //create root node
-            this.setRootPosition(step, relativeXY[0], relativeXY[1]);
-            this.data.setRoot(step.instance, false);
-        }
-        else {
-            //everything else
-            this.data.addStep(step.instance, dropTarget);
-            this.render();
-        }
+        this.setRootPosition(step, relativeXY[0], relativeXY[1]);
     }
 
-    public moveStep(step: NgFlowchartAbstractStep, dropTarget: NgFlowchart.DropTarget) {
-        this.data.addStep(step, dropTarget, true);
-        this.render();
+    public renderNonRoot(step: ComponentRef<NgFlowchartAbstractStep>, dragEvent?: DragEvent) {
+        this.getCanvasContentElement().appendChild((step.location.nativeElement));
     }
 
-    public moveRoot(dragEvent: DragEvent) {
+    public updatePosition(step: NgFlowchartAbstractStep, dragEvent: DragEvent) {
         const relativeXY = this.getRelativeXY(dragEvent);
-
-        this.data.root.setPosition(relativeXY[0], relativeXY[1], true);
-        // let rect = this.data.root.nativeElement.getBoundingClientRect();
-
-        this.render();
+        step.setPosition(relativeXY[0], relativeXY[1], true);
     }
 
     private renderChildTree(rootNode: NgFlowchartAbstractStep, rootRect: Partial<DOMRect>, canvasRect: DOMRect) {
@@ -99,15 +82,17 @@ export class CanvasRendererService {
 
     }
 
-    private render() {
-        if (!this.data.root) {
+    
+
+    public render(root: NgFlowchartAbstractStep) {
+        if (!root) {
             return;
         }
         const canvasRect = this.getCanvasContentElement().getBoundingClientRect();
-        this.renderChildTree(this.data.root, this.data.root.getCurrentRect(canvasRect), canvasRect);
+        this.renderChildTree(root, root.getCurrentRect(canvasRect), canvasRect);
     }
 
-    private findDropLocationForHover(absMouseXY: number[], targetStep: NgFlowchartAbstractStep, droppingStep: DragStep): DropProximity | 'deadzone' | null {
+    private findDropLocationForHover(absMouseXY: number[], targetStep: NgFlowchartStepComponent, droppingStep: DragStep): DropProximity | 'deadzone' | null {
 
         const stepRect = targetStep.nativeElement.getBoundingClientRect();
 
@@ -158,8 +143,8 @@ export class CanvasRendererService {
         return result;
     }
 
-    public findAndShowClosestDrop(dragStep: DragStep, event: DragEvent, init: boolean = false): NgFlowchart.DropTarget {
-        if (!this.data.hasRoot()) {
+    public findAndShowClosestDrop(dragStep: DragStep, event: DragEvent, steps: Array<NgFlowchartStepComponent>): NgFlowchart.DropTarget {
+        if (!steps || steps.length == 0) {
             return;
         }
 
@@ -168,23 +153,15 @@ export class CanvasRendererService {
 
         let bestMatch: DropProximity = null;
 
-        //since this is called every tick just get this information once for a drag event
-        //SEE if this is needed
-        if (init) {
+        for (let i = 0; i < steps.length; i++) {
 
-        }
-
-        for (let i = 0; i < this.data.allSteps.length; i++) {
-
-            const step = this.data.allSteps[i];
+            const step = steps[i];
 
             if (step.isHidden()) {
                 continue;
             }
 
             const position = this.findDropLocationForHover(absXY, step, dragStep);
-
-
             if (position) {
                 if (position == 'deadzone') {
                     bestMatch = null;
@@ -198,7 +175,7 @@ export class CanvasRendererService {
         }
 
         //TODO make this more efficient. two loops
-        this.data.allSteps.forEach(step => {
+        steps.forEach(step => {
             if (bestMatch == null || step.nativeElement.id !== bestMatch.step.nativeElement.id) {
 
                 step.clearHoverIcons();
@@ -222,8 +199,8 @@ export class CanvasRendererService {
 
     }
 
-    public clearAllSnapIndicators() {
-        this.data.allSteps.forEach(
+    public clearAllSnapIndicators(steps: Array<NgFlowchartAbstractStep>) {
+        steps.forEach(
             step => step.clearHoverIcons()
         )
     }
