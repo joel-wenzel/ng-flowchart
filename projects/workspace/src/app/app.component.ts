@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, TemplateRef, ViewChild } from '@angular/core';
 import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
 import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src/public-api';
+import { CustomStepComponent } from './custom-step/custom-step.component';
 
 @Component({
   selector: 'app-root',
@@ -31,8 +32,10 @@ export class AppComponent {
       name: 'Router',
       condition: ''
     }
-    
+
   ]
+
+  customStep = CustomStepComponent;
 
   wideOps = [
     {
@@ -61,18 +64,20 @@ export class AppComponent {
   constructor(private change: ChangeDetectorRef) {
     this.callbacks.canMoveStep = this.canMoveStep;
     this.callbacks.canAddStep = this.canAddStep;
+
+
   }
 
 
   onDelete(id) {
-    this.canvasElement.getFlow().getStep(id).delete();
-   
+    //this.canvasElement.getFlow().getStep(id).delete();
+
   }
 
   onEdit(id) {
-    let data = this.canvasElement.getFlow().getStep(id).getData();
-    data.name = Date.now();
-    data.inputs[0].value = Date.now();
+    // let data = this.canvasElement.getFlow().getStep(id).getData();
+    // data.name = Date.now();
+    // data.inputs[0].value = Date.now();
   }
 
   canMoveStep(dropEvent: NgFlowchart.DropEvent): boolean {
@@ -86,11 +91,17 @@ export class AppComponent {
   }
 
   printFlowData() {
-    console.log(this.canvasElement.getFlowJSON());    
+    console.log(this.canvasElement.getFlowJSON());
   }
 
   clearData() {
-    this.canvasElement.getFlow().clear();
+    //this.canvasElement.getFlow().clear();
+    this.canvasElement.getFlow().root.addChild(CustomStepComponent, {
+      sibling: false,
+      data: {
+        name: 'custom step'
+      } 
+    })
   }
 
   addChild(id) {
@@ -101,7 +112,7 @@ export class AppComponent {
         inputs: []
       }
     }
-    this.canvasElement.getFlow().getStep(id).addChild(this.normalStepTemplate, options);
+    //this.canvasElement.getFlow().getStep(id).addChild(this.normalStepTemplate, options);
   }
 
   addChildAtIndex(id) {
@@ -113,15 +124,15 @@ export class AppComponent {
         inputs: []
       }
     }
-    this.canvasElement.getFlow().getStep(id).addChild(this.normalStepTemplate, options);
+    // this.canvasElement.getFlow().getStep(id).addChild(this.normalStepTemplate, options);
   }
 
   stepGapChanged(event) {
     this.options = {
       ...this.options,
-      stepGap:  parseInt(event.target.value)
+      stepGap: parseInt(event.target.value)
     };
-    
-    
+
+
   }
 }
