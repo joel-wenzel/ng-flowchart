@@ -2,12 +2,19 @@ import { Directive, ElementRef, HostListener, Input, OnInit, ViewContainerRef } 
 import { NgFlowchart } from './model/flow.model';
 import { CONSTANTS } from './model/flowchart.constants';
 import { NgFlowchartCanvasService } from './ng-flowchart-canvas.service';
+import { CanvasRendererService } from './services/canvas-renderer.service';
+import { CanvasDataService } from './services/canvasdata.service';
+import { OptionsService } from './services/options.service';
+
 
 
 @Directive({
     selector: '[ngFlowchartCanvas]',
     providers: [
-        NgFlowchartCanvasService
+        NgFlowchartCanvasService,
+        OptionsService,
+        CanvasRendererService,
+        CanvasDataService
     ]
 })
 export class NgFlowchartCanvasDirective implements OnInit {
@@ -15,25 +22,18 @@ export class NgFlowchartCanvasDirective implements OnInit {
     @HostListener('drop', ['$event'])
     protected onDrop(event: DragEvent) {
         const type = event.dataTransfer.getData('type');
-
-        document.querySelectorAll('.' + CONSTANTS.CANVAS_STEP_CLASS).forEach(
-            ele => ele.removeAttribute(CONSTANTS.DROP_HOVER_ATTR)
-        );
-
-        if (type == 'FROM_PALETTE') {
-            this.canvas.dropPaletteStep(event);
+        if('FROM_CANVAS' == type) {
+            this.canvas.moveStep(event, event.dataTransfer.getData('id'));
         }
-        else if (type == 'FROM_CANVAS') {
-            this.canvas.dropCanvasStep(event, event.dataTransfer.getData('id'));
+        else {
+            this.canvas.onDrop(event);
         }
     }
 
     @HostListener('dragover', ['$event'])
     protected onDragOver(event: DragEvent) {
-
         event.preventDefault();
-        this.canvas.onDragStep(event);
-
+        this.canvas.onDragStart(event);
     }
 
     _options: NgFlowchart.Options;
@@ -41,24 +41,22 @@ export class NgFlowchartCanvasDirective implements OnInit {
 
     @HostListener('window:resize', ['$event'])
     protected onResize(event) {
-        this.canvas.reRender();
+       // this.canvas.reRender();
     }
 
     @Input('ngFlowchartCallbacks')
     set callbacks(callbacks: NgFlowchart.Callbacks) {
         this._callbacks = callbacks;
         if(!!this.canvas) {
-            this.canvas.setCallbacks(this._callbacks);
+            //this.canvas.setCallbacks(this._callbacks);
         }
     }
 
     @Input('ngFlowchartOptions')
     set options(options: NgFlowchart.Options) {
         this._options = options;
-        if(!!this.canvas) {
-            
-            this.canvas.setOptions(this._options);
-            this.canvas.reRender();
+        if(!!this.optionService) {
+            this.optionService.set(this._options);
         }
     }
 
@@ -67,7 +65,9 @@ export class NgFlowchartCanvasDirective implements OnInit {
     constructor(
         protected canvasEle: ElementRef<HTMLElement>,
         private viewContainer: ViewContainerRef,
-        private canvas: NgFlowchartCanvasService
+        private canvas: NgFlowchartCanvasService,
+        private optionService: OptionsService,
+        private flow: CanvasDataService
     ) {
             
         this.canvasEle.nativeElement.classList.add(CONSTANTS.CANVAS_CLASS);
@@ -77,12 +77,13 @@ export class NgFlowchartCanvasDirective implements OnInit {
     }
 
     ngOnInit() {
-        this.canvas.init(this.viewContainer, this._options);
+        this.canvas.init(this.viewContainer);
     }
 
     private createCanvasContent(viewContainer: ViewContainerRef) {
         let canvasEle = viewContainer.element.nativeElement as HTMLElement;
         let canvasContent = document.createElement('div');
+        canvasContent.id = CONSTANTS.CANVAS_CONTENT_ID;
         canvasContent.classList.add(CONSTANTS.CANVAS_CONTENT_CLASS);
         canvasEle.appendChild(canvasContent);
     }
@@ -90,15 +91,21 @@ export class NgFlowchartCanvasDirective implements OnInit {
     /**
      * Returns the Flow object representing this flow chart.
      */
-    public getFlow(): NgFlowchart.Flow {
-        return new NgFlowchart.Flow(this.canvas);
+    public getFlow() {
+        return {
+            name: 'Sample Flow',
+            root: this.flow.root
+        }
     }
 
     /**
      * Returns the json representing this flow chart
      */
-    public getFlowJSON(): string {
-        return new NgFlowchart.Flow(this.canvas).toJSON();
+    public getFlowJSON() {
+      return JSON.stringify({
+          name: 'Sample Flow',
+          root: this.flow.root.toJSON()
+      })
     }
 
     // /**

@@ -2,8 +2,7 @@
   <div
     id="canvas"
     ngFlowchartCanvas
-    [ngFlowchartOptions]="options"
-    [ngFlowchartCallbacks]="callbacks"
+
   ></div>
   <div id="palette">
     <div
@@ -14,7 +13,7 @@
     >
       <span>{{ op.name }}</span>
     </div>
-    <div
+    <!-- <div
       class="plugin-op"
       *ngFor="let op of wideOps"
       [ngFlowchartStep]="wideStep"
@@ -29,13 +28,13 @@
       [ngFlowchartStepData]="op"
     >
       <span>{{ op.name }}</span>
-    </div>
+    </div> -->
 
     <button (click)="printFlowData()">Get Flow Data</button>
     <button (click)="clearData()">Clear Flow</button>
 
     <input type="number" id="step-gap" (change)="stepGapChanged($event)" />
-    <ng-template #normalStep let-data="data">
+    <ng-template #normalStep let-data>
       <div
         class="card"
         [attr.name]="data.name"
