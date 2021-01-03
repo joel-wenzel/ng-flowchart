@@ -48,6 +48,7 @@ export class NgFlowchartCanvasService {
     let ref = this.stepmanager.createStepFromComponent(NgFlowchartStepComponent, {}, this);
     const i = this.viewContainer.indexOf(ref.hostView)
     this.viewContainer.remove(i);
+
   }
 
   public moveStep(drag: DragEvent, id: any) {
@@ -182,10 +183,10 @@ export class NgFlowchartCanvasService {
   }
 
   private placeStepAdjacent(newStep: NgFlowchartStepComponent, siblingStep: NgFlowchartStepComponent, isLeft: boolean = true) {
-    if (siblingStep.getParent()) {
+    if (siblingStep.parent) {
       //find the adjacent steps index in the parents child array
-      const adjacentIndex = siblingStep.getParent().getChildren().findIndex(child => child.nativeElement.id == siblingStep.nativeElement.id);
-      siblingStep.getParent().addChildSibling0(newStep, adjacentIndex + (isLeft ? 0 : 1));
+      const adjacentIndex = siblingStep.parent.children.findIndex(child => child.nativeElement.id == siblingStep.nativeElement.id);
+      siblingStep.parent.addChildSibling0(newStep, adjacentIndex + (isLeft ? 0 : 1));
     }
     else {
       console.warn('Parallel actions must have a common parent');
@@ -196,7 +197,7 @@ export class NgFlowchartCanvasService {
 
   private placeStepAbove(newStep: NgFlowchartStepComponent, childStep: NgFlowchartStepComponent) {
 
-    let adjParent = childStep.getParent();
+    let adjParent = childStep.parent;
     if (adjParent) {
       //we want to remove child and insert our newStep at the same index
       let index = adjParent.removeChild(childStep);

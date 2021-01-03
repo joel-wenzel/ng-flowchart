@@ -1,7 +1,6 @@
 import { ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { CONSTANTS } from '../model/flowchart.constants';
-import { NgFlowchartAbstractStep } from '../ng-flowchart-step/ng-flowchart-abstract-step';
 import { NgFlowchartStepComponent } from '../ng-flowchart-step/ng-flowchart-step.component';
 import { DragStep } from './dropdata.service';
 import { OptionsService } from './options.service';
@@ -26,22 +25,22 @@ export class CanvasRendererService {
         this.viewContainer = viewContainer;
     }
 
-    public renderRoot(step: ComponentRef<NgFlowchartAbstractStep>, dragEvent: DragEvent) {
+    public renderRoot(step: ComponentRef<NgFlowchartStepComponent>, dragEvent: DragEvent) {
         this.getCanvasContentElement().appendChild((step.location.nativeElement));
         const relativeXY = this.getRelativeXY(dragEvent);
         this.setRootPosition(step, relativeXY[0], relativeXY[1]);
     }
 
-    public renderNonRoot(step: ComponentRef<NgFlowchartAbstractStep>, dragEvent?: DragEvent) {
+    public renderNonRoot(step: ComponentRef<NgFlowchartStepComponent>, dragEvent?: DragEvent) {
         this.getCanvasContentElement().appendChild((step.location.nativeElement));
     }
 
-    public updatePosition(step: NgFlowchartAbstractStep, dragEvent: DragEvent) {
+    public updatePosition(step: NgFlowchartStepComponent, dragEvent: DragEvent) {
         const relativeXY = this.getRelativeXY(dragEvent);
         step.setPosition(relativeXY, true);
     }
 
-    private renderChildTree(rootNode: NgFlowchartAbstractStep, rootRect: Partial<DOMRect>, canvasRect: DOMRect) {
+    private renderChildTree(rootNode: NgFlowchartStepComponent, rootRect: Partial<DOMRect>, canvasRect: DOMRect) {
         //the rootNode passed in is already rendered. just need to render its children /subtree
 
         if (!rootNode.hasChildren()) {
@@ -56,7 +55,7 @@ export class CanvasRendererService {
         let childTreeWidths = {};
         let totalTreeWidth = 0;
 
-        rootNode.getChildren().forEach(child => {
+        rootNode.children.forEach(child => {
             let totalChildWidth = child.getNodeTreeWidth(this.options.options.stepGap);
             childTreeWidths[child.nativeElement.id] = totalChildWidth;
 
@@ -64,12 +63,12 @@ export class CanvasRendererService {
         });
 
         //add length for stepGaps between child trees
-        totalTreeWidth += (rootNode.getChildren().length - 1) * this.options.options.stepGap;
+        totalTreeWidth += (rootNode.children.length - 1) * this.options.options.stepGap;
 
         //if we have more than 1 child, we want half the extent on the left and half on the right
         let leftXTree = rootXCenter - (totalTreeWidth / 2);
 
-        rootNode.getChildren().forEach(child => {
+        rootNode.children.forEach(child => {
 
             let childExtent = childTreeWidths[child.nativeElement.id];
 
@@ -91,7 +90,7 @@ export class CanvasRendererService {
 
 
 
-    public render(root: NgFlowchartAbstractStep) {
+    public render(root: NgFlowchartStepComponent) {
         if (!root) {
             return;
         }
@@ -206,13 +205,13 @@ export class CanvasRendererService {
 
     }
 
-    public clearAllSnapIndicators(steps: Array<NgFlowchartAbstractStep>) {
+    public clearAllSnapIndicators(steps: Array<NgFlowchartStepComponent>) {
         steps.forEach(
             step => step.clearHoverIcons()
         )
     }
 
-    private setRootPosition(step: ComponentRef<NgFlowchartAbstractStep>, x, y) {
+    private setRootPosition(step: ComponentRef<NgFlowchartStepComponent>, x, y) {
         switch (this.options.options.rootPosition) {
             case 'CENTER':
                 const canvasCenter = this.getCanvasCenterPosition();
