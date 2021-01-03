@@ -53,7 +53,8 @@ export class NgFlowchartCanvasService {
   public moveStep(drag: DragEvent, id: any) {
     this.renderer.clearAllSnapIndicators(this.flow.allSteps);
 
-    let step = this.flow.allSteps.find(step => step.nativeElement.id === id);
+    let step: NgFlowchartStepComponent = this.flow.allSteps.find(step => step.nativeElement.id === id);
+
     if (step.isRootElement()) {
       this.renderer.updatePosition(step, drag);
       this.renderer.render(step);

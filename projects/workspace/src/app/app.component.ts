@@ -83,4 +83,8 @@ export class AppComponent {
 
 
   }
+
+  onDelete(id) {
+    this.canvasElement.getFlow().getStep(id).destroy(true);
+  }
 }

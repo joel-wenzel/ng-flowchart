@@ -38,7 +38,7 @@ export class CanvasRendererService {
 
     public updatePosition(step: NgFlowchartAbstractStep, dragEvent: DragEvent) {
         const relativeXY = this.getRelativeXY(dragEvent);
-        step.setPosition(relativeXY[0], relativeXY[1], true);
+        step.setPosition(relativeXY, true);
     }
 
     private renderChildTree(rootNode: NgFlowchartAbstractStep, rootRect: Partial<DOMRect>, canvasRect: DOMRect) {
@@ -70,19 +70,26 @@ export class CanvasRendererService {
         let leftXTree = rootXCenter - (totalTreeWidth / 2);
 
         rootNode.getChildren().forEach(child => {
-            
+
             let childExtent = childTreeWidths[child.nativeElement.id];
 
             let childLeft = leftXTree + (childExtent / 2) - (child.nativeElement.offsetWidth / 2);
-            child.setPosition(childLeft, childYTop);    
+            child.setPosition([childLeft, childYTop]);
 
-            this.renderChildTree(child, child.getCurrentRect(canvasRect), canvasRect);
+            const currentChildRect = child.getCurrentRect(canvasRect);
+
+            child.drawArrow(
+                [rootXCenter, (rootRect.bottom - canvasRect.top)], 
+                [currentChildRect.left + currentChildRect.width / 2, currentChildRect.top]
+                );
+                
+            this.renderChildTree(child, currentChildRect, canvasRect);
             leftXTree += childExtent + this.options.options.stepGap;
         })
 
     }
 
-    
+
 
     public render(root: NgFlowchartAbstractStep) {
         if (!root) {
@@ -209,14 +216,14 @@ export class CanvasRendererService {
         switch (this.options.options.rootPosition) {
             case 'CENTER':
                 const canvasCenter = this.getCanvasCenterPosition();
-                step.instance.setPosition(canvasCenter[0], canvasCenter[1], true);
+                step.instance.setPosition(canvasCenter, true);
                 return;
             case 'TOP_CENTER':
                 const canvasTop = this.getCanvasTopCenterPosition();
-                step.instance.setPosition(canvasTop[0], canvasTop[1], true)
+                step.instance.setPosition(canvasTop, true)
                 return;
             default:
-                step.instance.setPosition(x, y, true);
+                step.instance.setPosition([x, y], true);
                 return;
         }
     }

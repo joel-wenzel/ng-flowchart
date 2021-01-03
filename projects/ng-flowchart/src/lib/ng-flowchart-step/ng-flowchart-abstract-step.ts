@@ -1,8 +1,9 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ComponentFactoryResolver, ComponentRef, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild, ViewContainerRef } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { CONSTANTS } from '../model/flowchart.constants';
+import { NgFlowchartArrowComponent } from '../ng-flowchart-arrow/ng-flowchart-arrow.component';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
-import { DragStep } from '../services/dropdata.service';
+import { DragStep, DropDataService } from '../services/dropdata.service';
 
 @Component({
   template: ''
@@ -14,6 +15,11 @@ export abstract class NgFlowchartAbstractStep implements OnInit, AfterViewInit {
     this.hideTree();
     event.dataTransfer.setData('type', 'FROM_CANVAS');
     event.dataTransfer.setData('id', this.nativeElement.id);
+
+    this.drop.dragStep = {
+      instance: this,
+      data: this.data
+    }
 
   }
 
@@ -32,6 +38,9 @@ export abstract class NgFlowchartAbstractStep implements OnInit, AfterViewInit {
   @Input()
   canvas: NgFlowchartCanvasService;
 
+  @Input()
+  compRef: ComponentRef<NgFlowchartAbstractStep>;
+
   @Output()
   viewInit = new EventEmitter();
 
@@ -43,9 +52,15 @@ export abstract class NgFlowchartAbstractStep implements OnInit, AfterViewInit {
   private _isHidden = false;
   private parent: NgFlowchartAbstractStep;
   private children: Array<NgFlowchartAbstractStep>;
+  private arrow: ComponentRef<NgFlowchartArrowComponent>;
 
-  constructor() {
+  constructor(
+    private drop: DropDataService,
+    private viewContainer: ViewContainerRef,
+    private compFactory: ComponentFactoryResolver
+  ) {
     this.children = [];
+
   }
 
   abstract getDropPositionsForStep(pendingStep: DragStep): NgFlowchart.DropPosition[] | null;
@@ -58,15 +73,15 @@ export abstract class NgFlowchartAbstractStep implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    if(!this.nativeElement) {
+    if (!this.nativeElement) {
       throw 'Missing canvasContent ViewChild. Be sure to add #canvasContent to your root html element.'
     }
 
     this.nativeElement.classList.add('ngflowchart-step-wrapper');
     this.nativeElement.setAttribute('draggable', 'true');
-    
+
     if (this._initPosition) {
-      this.setPosition(this._initPosition[0], this._initPosition[1]);
+      this.setPosition(this._initPosition);
     }
     this.nativeElement.id = 's' + Date.now();
     this._id = this.nativeElement.id;
@@ -81,21 +96,33 @@ export abstract class NgFlowchartAbstractStep implements OnInit, AfterViewInit {
     return this._currentPosition;
   }
 
-  setPosition(x: number, y: number, offsetCenter: boolean = false) {
+  setPosition(pos: number[], offsetCenter: boolean = false) {
     if (!this.view) {
       console.warn('Trying to set position before view init');
       //save pos and set in after view init
-      this._initPosition = [x, y];
+      this._initPosition = [...pos];
       return;
     }
 
-    let adjustedX = x - (offsetCenter ? this.nativeElement.offsetWidth / 2 : 0);
-    let adjustedY = y - (offsetCenter ? this.nativeElement.offsetHeight / 2 : 0);
+    let adjustedX = pos[0] - (offsetCenter ? this.nativeElement.offsetWidth / 2 : 0);
+    let adjustedY = pos[1] - (offsetCenter ? this.nativeElement.offsetHeight / 2 : 0);
 
     this.nativeElement.style.left = `${adjustedX}px`;
     this.nativeElement.style.top = `${adjustedY}px`;
 
     this._currentPosition = [adjustedX, adjustedY];
+  }
+
+  // May not even need the positions passed in here,
+  // Just use this._currentPosition as the end and parent_currentPosition as start
+  drawArrow(start: number[], end: number[]) {
+    if (!this.arrow) {
+      this.createArrow();
+    }
+    this.arrow.instance.position = {
+      start: start,
+      end: end
+    };
   }
 
   addChildSibling0(child: NgFlowchartAbstractStep, index?: number): void {
@@ -166,22 +193,7 @@ export abstract class NgFlowchartAbstractStep implements OnInit, AfterViewInit {
     this.parent = newParent;
   }
 
-  destroy(recursive: boolean = true, checkCallbacks: boolean = true): boolean {
 
-    if (this.canDeleteStep()) {
-      //remove parents child ref
-      //only want to call this on the root of the delete
-      let parentIndex;
-      if (this.parent) {
-        parentIndex = this.parent.removeChild(this);
-      }
-
-      this.destroy0(parentIndex, recursive);
-      return true;
-    }
-
-    return false;
-  }
 
   clearHoverIcons() {
     this.nativeElement.removeAttribute(CONSTANTS.DROP_HOVER_ATTR);
@@ -263,7 +275,11 @@ export abstract class NgFlowchartAbstractStep implements OnInit, AfterViewInit {
     this._id = id;
   }
 
-
+  private createArrow() {
+    const factory = this.compFactory.resolveComponentFactory(NgFlowchartArrowComponent)
+    this.arrow = this.viewContainer.createComponent(factory);
+    this.nativeElement.parentElement.appendChild(this.arrow.location.nativeElement);
+  }
 
   private hideTree() {
     this._isHidden = true;
@@ -313,58 +329,11 @@ export abstract class NgFlowchartAbstractStep implements OnInit, AfterViewInit {
 
 
 
-  private setChildren(children: Array<NgFlowchartAbstractStep>): void {
+  protected setChildren(children: Array<NgFlowchartAbstractStep>): void {
     this.children = children;
     this.children.forEach(child => {
       child.setParent(this, true);
     })
   }
-
-  private destroy0(parentIndex, recursive: boolean = true) {
-
-    // this.view.destroy();
-    // //remove from master array
-    // let index = this.canvasRef.canvasData.allElements.findIndex(ele => ele.html.id == this.html.id);
-    // if (index >= 0) {
-    //   this.canvasRef.canvasData.allElements.splice(index, 1);
-    // }
-
-    // if (this.hasChildren()) {
-
-    //   //this was the root node
-    //   if (!this.parent && !recursive) {
-
-    //     //set first child as new root
-    //     this.canvasRef.canvasData.rootElement = this.children[0];
-    //     this.children[0].parent = null;
-
-    //     //make previous siblings children of the new root
-    //     if (this.children.length > 1) {
-    //       for (let i = 1; i < this.children.length; i++) {
-    //         let child = this.children[i];
-    //         this.children[0].addChild(child);
-    //       }
-    //     }
-
-    //   }
-
-    //   //update children
-    //   for (let i = 0; i < this.children.length; i++) {
-    //     let child = this.children[i];
-    //     if (recursive) {
-    //       child.destroy0(null, true);
-    //     }
-    //     else if (!!this.parent) {
-    //       this.parent.addChild(child, i + parentIndex);
-    //     }
-    //   }
-    //   this.children = [];
-    // }
-
-
-
-    // this.parent = null;
-  }
-
 
 }

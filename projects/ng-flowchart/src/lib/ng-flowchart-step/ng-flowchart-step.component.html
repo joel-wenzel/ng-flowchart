@@ -1,6 +1,7 @@
 <div #canvasContent>
   <ng-container
-    *ngTemplateOutlet="contentTemplate; context: { $implicit: data }"
+    *ngTemplateOutlet="contentTemplate; context: { $implicit: data, id: id }"
   >
   </ng-container>
+  
 </div>

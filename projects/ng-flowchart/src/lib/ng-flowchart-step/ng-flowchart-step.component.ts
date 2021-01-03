@@ -55,6 +55,26 @@ export class NgFlowchartStepComponent extends NgFlowchartAbstractStep {
     return componentRef.instance;
   }
 
+  destroy(recursive: boolean = true, checkCallbacks: boolean = true): boolean {
+
+    if (!checkCallbacks || this.canDeleteStep()) {
+
+      let parentIndex;
+      if (this.getParent()) {
+        parentIndex = this.getParent().removeChild(this);
+      }
+
+      this.destroy0(parentIndex, recursive);
+
+      this.canvas.reRender();
+
+      return true;
+    }
+    return false;
+
+
+  }
+
   ngOnInit(): void {
 
   }
@@ -65,6 +85,57 @@ export class NgFlowchartStepComponent extends NgFlowchartAbstractStep {
 
   getDropPositionsForStep(pendingStep: DragStep): NgFlowchart.DropPosition[] {
     return ['BELOW', 'LEFT', 'RIGHT', 'ABOVE'];
+  }
+
+  private destroy0(parentIndex, recursive: boolean = true) {
+
+    this.compRef.destroy();
+
+    // //remove from master array
+    let index = this.canvas.flow.allSteps.findIndex(ele => ele.id == this.id);
+    if (index >= 0) {
+      this.canvas.flow.allSteps.splice(index, 1);
+    }
+
+    
+
+    if (this.hasChildren()) {
+
+      //this was the root node
+      if (this.isRootElement() && !recursive) {
+
+        //set first child as new root
+        this.canvas.flow.rootStep = this.getChildren()[0] as NgFlowchartStepComponent;
+        this.getChildren()[0].setParent(null);
+
+        //make previous siblings children of the new root
+        if (this.hasChildren(2)) {
+          for (let i = 1; i < this.getChildren().length; i++) {
+            let child = this.getChildren()[i];
+            this.getChildren()[0].addChild0(child);
+          }
+        }
+
+      }
+
+      //update children
+      let length = this.getChildren().length;
+      for (let i = 0; i < length; i++) {
+        let child = this.getChildren()[0];
+        if (recursive) {
+          (child as NgFlowchartStepComponent).destroy0(null, true);
+        }
+        else if (!!this.getParent()) {
+          this.getParent().addChildSibling0(child, i + parentIndex);
+        }
+      }
+      this.setChildren([]);
+    }
+
+
+
+    // this.parent = null;
+
   }
 
 }
