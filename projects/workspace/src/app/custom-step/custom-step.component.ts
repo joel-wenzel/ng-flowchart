@@ -47,7 +47,7 @@ export class CustomStepComponent extends NgFlowchartStepComponent {
   }
 
   delete() {
-    this.destroy(false);
+    this.destroy(true);
   }
 
 }

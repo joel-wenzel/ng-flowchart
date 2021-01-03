@@ -49,7 +49,11 @@ export class NgFlowchartArrowComponent implements OnInit, AfterViewInit {
   }
 
   hideArrow() {
+    this.opacity = .2;
+  }
 
+  showArrow() {
+    this.opacity = 1;
   }
 
   private updatePath() {
