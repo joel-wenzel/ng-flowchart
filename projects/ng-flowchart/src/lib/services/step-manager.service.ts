@@ -28,6 +28,7 @@ export class StepManagerService {
       componentRef.instance.data = data;
       componentRef.instance.contentTemplate = template;
       componentRef.instance.canvas = canvas;
+      componentRef.instance.compRef = componentRef;
   
       return componentRef;
     }
@@ -38,6 +39,7 @@ export class StepManagerService {
       componentRef = this.viewContainer.createComponent<any>(factory);
       componentRef.instance.data = data;
       componentRef.instance.canvas = canvas;
+      componentRef.instance.compRef = componentRef;
   
       return componentRef;
     }

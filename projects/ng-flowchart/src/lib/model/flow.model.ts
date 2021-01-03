@@ -24,18 +24,14 @@ export namespace NgFlowchart {
      * @param id
      */
     getStep(id) {
-      // let ele = this.canvas.canvasData.allElements.find(child => child.html.id == id);
-      // if (ele) {
-      //     return new Step(ele, this.canvas);
-      // }
-      // else return null;
+      return this.canvas.flow.allSteps.find((child) => child.id == id);
     }
 
     /**
      * Re-renders the canvas. Generally this should only be used in rare circumstances
      */
     render() {
-      //this.canvas.reRender();
+      this.canvas.reRender();
     }
 
     /**

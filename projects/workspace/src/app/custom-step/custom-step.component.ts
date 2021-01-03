@@ -25,7 +25,12 @@ export class CustomStepComponent extends NgFlowchartStepComponent {
   }
 
   getDropPositionsForStep(pendingStep: DragStep): NgFlowchart.DropPosition[] {
-    return ['ABOVE', 'BELOW', 'LEFT', 'RIGHT'];
+    if(pendingStep.template !== RouteStepComponent) {
+      return ['ABOVE', 'LEFT', 'RIGHT'];
+    }
+    else {
+      return ['BELOW'];
+    }
   }
 
   onAddRoute() {
@@ -39,6 +44,10 @@ export class CustomStepComponent extends NgFlowchartStepComponent {
       sibling: true,
       data: route
     });
+  }
+
+  delete() {
+    this.destroy(false);
   }
 
 }

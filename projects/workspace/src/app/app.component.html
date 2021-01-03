@@ -42,12 +42,12 @@
     <button (click)="clearData()">Clear Flow</button>
 
     <input type="number" id="step-gap" (change)="stepGapChanged($event)" />
-    <ng-template #normalStep let-data>
+    <ng-template #normalStep let-data let-id>
       <div
         class="card"
         [attr.name]="data.name"
         #card
-        (click)="onDelete(card.id)"
+        (click)="onDelete(card.parent.id)"
       >
         <span>{{ data.name }}</span>
       </div>
