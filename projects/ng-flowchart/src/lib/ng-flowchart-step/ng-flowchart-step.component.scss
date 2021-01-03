@@ -1,9 +1,18 @@
+.ngflowchart-canvas {
+  overflow: auto;
+}
+
+.ngflowchart-canvas-content {
+  position: relative;
+  min-height: 100%;
+  min-width: 100%;
+}
+
 .ngflowchart-step-wrapper {
     height: auto;
     width: auto;
     position: absolute;
     box-sizing: border-box;
-    //left: 50%;
    
     transition: all 0.2s;
 

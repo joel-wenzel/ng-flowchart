@@ -33,6 +33,25 @@ main {
     }
 }
 
+section {
+    padding: 1em;
+    border-bottom: 1px solid lightgrey;
+
+    & .wide {
+        width: 100%;
+    }
+}
+
+.sub-section {
+    padding: .5em 0;
+}
+
+select {
+    padding: .3em;
+}
+
+
+
 .card {
     padding: 1em;
     background: white;
@@ -40,14 +59,4 @@ main {
     border-radius: 4px;
     min-width: 12em;
     height: 4em;
-
- 
-
-    &.tall {
-        height: 8em;
-    }
-
-    &.wide {
-        width: 16em;
-    }
 }

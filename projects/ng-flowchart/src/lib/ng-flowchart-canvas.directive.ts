@@ -55,6 +55,7 @@ export class NgFlowchartCanvasDirective implements OnInit {
         this._options = options;
         if(!!this.optionService) {
             this.optionService.set(this._options);
+            this.canvas.reRender();
         }
     }
 

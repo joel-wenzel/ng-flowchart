@@ -13,11 +13,7 @@ export class AppComponent {
 
   callbacks: NgFlowchart.Callbacks = {};
   options: NgFlowchart.Options = {
-    stepGap: 40,
-    theme: {
-      connectors: 'pink',
-      dropIcon: 'blue'
-    }
+    stepGap: 40
   }
 
   @ViewChild('normalStep')
@@ -48,7 +44,7 @@ export class AppComponent {
   
 
   @ViewChild(NgFlowchartCanvasDirective)
-  canvasElement: NgFlowchartCanvasDirective;
+  canvas: NgFlowchartCanvasDirective;
 
 
 
@@ -62,29 +58,30 @@ export class AppComponent {
   
 
   printFlowData() {
-    console.log(this.canvasElement.getFlowJSON());
+    console.log(this.canvas.getFlowJSON());
   }
 
   clearData() {
-    this.canvasElement.getFlow().getRoot().addChild(CustomStepComponent, {
-      sibling: false,
-      data: {
-        name: 'custom step'
-      }
-    })
+    this.canvas.getFlow().clear();
  
   }
 
-  stepGapChanged(event) {
+  onGapChanged(event) {
+    
     this.options = {
       ...this.options,
       stepGap: parseInt(event.target.value)
     };
+  }
 
-
+  onSequentialChange(event) {
+    this.options = {
+      ...this.options,
+      isSequential: event.target.checked
+    }    
   }
 
   onDelete(id) {
-    this.canvasElement.getFlow().getStep(id).destroy(false);
+    this.canvas.getFlow().getStep(id).destroy(true);
   }
 }

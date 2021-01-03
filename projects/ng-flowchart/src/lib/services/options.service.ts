@@ -14,9 +14,7 @@ export class OptionsService {
     }
 
     set(options) {
-        this._options = this.sanitizeOptions(options);
-        console.log(this._options);
-        
+        this._options = this.sanitizeOptions(options);        
         this.optionsWatch.next(this._options);
     }
 
@@ -29,11 +27,7 @@ export class OptionsService {
 
         options = {
           ...defaultOpts,
-          ...options,
-          theme: {
-            ...defaultOpts.theme,
-            ...options?.theme
-          }
+          ...options
         };
     
         options.stepGap = Math.max(options.stepGap, 20) || 40;
