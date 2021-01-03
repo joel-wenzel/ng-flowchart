@@ -9,7 +9,7 @@ export namespace NgFlowchart {
 
         toJSON() {
             return JSON.stringify({
-                root: this.canvas.flow.rootStep.toJSON()
+                root: this.canvas.flow.rootStep?.toJSON()
             });
         }
 
@@ -62,18 +62,6 @@ export namespace NgFlowchart {
         rootPosition?: 'TOP_CENTER' | 'CENTER' | 'DEFAULT' = 'TOP_CENTER';
 
         showSnapIndicators?: boolean = true;
-
-        /** Theme/color of the drop icons and connectors */
-        theme?: {
-            connectors?: string,
-            dropIcon?: string,
-            dropIconBackground?: string
-        } = {
-                connectors: 'lightgrey',
-                dropIcon: 'darkred',
-                dropIconBackground: 'rgb(192, 123, 123)'
-            }
-
     }
 
     // export type DropEvent = {

@@ -141,7 +141,7 @@ export class NgFlowchartCanvasService {
       //reparent root
       let oldRoot = this.flow.rootStep;
       this.flow.rootStep = step;
-      step.addChild0(oldRoot);
+      step.zaddChild0(oldRoot);
     }
     else {
       this.flow.rootStep = step;
@@ -179,14 +179,14 @@ export class NgFlowchartCanvasService {
   }
 
   private placeStepBelow(newStep: NgFlowchartStepComponent, parentStep: NgFlowchartStepComponent): boolean {
-    return parentStep.addChild0(newStep)
+    return parentStep.zaddChild0(newStep)
   }
 
   private placeStepAdjacent(newStep: NgFlowchartStepComponent, siblingStep: NgFlowchartStepComponent, isLeft: boolean = true) {
     if (siblingStep.parent) {
       //find the adjacent steps index in the parents child array
       const adjacentIndex = siblingStep.parent.children.findIndex(child => child.nativeElement.id == siblingStep.nativeElement.id);
-      siblingStep.parent.addChildSibling0(newStep, adjacentIndex + (isLeft ? 0 : 1));
+      siblingStep.parent.zaddChildSibling0(newStep, adjacentIndex + (isLeft ? 0 : 1));
     }
     else {
       console.warn('Parallel actions must have a common parent');
@@ -201,12 +201,12 @@ export class NgFlowchartCanvasService {
     if (adjParent) {
       //we want to remove child and insert our newStep at the same index
       let index = adjParent.removeChild(childStep);
-      newStep.addChild0(childStep);
+      newStep.zaddChild0(childStep);
       //adjParent.addChild(newStep, index);
     }
     else { // new root node
       this.setRoot(newStep);
-      newStep.addChild0(childStep);
+      newStep.zaddChild0(childStep);
     }
     return true;
   }

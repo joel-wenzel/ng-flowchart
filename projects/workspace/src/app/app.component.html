@@ -1,47 +1,49 @@
 <main>
-  <div
-    id="canvas"
-    ngFlowchartCanvas
-
-  ></div>
+  <div id="canvas" ngFlowchartCanvas [ngFlowchartOptions]="options"></div>
   <div id="palette">
-    <div
-      class="plugin-op"
-      *ngFor="let op of pluginOps"
-      [ngFlowchartStep]="normalStep"
-      [ngFlowchartStepData]="op"
-    >
-      <span>{{ op.name }}</span>
-    </div>
-    <div
-      class="plugin-op"
-      *ngFor="let op of customOps"
-      [ngFlowchartStep]="op.component"
-      [ngFlowchartStepData]="op.data"
-    >
-      <span>{{ op.paletteName }}</span>
-    </div>
-    <!-- <div
-      class="plugin-op"
-      *ngFor="let op of wideOps"
-      [ngFlowchartStep]="wideStep"
-      [ngFlowchartStepData]="op"
-    >
-      <span>{{ op.name }}</span>
-    </div>
-    <div
-      class="plugin-op"
-      *ngFor="let op of tallOps"
-      [ngFlowchartStep]="tallStep"
-      [ngFlowchartStepData]="op"
-    >
-      <span>{{ op.name }}</span>
-    </div> -->
+    <section>
+      <div
+        class="plugin-op"
+        *ngFor="let op of pluginOps"
+        [ngFlowchartStep]="normalStep"
+        [ngFlowchartStepData]="op"
+      >
+        <span>{{ op.name }}</span>
+      </div>
+      <div
+        class="plugin-op"
+        *ngFor="let op of customOps"
+        [ngFlowchartStep]="op.component"
+        [ngFlowchartStepData]="op.data"
+      >
+        <span>{{ op.paletteName }}</span>
+      </div>
+    </section>
 
-    <button (click)="printFlowData()">Get Flow Data</button>
-    <button (click)="clearData()">Clear Flow</button>
+    <section>
+      <button (click)="printFlowData()">Get Flow Data</button>
+      <button (click)="clearData()">Clear Flow</button>
+    </section>
+    <section>
+      <div class="sub-section">
+        <label for="step-gap-select" class="wide">Step Gap</label>
+        <select
+          name="step-gap-select"
+          id="step-gap-select"
+          class="wide"
+          (change)="onGapChanged($event)"
+        >
+          <option value="30">30</option>
+          <option value="40" selected>40</option>
+          <option value="60">60</option>
+        </select>
+      </div>
+      <div class="sub-section">
+        <label for="sequential">Sequential</label>
+        <input type="checkbox" name="sequential" (change)="onSequentialChange($event)">
+      </div>
+    </section>
 
-    <input type="number" id="step-gap" (change)="stepGapChanged($event)" />
     <ng-template #normalStep let-data>
       <div
         class="card"

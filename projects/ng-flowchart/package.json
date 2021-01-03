@@ -14,9 +14,6 @@
   "ngPackage": {
     "lib": {
       "entryFile": "src/public-api.ts"
-    },
-    "assets": [
-      "src/assets/ng-flowchart.scss"
-    ]
+    }
   }
 }
