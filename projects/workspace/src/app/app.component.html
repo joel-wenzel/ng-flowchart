@@ -21,8 +21,9 @@
     </section>
 
     <section>
-      <button (click)="printFlowData()">Get Flow Data</button>
-      <button (click)="clearData()">Clear Flow</button>
+      <button (click)="showFlowData()">Show JSON</button>
+      <button (click)="showUpload()">Upload JSON</button>
+      
     </section>
     <section>
       <div class="sub-section">
@@ -43,7 +44,9 @@
         <input type="checkbox" name="sequential" (change)="onSequentialChange($event)">
       </div>
     </section>
-
+    <section>
+      <button (click)="clearData()">Clear Flow</button>
+    </section>
     <ng-template #normalStep let-data>
       <div
         class="card"

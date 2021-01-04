@@ -7,10 +7,23 @@ export namespace NgFlowchart {
 
         }
 
-        toJSON() {
+        /**
+         * Returns the json representation of this flow
+         * @param indent Optional indent to specify for formatting
+         */
+        toJSON(indent?: number) {
             return JSON.stringify({
                 root: this.canvas.flow.rootStep?.toJSON()
-            });
+            }, null, indent);
+        }
+
+        /**
+         * Create a flow and render it on the canvas from a json string
+         * @param json The json string of the flow to render
+         */
+        upload(json: string) {
+            let root = JSON.parse(json).root;
+            console.log(root);
         }
 
         /**

@@ -93,13 +93,6 @@ export class NgFlowchartCanvasDirective implements OnInit {
         return new NgFlowchart.Flow(this.canvas);
     }
 
-    /**
-     * Returns the json representing this flow chart
-     */
-    public getFlowJSON() {
-      return new NgFlowchart.Flow(this.canvas).toJSON();
-    }
-
     // /**
     //  * Sets the flow object from the given json string. Typically used to reload a saved flow.
     //  * @param flow -Json representation of the flow. See getFlowJSON()
