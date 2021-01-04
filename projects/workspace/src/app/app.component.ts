@@ -19,6 +19,8 @@ export class AppComponent {
   @ViewChild('normalStep')
   normalStepTemplate: TemplateRef<any>;
 
+  sampleJson = '{"root":{"id":"s1609804611155","data":{"name":"Do Action","inputs":[]},"children":[{"id":"s1609804612230","data":{"name":"Do Action","inputs":[]},"children":[]}]}}';
+
   pluginOps = [
     {
       name: 'Do Action',
@@ -41,7 +43,7 @@ export class AppComponent {
     }
   ]
 
-  
+
 
   @ViewChild(NgFlowchartCanvasDirective)
   canvas: NgFlowchartCanvasDirective;
@@ -55,19 +57,28 @@ export class AppComponent {
 
   }
 
-  
+  showUpload() {
+    this.canvas.getFlow().upload(this.sampleJson);
+  }
 
-  printFlowData() {
-    console.log(this.canvas.getFlowJSON());
+  showFlowData() {
+
+    let json = this.canvas.getFlow().toJSON(4);
+    
+    var x = window.open();
+    x.document.open();
+    x.document.write('<html><body><pre>' + json + '</pre></body></html>');
+    x.document.close();
+
   }
 
   clearData() {
     this.canvas.getFlow().clear();
- 
+
   }
 
   onGapChanged(event) {
-    
+
     this.options = {
       ...this.options,
       stepGap: parseInt(event.target.value)
@@ -78,7 +89,7 @@ export class AppComponent {
     this.options = {
       ...this.options,
       isSequential: event.target.checked
-    }    
+    }
   }
 
   onDelete(id) {
