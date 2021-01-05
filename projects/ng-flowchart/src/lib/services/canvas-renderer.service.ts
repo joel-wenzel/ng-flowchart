@@ -2,7 +2,6 @@ import { ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { CONSTANTS } from '../model/flowchart.constants';
 import { NgFlowchartStepComponent } from '../ng-flowchart-step/ng-flowchart-step.component';
-import { DragStep } from './dropdata.service';
 import { OptionsService } from './options.service';
 
 export type DropProximity = {
@@ -98,7 +97,7 @@ export class CanvasRendererService {
         this.renderChildTree(root, root.getCurrentRect(canvasRect), canvasRect);
     }
 
-    private findDropLocationForHover(absMouseXY: number[], targetStep: NgFlowchartStepComponent, droppingStep: DragStep): DropProximity | 'deadzone' | null {
+    private findDropLocationForHover(absMouseXY: number[], targetStep: NgFlowchartStepComponent, droppingStep: NgFlowchart.Step): DropProximity | 'deadzone' | null {
 
         const stepRect = targetStep.nativeElement.getBoundingClientRect();
 
@@ -149,7 +148,7 @@ export class CanvasRendererService {
         return result;
     }
 
-    public findAndShowClosestDrop(dragStep: DragStep, event: DragEvent, steps: Array<NgFlowchartStepComponent>): NgFlowchart.DropTarget {
+    public findAndShowClosestDrop(dragStep: NgFlowchart.Step, event: DragEvent, steps: Array<NgFlowchartStepComponent>): NgFlowchart.DropTarget {
         if (!steps || steps.length == 0) {
             return;
         }
@@ -200,7 +199,7 @@ export class CanvasRendererService {
         };
     }
 
-    public showSnaps(dragStep: DragStep) {
+    public showSnaps(dragStep: NgFlowchart.PendingStep) {
 
 
     }

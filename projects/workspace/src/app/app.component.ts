@@ -1,5 +1,6 @@
-import { ChangeDetectorRef, Component, TemplateRef, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
+import { NgFlowchartStepRegistry } from 'projects/ng-flowchart/src/lib/services/step-registry.service';
 import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src/public-api';
 import { CustomStepComponent } from './custom-step/custom-step.component';
 
@@ -19,15 +20,17 @@ export class AppComponent {
   @ViewChild('normalStep')
   normalStepTemplate: TemplateRef<any>;
 
-  sampleJson = '{"root":{"id":"s1609804611155","data":{"name":"Do Action","inputs":[]},"children":[{"id":"s1609804612230","data":{"name":"Do Action","inputs":[]},"children":[]}]}}';
+  sampleJson = '{"root":{"id":"s1609806130549","type":"rest-get","data":{"name":"REST Get","type":"rest-get","inputs":[]},"children":[{"id":"s1609806132473","type":"filter","data":{"name":"Filter","type":"filter","condition":""},"children":[]}]}}';
 
   pluginOps = [
     {
-      name: 'Do Action',
+      name: 'REST Get',
+      type: 'rest-get',
       inputs: []
     },
     {
-      name: 'Router',
+      name: 'Filter',
+      type: 'filter',
       condition: ''
     }
 
@@ -35,8 +38,9 @@ export class AppComponent {
 
   customOps = [
     {
-      paletteName: 'Custom Step',
+      paletteName: 'Router',
       component: CustomStepComponent,
+      type: 'router',
       data: {
         name: 'Routing Block'
       }
@@ -50,11 +54,16 @@ export class AppComponent {
 
 
 
-  constructor(private change: ChangeDetectorRef) {
+  constructor(private stepRegistry: NgFlowchartStepRegistry) {
+    
     // this.callbacks.canMoveStep = this.canMoveStep;
     // this.callbacks.canAddStep = this.canAddStep;
 
 
+  }
+
+  ngAfterViewInit() {
+    this.stepRegistry.registerStep('rest-get', this.normalStepTemplate);
   }
 
   showUpload() {

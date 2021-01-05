@@ -1,9 +1,9 @@
-import { Component, ComponentFactoryResolver, ComponentRef, ElementRef, EventEmitter, HostListener, Input, Output, TemplateRef, Type, ViewChild, ViewContainerRef, ViewEncapsulation } from '@angular/core';
+import { Component, ComponentFactoryResolver, ComponentRef, ElementRef, EventEmitter, HostListener, Input, Output, TemplateRef, ViewChild, ViewContainerRef, ViewEncapsulation } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { CONSTANTS } from '../model/flowchart.constants';
 import { NgFlowchartArrowComponent } from '../ng-flowchart-arrow/ng-flowchart-arrow.component';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
-import { DragStep, DropDataService } from '../services/dropdata.service';
+import { DropDataService } from '../services/dropdata.service';
 
 export type AddChildOptions = {
   /** Should the child be added as a sibling to existing children, if false the existing children will be reparented to this new child.
@@ -13,10 +13,7 @@ export type AddChildOptions = {
   /** The index of the child. Only used when sibling is true.
    * Defaults to the end of the child array. 
    */
-  index?: number,
-
-  /** Optional data to assign to the component */
-  data?: any
+  index?: number
 }
 
 @Component({
@@ -33,11 +30,12 @@ export class NgFlowchartStepComponent {
     event.dataTransfer.setData('type', 'FROM_CANVAS');
     event.dataTransfer.setData('id', this.nativeElement.id);
 
-    this.drop.dragStep = {
-      instance: this,
-      data: this.data
-    }
 
+    this.drop.dragStep = {
+      type: this.type,
+      data: this.data,
+      instance: this
+    }
   }
 
   @HostListener('dragend', ['$event'])
@@ -51,6 +49,9 @@ export class NgFlowchartStepComponent {
 
   @Input()
   data: any;
+
+  @Input()
+  type: string;
 
   @Input()
   protected canvas: NgFlowchartCanvasService;
@@ -92,7 +93,7 @@ export class NgFlowchartStepComponent {
     return true;
   }
 
-  getDropPositionsForStep(pendingStep: DragStep): NgFlowchart.DropPosition[] {
+  getDropPositionsForStep(step: NgFlowchart.Step): NgFlowchart.DropPosition[] {
     return ['BELOW', 'LEFT', 'RIGHT', 'ABOVE'];
   }
 
@@ -134,9 +135,9 @@ export class NgFlowchartStepComponent {
    * @param template The template or component type to create
    * @param options Add options 
    */
-  async addChild(template: TemplateRef<any> | Type<NgFlowchartStepComponent>, options?: AddChildOptions): Promise<NgFlowchartStepComponent | null> {
+  async addChild(pending: NgFlowchart.PendingStep, options: AddChildOptions): Promise<NgFlowchartStepComponent | null> {
 
-    let componentRef = await this.canvas.createStep(template, options?.data);
+    let componentRef = await this.canvas.createStep(pending);
     this.canvas.addToCanvas(componentRef);
     if (options?.sibling) {
       this.zaddChildSibling0(componentRef.instance, options?.index);
@@ -303,6 +304,7 @@ export class NgFlowchartStepComponent {
   toJSON() {
     return {
       id: this.id,
+      type: this.type,
       data: this.data,
       children: this.hasChildren() ? this._children.map(child => {
         return child.toJSON()
@@ -315,7 +317,7 @@ export class NgFlowchartStepComponent {
     return this.view?.nativeElement;
   }
 
-  protected setId(id) {
+  setId(id) {
     this._id = id;
   }
 

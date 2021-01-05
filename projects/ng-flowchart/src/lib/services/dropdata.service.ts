@@ -1,24 +1,20 @@
-import { Injectable, TemplateRef, Type } from "@angular/core";
-import { NgFlowchartStepComponent } from '../ng-flowchart-step/ng-flowchart-step.component';
+import { Injectable } from "@angular/core";
+import { NgFlowchart } from '../model/flow.model';
 
-export type DragStep = {
-    template?: TemplateRef<any> | Type<NgFlowchartStepComponent>,
-    instance?: NgFlowchartStepComponent,
-    data?: any
-}
+
 
 @Injectable({
     providedIn: 'root'
 })
 export class DropDataService {
 
-    dragStep: DragStep;
+    dragStep: NgFlowchart.PendingStep | NgFlowchart.MoveStep;
 
     constructor() {
 
     }
 
-    public setDragStep(ref: DragStep) {
+    public setDragStep(ref: NgFlowchart.PendingStep) {
         this.dragStep = ref;
     }
 

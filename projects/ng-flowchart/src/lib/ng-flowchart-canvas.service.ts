@@ -1,4 +1,4 @@
-import { ComponentRef, Injectable, TemplateRef, Type, ViewContainerRef } from '@angular/core';
+import { ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
 import { NgFlowchart } from './model/flow.model';
 import { NgFlowchartStepComponent } from './ng-flowchart-step/ng-flowchart-step.component';
 import { CanvasRendererService } from './services/canvas-renderer.service';
@@ -45,7 +45,11 @@ export class NgFlowchartCanvasService {
     this.stepmanager.init(view);
 
     //hack to load the css
-    let ref = this.stepmanager.createStepFromComponent(NgFlowchartStepComponent, {}, this);
+    let ref = this.stepmanager.create({
+      template: NgFlowchartStepComponent,
+      type: '',
+      data: null
+    }, this);
     const i = this.viewContainer.indexOf(ref.hostView)
     this.viewContainer.remove(i);
 
@@ -74,7 +78,8 @@ export class NgFlowchartCanvasService {
       return;
     }
 
-    let componentRef = await this.createStep(this.drag.dragStep.template, this.drag.dragStep.data);
+    //TODO just pass dragStep here, but come up with a better name and move the type to flow.model
+    let componentRef = await this.createStep(this.drag.dragStep as NgFlowchart.PendingStep);
 
     const dropTarget = this.currentDropTarget || null;
 
@@ -100,15 +105,21 @@ export class NgFlowchartCanvasService {
     this.currentDropTarget = this.renderer.findAndShowClosestDrop(this.drag.dragStep, drag, this.flow.allSteps);
   }
 
+  public createStepFromType(id: string, type: string, data: any): Promise<ComponentRef<NgFlowchartStepComponent>> {
+    let compRef = this.stepmanager.createFromRegistry(id, type, data, this);
+    return new Promise((resolve) => {
+      let sub = compRef.instance.viewInit.subscribe(() => {
+        sub.unsubscribe();
+        resolve(compRef);
+      })
+    })
+  }
 
-  public createStep(template: TemplateRef<any> | Type<NgFlowchartStepComponent>, data: any): Promise<ComponentRef<NgFlowchartStepComponent>> {
+  public createStep(pending: NgFlowchart.PendingStep): Promise<ComponentRef<NgFlowchartStepComponent>> {
     let componentRef: ComponentRef<NgFlowchartStepComponent>;
-    if (template instanceof TemplateRef) {
-      componentRef = this.stepmanager.createStepFromTemplate(template, data, this);
-    }
-    else {
-      componentRef = this.stepmanager.createStepFromComponent(template, data, this);
-    }
+
+    componentRef = this.stepmanager.create(pending, this);
+
     return new Promise((resolve) => {
       let sub = componentRef.instance.viewInit.subscribe(() => {
         sub.unsubscribe();
