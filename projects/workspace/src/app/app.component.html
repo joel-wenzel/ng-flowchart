@@ -6,6 +6,7 @@
         class="plugin-op"
         *ngFor="let op of pluginOps"
         [ngFlowchartStep]="normalStep"
+        [ngFlowchartStepType]="op.type"
         [ngFlowchartStepData]="op"
       >
         <span>{{ op.name }}</span>
@@ -14,6 +15,7 @@
         class="plugin-op"
         *ngFor="let op of customOps"
         [ngFlowchartStep]="op.component"
+        [ngFlowchartStepType]="op.type"
         [ngFlowchartStepData]="op.data"
       >
         <span>{{ op.paletteName }}</span>
@@ -57,21 +59,7 @@
         <span>{{ data.data.name }}</span>
       </div>
     </ng-template>
-    <ng-template #wideStep let-data="data">
-      <div class="card wide" [attr.name]="data.name" #wide>
-        <span>{{ data.name }}</span>
-        <div>
-          <button (click)="onDelete(wide.id)">Delete</button>
-          <button (click)="onEdit(wide.id)">Edit</button>
-        </div>
-      </div>
-    </ng-template>
-    <ng-template #tallStep let-data="data">
-      <div class="card tall" [attr.name]="data.name" #tall>
-        <span>{{ data.name }}</span>
-        <button (click)="addChild(tall.id)"></button>
-        <button (click)="addChildAtIndex(tall.id)"></button>
-      </div>
-    </ng-template>
+    
+    
   </div>
 </main>

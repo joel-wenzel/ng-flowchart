@@ -12,10 +12,11 @@ export class NgFlowchartStepDirective implements AfterViewInit {
         
         this.data.setDragStep({
             template: this.flowStepCanvasContent,
+            type: this.flowStepType,
             data: this.flowStepData
         });
 
-        //this.canvas.onDragStart(event);
+        
 
         event.dataTransfer.setData('type', 'FROM_PALETTE');
     }
@@ -24,11 +25,14 @@ export class NgFlowchartStepDirective implements AfterViewInit {
     onDragEnd(event: DragEvent) {
         
         this.data.setDragStep(null);
-        //this.canvas.onDragEnd(event);
+       
     }
 
     @Input('ngFlowchartStep')
     flowStepCanvasContent: TemplateRef<any> | any;
+
+    @Input('ngFlowchartStepType')
+    flowStepType: string;
 
     @Input('ngFlowchartStepData')
     flowStepData: Object;

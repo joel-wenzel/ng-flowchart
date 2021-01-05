@@ -1,3 +1,4 @@
+import { TemplateRef, Type } from '@angular/core';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
 import { NgFlowchartStepComponent } from '../ng-flowchart-step/ng-flowchart-step.component';
 
@@ -22,8 +23,9 @@ export namespace NgFlowchart {
          * @param json The json string of the flow to render
          */
         upload(json: string) {
-            let root = JSON.parse(json).root;
-            console.log(root);
+            let root: any = JSON.parse(json).root;
+            let comp = this.canvas.createStepFromType(root.id, root.type, root.data);
+            
         }
 
         /**
@@ -84,6 +86,21 @@ export namespace NgFlowchart {
     //     status: DropStatus,
     //     error?: string
     // }
+
+    export interface MoveStep extends Step {
+        instance: NgFlowchartStepComponent
+    }
+
+    export interface PendingStep extends Step {
+        template: TemplateRef<any> | Type<NgFlowchartStepComponent>
+    }
+
+    export interface Step {
+        type: string,
+        data?: any
+    }
+
+   
 
     export type DropTarget = {
         step: NgFlowchartStepComponent,

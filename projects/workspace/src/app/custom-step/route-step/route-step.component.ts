@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { NgFlowchartStepComponent } from 'projects/ng-flowchart/src/lib/ng-flowchart-step/ng-flowchart-step.component';
-import { DragStep } from 'projects/ng-flowchart/src/lib/services/dropdata.service';
 import { NgFlowchart } from 'projects/ng-flowchart/src/public-api';
 
 @Component({
@@ -13,8 +12,8 @@ export class RouteStepComponent extends NgFlowchartStepComponent {
   ngOnInit(): void {
   }
 
-  getDropPositionsForStep(pendingStep: DragStep): NgFlowchart.DropPosition[] {    
-    if(pendingStep?.template !== RouteStepComponent && !(pendingStep?.instance instanceof RouteStepComponent)) {
+  getDropPositionsForStep(step: NgFlowchart.Step): NgFlowchart.DropPosition[] {    
+    if(step.type !== 'route-step') {
       return ['BELOW']
     }
     else {
