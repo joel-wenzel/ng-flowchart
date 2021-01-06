@@ -1,8 +1,8 @@
 import { ComponentFactoryResolver, ComponentRef, Injectable, TemplateRef, Type, ViewContainerRef } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
+import { NgFlowchartStepRegistry } from '../ng-flowchart-step-registry.service';
 import { NgFlowchartStepComponent } from '../ng-flowchart-step/ng-flowchart-step.component';
-import { NgFlowchartStepRegistry } from './step-registry.service';
 
 /**
  * This service handles adding new steps to the canvas

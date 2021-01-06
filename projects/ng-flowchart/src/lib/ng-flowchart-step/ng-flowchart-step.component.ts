@@ -25,7 +25,7 @@ export type AddChildOptions = {
 export class NgFlowchartStepComponent {
 
   @HostListener('dragstart', ['$event'])
-  protected onMoveStart(event: DragEvent) {
+  onMoveStart(event: DragEvent) {
     this.hideTree();
     event.dataTransfer.setData('type', 'FROM_CANVAS');
     event.dataTransfer.setData('id', this.nativeElement.id);
@@ -39,7 +39,7 @@ export class NgFlowchartStepComponent {
   }
 
   @HostListener('dragend', ['$event'])
-  protected onMoveEnd(event: DragEvent) {
+  onMoveEnd(event: DragEvent) {
     this.showTree();
   }
 
@@ -154,7 +154,7 @@ export class NgFlowchartStepComponent {
   }
 
   /**
-   * 
+   * Destroys this step component and updates all necessary child and parent relationships
    * @param recursive 
    * @param checkCallbacks 
    */

@@ -1,6 +1,6 @@
-import { AfterViewInit, Directive, ElementRef, HostListener, Input, TemplateRef } from '@angular/core';
+import { AfterViewInit, Directive, ElementRef, HostListener, Input } from '@angular/core';
+import { NgFlowchart } from './model/flow.model';
 import { DropDataService } from './services/dropdata.service';
-
 
 @Directive({
     selector: '[ngFlowchartStep]'
@@ -10,14 +10,7 @@ export class NgFlowchartStepDirective implements AfterViewInit {
     @HostListener('dragstart', ['$event'])
     onDragStart(event: DragEvent) {
         
-        this.data.setDragStep({
-            template: this.flowStepCanvasContent,
-            type: this.flowStepType,
-            data: this.flowStepData
-        });
-
-        
-
+        this.data.setDragStep(this.flowStep);
         event.dataTransfer.setData('type', 'FROM_PALETTE');
     }
 
@@ -29,13 +22,7 @@ export class NgFlowchartStepDirective implements AfterViewInit {
     }
 
     @Input('ngFlowchartStep')
-    flowStepCanvasContent: TemplateRef<any> | any;
-
-    @Input('ngFlowchartStepType')
-    flowStepType: string;
-
-    @Input('ngFlowchartStepData')
-    flowStepData: Object;
+    flowStep: NgFlowchart.PendingStep;
 
     constructor(
         protected element: ElementRef<HTMLElement>,

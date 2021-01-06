@@ -5,7 +5,6 @@ import { CanvasRendererService } from './services/canvas-renderer.service';
 import { DropDataService as DragService } from './services/dropdata.service';
 import { OptionsService } from './services/options.service';
 import { StepManagerService } from './services/step-manager.service';
-import { NgFlowchartStepRegistry } from './services/step-registry.service';
 
 export class CanvasFlow {
   rootStep: NgFlowchartStepComponent;
@@ -34,8 +33,7 @@ export class NgFlowchartCanvasService {
     private drag: DragService,
     private options: OptionsService,
     private renderer: CanvasRendererService,
-    private stepmanager: StepManagerService,
-    private registry: NgFlowchartStepRegistry
+    private stepmanager: StepManagerService
   ) {
     window['flow'] = this.flow;
 

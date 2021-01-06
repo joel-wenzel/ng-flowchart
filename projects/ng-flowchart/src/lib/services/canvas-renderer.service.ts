@@ -77,7 +77,7 @@ export class CanvasRendererService {
 
             child.zdrawArrow(
                 [rootXCenter, (rootRect.bottom - canvasRect.top)],
-                [currentChildRect.left + currentChildRect.width / 2, currentChildRect.top]
+                [currentChildRect.left + currentChildRect.width / 2 - canvasRect.left, currentChildRect.top - canvasRect.top]
             );
 
             this.renderChildTree(child, currentChildRect, canvasRect);
