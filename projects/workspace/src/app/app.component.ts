@@ -20,7 +20,7 @@ export class AppComponent {
   @ViewChild('normalStep')
   normalStepTemplate: TemplateRef<any>;
 
-  sampleJson = '{"root":{"id":"s1609806130549","type":"rest-get","data":{"name":"REST Get","type":"rest-get","inputs":[]},"children":[{"id":"s1609806132473","type":"filter","data":{"name":"Filter","type":"filter","condition":""},"children":[]}]}}';
+  sampleJson = '{"root":{"id":"s1609806130549","type":"rest-get","data":{"name":"REST Get","type":"rest-get","inputs":[]},"children":[{"id":"s1609806132473","type":"filter","data":{"name":"Filter","type":"filter","condition":""},"children":[]},{"id":"s1609899756883","type":"filter","data":{"name":"Filter","type":"filter","condition":""},"children":[{"id":"s1609899758149","type":"filter","data":{"name":"Filter","type":"filter","condition":""},"children":[{"id":"s1609899796612","type":"router","data":{"name":"Routing Block"},"children":[]}]},{"id":"s1609899760490","type":"filter","data":{"name":"Filter","type":"filter","condition":""},"children":[{"id":"s1609899794381","type":"rest-get","data":{"name":"REST Get","type":"rest-get","inputs":[]},"children":[]}]}]}]}}';
 
   pluginOps = [
     {
@@ -64,6 +64,8 @@ export class AppComponent {
 
   ngAfterViewInit() {
     this.stepRegistry.registerStep('rest-get', this.normalStepTemplate);
+    this.stepRegistry.registerStep('filter', this.normalStepTemplate);
+    this.stepRegistry.registerStep('router', CustomStepComponent);
   }
 
   showUpload() {

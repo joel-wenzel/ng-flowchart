@@ -19,6 +19,7 @@ export class NgFlowchartCanvasDirective implements OnInit {
 
     @HostListener('drop', ['$event'])
     protected onDrop(event: DragEvent) {
+       
         const type = event.dataTransfer.getData('type');
         if('FROM_CANVAS' == type) {
             this.canvas.moveStep(event, event.dataTransfer.getData('id'));
