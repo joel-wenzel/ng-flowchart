@@ -24,10 +24,9 @@ export class CanvasRendererService {
         this.viewContainer = viewContainer;
     }
 
-    public renderRoot(step: ComponentRef<NgFlowchartStepComponent>, dragEvent: DragEvent) {
+    public renderRoot(step: ComponentRef<NgFlowchartStepComponent>, dragEvent?: DragEvent) {
         this.getCanvasContentElement().appendChild((step.location.nativeElement));
-        const relativeXY = this.getRelativeXY(dragEvent);
-        this.setRootPosition(step, relativeXY[0], relativeXY[1]);
+        this.setRootPosition(step.instance, dragEvent);
     }
 
     public renderNonRoot(step: ComponentRef<NgFlowchartStepComponent>, dragEvent?: DragEvent) {
@@ -77,10 +76,10 @@ export class CanvasRendererService {
             const currentChildRect = child.getCurrentRect(canvasRect);
 
             child.zdrawArrow(
-                [rootXCenter, (rootRect.bottom - canvasRect.top)], 
+                [rootXCenter, (rootRect.bottom - canvasRect.top)],
                 [currentChildRect.left + currentChildRect.width / 2, currentChildRect.top]
-                );
-                
+            );
+
             this.renderChildTree(child, currentChildRect, canvasRect);
             leftXTree += childExtent + this.options.options.stepGap;
         })
@@ -89,11 +88,15 @@ export class CanvasRendererService {
 
 
 
-    public render(root: NgFlowchartStepComponent) {
+    public render(root: NgFlowchartStepComponent, pretty?: boolean) {
         if (!root) {
             return;
         }
         const canvasRect = this.getCanvasContentElement().getBoundingClientRect();
+        if (pretty) {
+            //this will place the root at the top center of the canvas and render from there
+            this.setRootPosition(root, null);
+        }
         this.renderChildTree(root, root.getCurrentRect(canvasRect), canvasRect);
     }
 
@@ -210,18 +213,25 @@ export class CanvasRendererService {
         )
     }
 
-    private setRootPosition(step: ComponentRef<NgFlowchartStepComponent>, x, y) {
+    private setRootPosition(step: NgFlowchartStepComponent, dragEvent?: DragEvent) {
+        if (!dragEvent) {
+            const canvasTop = this.getCanvasTopCenterPosition();
+            step.zsetPosition(canvasTop, true)
+            return;
+        }
+        
         switch (this.options.options.rootPosition) {
             case 'CENTER':
                 const canvasCenter = this.getCanvasCenterPosition();
-                step.instance.zsetPosition(canvasCenter, true);
+                step.zsetPosition(canvasCenter, true);
                 return;
             case 'TOP_CENTER':
                 const canvasTop = this.getCanvasTopCenterPosition();
-                step.instance.zsetPosition(canvasTop, true)
+                step.zsetPosition(canvasTop, true)
                 return;
             default:
-                step.instance.zsetPosition([x, y], true);
+                const relativeXY = this.getRelativeXY(dragEvent);
+                step.zsetPosition(relativeXY, true);
                 return;
         }
     }
