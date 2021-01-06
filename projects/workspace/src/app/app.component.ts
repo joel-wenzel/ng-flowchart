@@ -1,6 +1,6 @@
 import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
-import { NgFlowchartStepRegistry } from 'projects/ng-flowchart/src/lib/services/step-registry.service';
+import { NgFlowchartStepRegistry } from 'projects/ng-flowchart/src/lib/ng-flowchart-step-registry.service';
 import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src/public-api';
 import { CustomStepComponent } from './custom-step/custom-step.component';
 
@@ -39,11 +39,14 @@ export class AppComponent {
   customOps = [
     {
       paletteName: 'Router',
-      component: CustomStepComponent,
-      type: 'router',
-      data: {
-        name: 'Routing Block'
+      step: {
+        template: CustomStepComponent,
+        type: 'router',
+        data: {
+          name: 'Routing Block'
+        }
       }
+      
     }
   ]
 
@@ -78,7 +81,7 @@ export class AppComponent {
     
     var x = window.open();
     x.document.open();
-    x.document.write('<html><body><pre>' + json + '</pre></body></html>');
+    x.document.write('<html><head><title>Flowchart Json</title></head><body><pre>' + json + '</pre></body></html>');
     x.document.close();
 
   }

@@ -19,9 +19,9 @@ export class NgFlowchartCanvasDirective implements OnInit {
 
     @HostListener('drop', ['$event'])
     protected onDrop(event: DragEvent) {
-       
+
         const type = event.dataTransfer.getData('type');
-        if('FROM_CANVAS' == type) {
+        if ('FROM_CANVAS' == type) {
             this.canvas.moveStep(event, event.dataTransfer.getData('id'));
         }
         else {
@@ -40,24 +40,26 @@ export class NgFlowchartCanvasDirective implements OnInit {
 
     @HostListener('window:resize', ['$event'])
     protected onResize(event) {
-       // this.canvas.reRender();
+        if(this._options.centerOnResize) {
+            this.canvas.reRender(true);
+        }
+        
     }
 
     @Input('ngFlowchartCallbacks')
     set callbacks(callbacks: NgFlowchart.Callbacks) {
         this._callbacks = callbacks;
-        if(!!this.canvas) {
+        if (!!this.canvas) {
             //this.canvas.setCallbacks(this._callbacks);
         }
     }
 
     @Input('ngFlowchartOptions')
     set options(options: NgFlowchart.Options) {
-        this._options = options;
-        if(!!this.optionService) {
-            this.optionService.set(this._options);
-            this.canvas.reRender();
-        }
+        this.optionService.set(options);
+        this._options = this.optionService.options;
+        this.canvas.reRender();
+       
     }
 
 
@@ -68,7 +70,7 @@ export class NgFlowchartCanvasDirective implements OnInit {
         private canvas: NgFlowchartCanvasService,
         private optionService: OptionsService
     ) {
-            
+
         this.canvasEle.nativeElement.classList.add(CONSTANTS.CANVAS_CLASS);
         this.createCanvasContent(this.viewContainer);
 
@@ -77,6 +79,10 @@ export class NgFlowchartCanvasDirective implements OnInit {
 
     ngOnInit() {
         this.canvas.init(this.viewContainer);
+
+        if(!this._options) {
+            this.options = new NgFlowchart.Options();
+        }
     }
 
     private createCanvasContent(viewContainer: ViewContainerRef) {

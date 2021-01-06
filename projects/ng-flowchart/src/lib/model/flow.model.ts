@@ -25,30 +25,31 @@ export namespace NgFlowchart {
         async upload(json: string): Promise<void> {
             let root: any = JSON.parse(json).root;
             this.clear();
-            
+
             await this.canvas.upload(root);
         }
 
         /**
          * Returns the root step of the flow chart
          */
-        getRoot() {
+        getRoot(): NgFlowchartStepComponent {
             return this.canvas.flow.rootStep;
         }
 
         /**
          * Finds a step in the flow chart by a given id
-         * @param id 
+         * @param id Id of the step to find. By default, the html id of the step
          */
-        getStep(id) {
+        getStep(id): NgFlowchartStepComponent {
             return this.canvas.flow.allSteps.find(child => child.id == id);
         }
 
         /**
          * Re-renders the canvas. Generally this should only be used in rare circumstances
+         * @param pretty Attempt to recenter the flow in the canvas
          */
-        render() {
-            this.canvas.reRender();
+        render(pretty?: boolean) {
+            this.canvas.reRender(pretty);
         }
 
         /**
@@ -62,7 +63,7 @@ export namespace NgFlowchart {
 
         }
 
-    }    
+    }
 
     export class Options {
         /** The gap (in pixels) between flow steps*/
@@ -75,33 +76,43 @@ export namespace NgFlowchart {
         isSequential?: boolean = false;
 
         /** When true steps will not snap to 'pretty' positions and instead remain where dropped */
-        rootPosition?: 'TOP_CENTER' | 'CENTER' | 'DEFAULT' = 'TOP_CENTER';
+        rootPosition?: 'TOP_CENTER' | 'CENTER' | 'FREE' = 'TOP_CENTER';
 
-        showSnapIndicators?: boolean = true;
+        centerOnResize?: boolean = true;
     }
 
-    // export type DropEvent = {
-    //     step: Step,
-    //     adjacent?: Step,
-    //     position?: DropPosition,
-    //     status: DropStatus,
-    //     error?: string
-    // }
+    export type DropEvent = {
+        step: MoveStep | PendingStep,
+        parent?: NgFlowchartStepComponent,
+        status: DropStatus,
+        error?: string
+    }
 
     export interface MoveStep extends Step {
         instance: NgFlowchartStepComponent
     }
 
     export interface PendingStep extends Step {
+        /**
+         * An Ng-template containing the canvas content to be displayed. 
+         * Or a component type that extends NgFlowchartStepComponent
+         */
         template: TemplateRef<any> | Type<NgFlowchartStepComponent>
     }
 
     export interface Step {
+        /**
+         * A unique string indicating the type of step this is.
+         * This type will be used to register steps if you are uploading from json.
+         */
         type: string,
+        /**
+         * Optional data to give the step. Typically configuration data that users can edit on the step.
+         */
         data?: any
     }
 
-   
+
 
     export type DropTarget = {
         step: NgFlowchartStepComponent,
@@ -112,14 +123,8 @@ export namespace NgFlowchart {
     export type DropPosition = 'RIGHT' | 'LEFT' | 'BELOW' | 'ABOVE';
 
     export type Callbacks = {
-        // canAddStep?: (dropCandidate: DropEvent) => boolean;
-        // canMoveStep?: (moveCandidate: DropEvent) => boolean;
-        // // canDeleteStep?: (step: Step) => boolean;
-        // onDropError?: (drop: DropEvent) => void;
-
-        // //TODO
-        // onDropStep?: (drop: DropEvent) => void;
-        // onMoveStep?: (drop: DropEvent) => void;
+        onDropError?: (drop: DropEvent) => void;
+        onDropStep?: (drop: DropEvent) => void;
     };
 }
 

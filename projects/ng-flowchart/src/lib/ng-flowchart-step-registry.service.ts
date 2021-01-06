@@ -1,5 +1,5 @@
 import { Injectable, TemplateRef, Type } from '@angular/core';
-import { NgFlowchartStepComponent } from '../ng-flowchart-step/ng-flowchart-step.component';
+import { NgFlowchartStepComponent } from './ng-flowchart-step/ng-flowchart-step.component';
 
 @Injectable({
     providedIn: 'root'
