@@ -46,7 +46,7 @@ export class AppComponent {
           name: 'Routing Block'
         }
       }
-      
+
     }
   ]
 
@@ -58,17 +58,23 @@ export class AppComponent {
 
 
   constructor(private stepRegistry: NgFlowchartStepRegistry) {
-    
-    // this.callbacks.canMoveStep = this.canMoveStep;
-    // this.callbacks.canAddStep = this.canAddStep;
 
-
+    this.callbacks.onDropError = this.onDropError;
+    this.callbacks.onMoveError = this.onMoveError;
   }
 
   ngAfterViewInit() {
     this.stepRegistry.registerStep('rest-get', this.normalStepTemplate);
     this.stepRegistry.registerStep('filter', this.normalStepTemplate);
     this.stepRegistry.registerStep('router', CustomStepComponent);
+  }
+
+  onDropError(error: NgFlowchart.DropError) {
+    console.log(error);
+  }
+
+  onMoveError(error: NgFlowchart.MoveError) {
+    console.log(error);
   }
 
   showUpload() {
@@ -78,7 +84,7 @@ export class AppComponent {
   showFlowData() {
 
     let json = this.canvas.getFlow().toJSON(4);
-    
+
     var x = window.open();
     x.document.open();
     x.document.write('<html><head><title>Flowchart Json</title></head><body><pre>' + json + '</pre></body></html>');

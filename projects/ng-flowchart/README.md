@@ -23,17 +23,15 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 ## Current and Upcoming Feature List
 
 - [Chart API](#chart-api) 
-- [Generating Output](#generating-output)
+- [Getting Output JSON](#generating-output-json)
+- [Uploading from JSON](#uploading-json)
 - [Controlling Behavior](#controlling-behavior)
 - [Custom Steps](#custom-steps)
-- [Uploading from JSON](#uploading-json)
 - [Theming](#theming)
-- Custom Error Messages
-
-- Storing step data
+- [Storing step data](#storing-step-data)
 - Disabling the chart
 
-## Getting started
+# Getting started
 
 1. Install it.
 
@@ -99,7 +97,7 @@ The directive requires an input, an object containing the templateRef, stepType 
 
 Please star the [repo](https://github.com/joel-wenzel/ng-flowchart) if you liked the library. Your support means everything to me and helps me focus on delivering new features
 
-## Chart API
+# Chart API
 The entire chart content and functionality is available via the NgFlowchart.Flow class. 
 ```
 //In your component.ts containing the chart
@@ -165,7 +163,7 @@ See the [wiki](#) for the full list and descriptions
 - #### **removeChild(child: NgFlowchartStepComponent)**
     Remove a child from this step. Returns the index at which the child was found or -1 if not found.
 
-## Generating Output
+# Generating Output JSON
 The flowchart can be exported in json format via the Flow object or Step object.
 ```
 //In your component.ts containing the chart
@@ -228,10 +226,38 @@ Here is sample json output for a very basic 3 node chart
 }
 
 ```
-## Controlling Behavior
+# Uploading JSON
+The chart flow can be initialized from the same json represenation seen in the [Generating Output JSON](#generating-output-json) section. 
+
+However, due to the customizable nature of the steps, step types must be registered with the **NgFlowchartStepRegistry** service so they can be created correctly.
+```
+constructor(private stepRegistry: NgFlowchartStepRegistry) {
+    
+}
+
+ngAfterViewInit() {
+  //created from standared ng-template refs
+  this.stepRegistry.registerStep('rest-get', this.normalStepTemplate);
+  this.stepRegistry.registerStep('filter', this.normalStepTemplate);
+
+  //created from custom component
+  this.stepRegistry.registerStep('router', CustomRouterStepComponent);
+}
+```
+After registering it is as simple as calling the public method on the flow object with your json.
+```
+@ViewChild(NgFlowchartCanvasDirective)
+canvas: NgFlowchartCanvasDirective;
+
+showUpload(json: string) {
+  this.canvas.getFlow().upload(json);
+}
+
+```
+# Controlling Behavior
 In addition to the [Chart API](#chart-api) above there are also several hooks and options to make the chart behave the way you want it to.
 
-### Options
+## Options
 Options are passed via the **ngFlowchartOptions** input on the **ngFlowchartCanvas** directive.
 ```
 <div
@@ -257,7 +283,7 @@ Options are passed via the **ngFlowchartOptions** input on the **ngFlowchartCanv
 - #### **centerOnResize**
     When a canvas resize is detected, should the flow be re-centered? Default is true
 
-### Callbacks
+## Callbacks
 Callbacks are passed via the **ngFlowchartCallbacks** input on the **ngFlowchartCanvas** directive.
 ```
 <div
@@ -276,22 +302,85 @@ callbacks: NgFlowchart.Callbacks = {};
 
 constructor() {
   //be sure to bind this to the callback if you want to access this classes context
-   this.callbacks.onDropError = this.onDropError.bind(this);
-   this.callbacks.onDropStep = this.onDropStep.bind(this); 
+   this.callbacks.onDropError = this.onDropError;
+   this.callbacks.onDropStep = this.onDropStep.bind(this);
+   this.callbacks.onMoveError = this.onMoveError; 
 }
 
-onDropError(dropEvent: NgFlowchart.DropEvent) {
-    console.log(dropEvent);
+onDropError(error: NgFlowchart.DropError) {
+    console.log(error);
+    //show some popup
+}
+
+onMoveError(error: NgFlowchart.MoveError) {
+    console.log(error);
     //show some popup
 }
 
 onDropStep(dropEvent: NgFlowchart.DropEvent) {
-    console.log(dropEvent);
+    this.actions.push(dropEvent);
 }
 
 ```
-- #### **onDropError?**: (drop: DropEvent) => void;
+- #### **onDropError?**: (drop: DropError) => void;
+    Called whenever a new step fails to drop on the canvas
+
+- #### **onMoveError?**: (drop: MoveError) => void;
+    Called whenever an existing canvas step fails to move
+
 - #### **onDropStep?**: (drop: DropEvent) => void;
+    Called whenever a new step or existing step is successfully dropped on the canvas
+
+# Custom Steps
+Custom steps can be created if you need any kind of complex logic for specific steps. The example below is a custom step for a router which can be seen elsewhere on this page. 
+```
+@Component({
+  selector: 'app-custom-router-step',
+  template: `
+  <div class="router-step" #canvasContent>
+    <span>{{ data.name }}</span>
+    <button class="btn" (click)="onAddRoute()">Add Route</button>
+  </div>
+  `,
+  styleUrls: ['./custom-router-step.component.scss']
+})
+export class CustomRouterStepComponent extends NgFlowchartStepComponent {
+
+  routes = [];
+
+  canDrop(dropEvent: NgFlowchart.DropTarget): boolean {
+    return true;
+  }
+
+  getDropPositionsForStep(pendingStep: NgFlowchart.PendingStep): NgFlowchart.DropPosition[] {
+    if (pendingStep.template !== RouteStepComponent) {
+      return ['ABOVE', 'LEFT', 'RIGHT'];
+    }
+    else {
+      return ['BELOW'];
+    }
+  }
+
+  onAddRoute() {
+    let route = {
+      name: 'New Route',
+      condition: '',
+      sequence: null
+    }
+    let index = this.routes.push(route);
+    route.sequence = index;
+
+    this.addChild({
+      template: RouteStepComponent, //another custom step
+      type: 'route-step',
+      data: route
+    }, {
+      sibling: true
+    });
+  }
+}
+```
+
 # Theming
 For the most part, the theme is left to the user given they have complete control over the canvas content via the step templates. However, connectors and drop icons can be styled by overriding a few css classes. 
 **These styles should be placed in your root styles.scss or prefix with ::ng-deep**
@@ -319,11 +408,50 @@ For the most part, the theme is left to the user given they have complete contro
 
 ```
 
+# Storing Step Data
+When creating a new step, a data object can be passed to the step. This data object is completely optional but allows you to store/edit configuration data for the step. See [Getting Started](#getting-started) for passing the data.
+```
+export class AppComponent {
+  title = 'workspace';
 
+  @ViewChild(NgFlowchartCanvasDirective)
+  canvas: NgFlowchartCanvasDirective;
+
+  async onStepEdit(id: string) {
+    let step = this.canvas.getFlow().getStep(id);
+
+    //if data is an object then step.data will return a reference
+    //returning and setting an updated version of the data may not be needed
+    let updated = await this.showConfigPopup(step.data);
+    step.data = updated;
+  }
+}
+```
+Depending on the type of data and complexity, it may be beneficial to create a component for it.
+```
+@Component({
+  selector: 'app-editable-step',
+  template: `
+  <div class="editable-step" #canvasContent>
+    <span>{{ data.name }}</span>
+    <button class="btn" (click)="edit()">Edit</button>
+  </div>
+  `,
+  styleUrls: ['./editable-step.component.scss']
+})
+export class EditableStepComponent extends NgFlowchartStepComponent {
+  
+  edit() {
+    let updated = await this.showConfigPopup(this.data);
+    this.data = updated;
+  }
+}
+
+```
 ## FAQ
 
 ### Undefined variables in a callback
 If you are trying to access your component variables and functions inside a callback be sure that you bound the "this" object when assigning the callback.
 ```
-this.callbacks.canMoveStep = this.canMoveStep.bind(this);
+this.callbacks.onDropStep = this.onDropStep.bind(this);
 ```

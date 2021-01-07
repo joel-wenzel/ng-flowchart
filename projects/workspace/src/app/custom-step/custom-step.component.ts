@@ -9,7 +9,7 @@ import { RouteStepComponent } from './route-step/route-step.component';
   styleUrls: ['./custom-step.component.scss']
 })
 export class CustomStepComponent extends NgFlowchartStepComponent {
-  
+
   routes = [];
 
   ngOnInit(): void {
@@ -24,7 +24,7 @@ export class CustomStepComponent extends NgFlowchartStepComponent {
   }
 
   getDropPositionsForStep(pendingStep: NgFlowchart.PendingStep): NgFlowchart.DropPosition[] {
-    if(pendingStep.template !== RouteStepComponent) {
+    if (pendingStep.template !== RouteStepComponent) {
       return ['ABOVE', 'LEFT', 'RIGHT'];
     }
     else {
@@ -38,7 +38,9 @@ export class CustomStepComponent extends NgFlowchartStepComponent {
       condition: '',
       sequence: null
     }
-    this.routes.push(route);
+    let index = this.routes.push(route);
+    route.sequence = index;
+
     this.addChild({
       template: RouteStepComponent,
       type: 'route-step',
@@ -49,6 +51,7 @@ export class CustomStepComponent extends NgFlowchartStepComponent {
   }
 
   delete() {
+    //recursively delete
     this.destroy(true);
   }
 

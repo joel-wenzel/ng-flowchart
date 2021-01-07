@@ -1,25 +1,30 @@
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
 import { NgFlowchart } from '../model/flow.model';
 
 @Injectable()
 export class OptionsService {
 
     private _options: NgFlowchart.Options;
-
-    optionsWatch = new Subject<NgFlowchart.Options>();
+    private _callbacks: NgFlowchart.Callbacks;
 
     constructor() {
         this._options = new NgFlowchart.Options();
     }
 
-    set(options) {
+    setOptions(options) {
         this._options = this.sanitizeOptions(options);        
-        this.optionsWatch.next(this._options);
+    }
+
+    setCallbacks(callbacks) {
+        this._callbacks = callbacks;
     }
 
     get options() {
         return this._options;
+    }
+
+    get callbacks() {
+        return this._callbacks;
     }
 
     private sanitizeOptions(options: NgFlowchart.Options): NgFlowchart.Options {
