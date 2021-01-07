@@ -82,10 +82,26 @@ export namespace NgFlowchart {
     }
 
     export type DropEvent = {
-        step: MoveStep | PendingStep,
+        step: NgFlowchartStepComponent,
         parent?: NgFlowchartStepComponent,
-        status: DropStatus,
-        error?: string
+        isMove: boolean
+    }
+
+    export type DropError = {
+        step: PendingStep,
+        parent?: NgFlowchartStepComponent,
+        error: ErrorMessage
+    }
+
+    export type MoveError = {
+        step: MoveStep,
+        parent?: NgFlowchartStepComponent,
+        error: ErrorMessage
+    }
+
+    export type ErrorMessage = {
+        code?: string,
+        message?: string
     }
 
     export interface MoveStep extends Step {
@@ -123,8 +139,21 @@ export namespace NgFlowchart {
     export type DropPosition = 'RIGHT' | 'LEFT' | 'BELOW' | 'ABOVE';
 
     export type Callbacks = {
-        onDropError?: (drop: DropEvent) => void;
+        
+        /**
+         * Called when user drops a new step from the palette or moves an existing step
+         */
         onDropStep?: (drop: DropEvent) => void;
+
+        /**
+         * Called when a new step fails to drop on the canvas
+         */
+        onDropError?: (drop: DropError) => void;
+
+        /**
+         * Called when an existing step fails to move
+         */
+        onMoveError?: (drop: MoveError) => void;
     };
 }
 

@@ -1,5 +1,10 @@
 <main>
-  <div id="canvas" ngFlowchartCanvas [ngFlowchartOptions]="options"></div>
+  <div
+    id="canvas"
+    ngFlowchartCanvas
+    [ngFlowchartOptions]="options"
+    [ngFlowchartCallbacks]="callbacks"
+  ></div>
   <div id="palette">
     <section>
       <div
@@ -25,7 +30,6 @@
     <section>
       <button (click)="showFlowData()">Show JSON</button>
       <button (click)="showUpload()">Upload JSON</button>
-      
     </section>
     <section>
       <div class="sub-section">
@@ -43,7 +47,11 @@
       </div>
       <div class="sub-section">
         <label for="sequential">Sequential</label>
-        <input type="checkbox" name="sequential" (change)="onSequentialChange($event)">
+        <input
+          type="checkbox"
+          name="sequential"
+          (change)="onSequentialChange($event)"
+        />
       </div>
     </section>
     <section>
@@ -59,7 +67,5 @@
         <span>{{ data.data.name }}</span>
       </div>
     </ng-template>
-    
-    
   </div>
 </main>

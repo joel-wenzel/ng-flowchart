@@ -48,15 +48,12 @@ export class NgFlowchartCanvasDirective implements OnInit {
 
     @Input('ngFlowchartCallbacks')
     set callbacks(callbacks: NgFlowchart.Callbacks) {
-        this._callbacks = callbacks;
-        if (!!this.canvas) {
-            //this.canvas.setCallbacks(this._callbacks);
-        }
+        this.optionService.setCallbacks(callbacks);
     }
 
     @Input('ngFlowchartOptions')
     set options(options: NgFlowchart.Options) {
-        this.optionService.set(options);
+        this.optionService.setOptions(options);
         this._options = this.optionService.options;
         this.canvas.reRender();
        
