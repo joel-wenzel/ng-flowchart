@@ -1,0 +1,14 @@
+<div #canvasContent [id]="id">
+  <ng-container
+    *ngTemplateOutlet="
+      contentTemplate;
+      context: {
+        $implicit: {
+          data: data,
+          id: id
+        }
+      }
+    "
+  >
+  </ng-container>
+</div>

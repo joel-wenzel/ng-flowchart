@@ -1,0 +1,17 @@
+svg {
+    position: absolute;
+    z-index: 0;
+
+    transition: all .2s;
+}
+
+//To override arrow style
+// .ngflowchart-arrow {
+//     & #arrowhead {
+//         fill: #00b894;
+//     }
+
+//     & #arrowpath {
+//         stroke: #00b894;
+//     }
+// }

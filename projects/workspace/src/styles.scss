@@ -1,5 +1,3 @@
-@import '../../ng-flowchart/src/assets/ng-flowchart.scss';
-
 /* You can add global styles to this file, and also import other style files */
 html,
 body {
@@ -8,4 +6,22 @@ body {
 body {
   margin: 0;
   font-family: Roboto, "Poppins", sans-serif;
+}
+
+.ngflowchart-step-wrapper[ngflowchart-drop-hover]::after {
+  background: #a3e798 !important;
+}
+
+.ngflowchart-step-wrapper[ngflowchart-drop-hover]::before {
+  background: #4cd137 !important;
+}
+
+.ngflowchart-arrow {
+  & #arrowhead {
+    fill: darkgrey;
+  }
+
+  & #arrowpath {
+    stroke: darkgrey;
+  }
 }

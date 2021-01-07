@@ -1,6 +1,8 @@
-import { ChangeDetectorRef, Component, TemplateRef, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
+import { NgFlowchartStepRegistry } from 'projects/ng-flowchart/src/lib/ng-flowchart-step-registry.service';
 import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src/public-api';
+import { CustomStepComponent } from './custom-step/custom-step.component';
 
 @Component({
   selector: 'app-root',
@@ -12,116 +14,105 @@ export class AppComponent {
 
   callbacks: NgFlowchart.Callbacks = {};
   options: NgFlowchart.Options = {
-    stepGap: 40,
-    theme: {
-      connectors: 'pink',
-      dropIcon: 'blue'
-    }
+    stepGap: 40
   }
 
   @ViewChild('normalStep')
   normalStepTemplate: TemplateRef<any>;
 
+  sampleJson = '{"root":{"id":"s1609806130549","type":"rest-get","data":{"name":"REST Get","type":"rest-get","inputs":[]},"children":[{"id":"s1609806132473","type":"filter","data":{"name":"Filter","type":"filter","condition":""},"children":[]},{"id":"s1609899756883","type":"filter","data":{"name":"Filter","type":"filter","condition":""},"children":[{"id":"s1609899758149","type":"filter","data":{"name":"Filter","type":"filter","condition":""},"children":[{"id":"s1609899796612","type":"router","data":{"name":"Routing Block"},"children":[]}]},{"id":"s1609899760490","type":"filter","data":{"name":"Filter","type":"filter","condition":""},"children":[{"id":"s1609899794381","type":"rest-get","data":{"name":"REST Get","type":"rest-get","inputs":[]},"children":[]}]}]}]}}';
+
   pluginOps = [
     {
-      name: 'Do Action',
+      name: 'REST Get',
+      type: 'rest-get',
       inputs: []
     },
     {
-      name: 'Router',
+      name: 'Filter',
+      type: 'filter',
       condition: ''
     }
-    
+
   ]
 
-  wideOps = [
+  customOps = [
     {
-      name: 'Wide Step',
-      inputs: [
-        {
-          name: 'Address',
-          value: null
+      paletteName: 'Router',
+      step: {
+        template: CustomStepComponent,
+        type: 'router',
+        data: {
+          name: 'Routing Block'
         }
-      ]
+      }
+
     }
   ]
 
-  tallOps = [
-    {
-      name: 'Tall Step',
-      inputs: []
-    }
-  ]
+
 
   @ViewChild(NgFlowchartCanvasDirective)
-  canvasElement: NgFlowchartCanvasDirective;
+  canvas: NgFlowchartCanvasDirective;
 
 
 
-  constructor(private change: ChangeDetectorRef) {
-    this.callbacks.canMoveStep = this.canMoveStep;
-    this.callbacks.canAddStep = this.canAddStep;
+  constructor(private stepRegistry: NgFlowchartStepRegistry) {
+
+    this.callbacks.onDropError = this.onDropError;
+    this.callbacks.onMoveError = this.onMoveError;
   }
 
-
-  onDelete(id) {
-    this.canvasElement.getFlow().getStep(id).delete();
-   
+  ngAfterViewInit() {
+    this.stepRegistry.registerStep('rest-get', this.normalStepTemplate);
+    this.stepRegistry.registerStep('filter', this.normalStepTemplate);
+    this.stepRegistry.registerStep('router', CustomStepComponent);
   }
 
-  onEdit(id) {
-    let data = this.canvasElement.getFlow().getStep(id).getData();
-    data.name = Date.now();
-    data.inputs[0].value = Date.now();
+  onDropError(error: NgFlowchart.DropError) {
+    console.log(error);
   }
 
-  canMoveStep(dropEvent: NgFlowchart.DropEvent): boolean {
-    console.log(dropEvent);
-
-    return true;
+  onMoveError(error: NgFlowchart.MoveError) {
+    console.log(error);
   }
 
-  canAddStep(dropEvent: NgFlowchart.DropEvent): boolean {
-    return true;
+  showUpload() {
+    this.canvas.getFlow().upload(this.sampleJson);
   }
 
-  printFlowData() {
-    console.log(this.canvasElement.getFlowJSON());    
+  showFlowData() {
+
+    let json = this.canvas.getFlow().toJSON(4);
+
+    var x = window.open();
+    x.document.open();
+    x.document.write('<html><head><title>Flowchart Json</title></head><body><pre>' + json + '</pre></body></html>');
+    x.document.close();
+
   }
 
   clearData() {
-    this.canvasElement.getFlow().clear();
+    this.canvas.getFlow().clear();
+
   }
 
-  addChild(id) {
-    const options: NgFlowchart.AddChildOptions = {
-      asSibling: true,
-      data: {
-        name: 'Do Action',
-        inputs: []
-      }
-    }
-    this.canvasElement.getFlow().getStep(id).addChild(this.normalStepTemplate, options);
-  }
+  onGapChanged(event) {
 
-  addChildAtIndex(id) {
-    const options: NgFlowchart.AddChildOptions = {
-      asSibling: true,
-      index: 0,
-      data: {
-        name: 'Do Action',
-        inputs: []
-      }
-    }
-    this.canvasElement.getFlow().getStep(id).addChild(this.normalStepTemplate, options);
-  }
-
-  stepGapChanged(event) {
     this.options = {
       ...this.options,
-      stepGap:  parseInt(event.target.value)
+      stepGap: parseInt(event.target.value)
     };
-    
-    
+  }
+
+  onSequentialChange(event) {
+    this.options = {
+      ...this.options,
+      isSequential: event.target.checked
+    }
+  }
+
+  onDelete(id) {
+    this.canvas.getFlow().getStep(id).destroy(true);
   }
 }

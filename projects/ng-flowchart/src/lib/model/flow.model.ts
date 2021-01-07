@@ -1,6 +1,6 @@
-import { EmbeddedViewRef, TemplateRef } from '@angular/core';
+import { TemplateRef, Type } from '@angular/core';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
-import { NgFlowCanvas } from './canvas.model';
+import { NgFlowchartStepComponent } from '../ng-flowchart-step/ng-flowchart-step.component';
 
 export namespace NgFlowchart {
     export class Flow {
@@ -8,157 +8,61 @@ export namespace NgFlowchart {
 
         }
 
-        toJSON(): string {
+        /**
+         * Returns the json representation of this flow
+         * @param indent Optional indent to specify for formatting
+         */
+        toJSON(indent?: number) {
             return JSON.stringify({
-                name: this.canvas.canvasData.name,
-                root: this.canvas.canvasData.rootElement?.getStepJSON()
-            });
+                root: this.canvas.flow.rootStep?.toJSON()
+            }, null, indent);
+        }
+
+        /**
+         * Create a flow and render it on the canvas from a json string
+         * @param json The json string of the flow to render
+         */
+        async upload(json: string): Promise<void> {
+            let root: any = JSON.parse(json).root;
+            this.clear();
+
+            await this.canvas.upload(root);
         }
 
         /**
          * Returns the root step of the flow chart
          */
-        getRoot(): Step {
-            return this.canvas.canvasData.rootElement?.getFlowStep();
+        getRoot(): NgFlowchartStepComponent {
+            return this.canvas.flow.rootStep;
         }
 
         /**
          * Finds a step in the flow chart by a given id
-         * @param id 
+         * @param id Id of the step to find. By default, the html id of the step
          */
-        getStep(id): Step {
-            let ele = this.canvas.canvasData.allElements.find(child => child.html.id == id);
-            if (ele) {
-                return new Step(ele, this.canvas);
-            }
-            else return null;
+        getStep(id): NgFlowchartStepComponent {
+            return this.canvas.flow.allSteps.find(child => child.id == id);
         }
 
         /**
          * Re-renders the canvas. Generally this should only be used in rare circumstances
+         * @param pretty Attempt to recenter the flow in the canvas
          */
-        render() {
-            this.canvas.reRender();
+        render(pretty?: boolean) {
+            this.canvas.reRender(pretty);
         }
 
         /**
          * Clears all flow chart, reseting the current canvas
          */
         clear() {
-            if (this.canvas.canvasData?.rootElement) {
-                this.canvas.canvasData.rootElement.destroy(true, false);
+            if (this.canvas.flow?.rootStep) {
+                this.canvas.flow.rootStep.destroy(true, false);
                 this.canvas.reRender();
             }
 
         }
 
-    }
-
-    export class Step {
-        private id: string;
-
-        constructor(private canvasElement: NgFlowCanvas.CanvasElement, private canvas: NgFlowchartCanvasService) {
-            this.id = canvasElement.html.id;
-        }
-
-        toJSON() {
-            return {
-                id: this.id,
-                data: this.getData(),
-                children: this.hasChildren() ? this.getChildren().map(child => {
-                    return child.toJSON()
-                }) : []
-            }
-        }
-
-        /**
-         * Returns the id of this step. This is the same as the html id of the element.
-         * To make modifications to the view you can getElementById
-         */
-        getId() {
-            return this.id;
-        }
-
-        /**
-         * Returns the referenced data object passed via the ngFlowchartStepData input
-         */
-        getData() {
-            return this.canvasElement.view.data;
-        }
-
-        /**
-         * Returns the parent step. This can be null if this is the root node.
-         */
-        getParent(): Step | null {
-            return this.canvasElement.parent?.getFlowStep();
-        }
-
-        hasChildren(): boolean {
-            return this.canvasElement.children && this.canvasElement.children.length > 0;
-        }
-
-        isRootStep() {
-            return !this.getParent();
-        }
-
-        /**
-         * Returns all direct children of this step. 
-         * To get all descendants you can recursively keep calling getChildren
-         */
-        getChildren(): Array<Step> {
-            return this.canvasElement.children ? this.canvasElement.children.map(child => {
-                return child.getFlowStep()
-            }) : []
-        }
-
-        /**
-         * Deletes this node from the tree. Returns true or false if delete was a success
-         * @param recursive Should its children also be deleted? (default is false)
-         */
-        delete(recursive: boolean = false): boolean {
-            let result = this.canvasElement.destroy(recursive);
-            if (result) {
-                this.canvas.reRender();
-            }
-            return result;
-        }
-
-        /**
-         * Adds a direct child to this step
-         * @param template Ng Template Ref containing the content to display
-         * @param options Child options when adding
-         */
-        addChild(template: TemplateRef<any>, options?: AddChildOptions) {
-            if (options && options.asSibling && this.canvasElement.hasChildren()) {
-                let child;
-                if (options.index > -1) {
-                    child = this.canvasElement.children[options.index];
-                    this.canvas.addStep(template, options.data, child, 'LEFT', null);
-                }
-                else {
-                    child = this.canvasElement.children[this.canvasElement.children.length - 1];
-                    this.canvas.addStep(template, options.data, child, 'RIGHT', null);
-                }
-            }
-            else {
-                this.canvas.addStep(template, options.data, this.canvasElement, 'BELOW', null);
-            }
-
-            this.canvas.reRender();
-        }
-    }
-
-    export type AddChildOptions = {
-        /** Optional data to pass to the step */
-        data?: any,
-        /** Should this child be added as a sibling of any existing children?  If false then existing children will be re-parented to this new child*/
-        asSibling?: boolean,
-        /** Optional index at which to create the child. By default the child will be pushed to the end */
-        index?: number
-    }
-
-    export interface StepView extends EmbeddedViewRef<any> {
-        data?: any
     }
 
     export class Options {
@@ -171,39 +75,85 @@ export namespace NgFlowchart {
         /** Is the flow sequential? If true, then you will not be able to drag parallel steps */
         isSequential?: boolean = false;
 
-        /** Theme/color of the drop icons and connectors */
-        theme?: {
-            connectors?: string,
-            dropIcon?: string,
-            dropIconBackground?: string
-        } = {
-            connectors: 'lightgrey',
-            dropIcon: 'darkred',
-            dropIconBackground: 'rgb(192, 123, 123)'
-        }
+        /** When true steps will not snap to 'pretty' positions and instead remain where dropped */
+        rootPosition?: 'TOP_CENTER' | 'CENTER' | 'FREE' = 'TOP_CENTER';
 
+        centerOnResize?: boolean = true;
     }
 
     export type DropEvent = {
-        step: Step,
-        adjacent?: Step,
-        position?: DropPosition,
-        status: DropStatus,
-        error?: string
+        step: NgFlowchartStepComponent,
+        parent?: NgFlowchartStepComponent,
+        isMove: boolean
+    }
+
+    export type DropError = {
+        step: PendingStep,
+        parent?: NgFlowchartStepComponent,
+        error: ErrorMessage
+    }
+
+    export type MoveError = {
+        step: MoveStep,
+        parent?: NgFlowchartStepComponent,
+        error: ErrorMessage
+    }
+
+    export type ErrorMessage = {
+        code?: string,
+        message?: string
+    }
+
+    export interface MoveStep extends Step {
+        instance: NgFlowchartStepComponent
+    }
+
+    export interface PendingStep extends Step {
+        /**
+         * An Ng-template containing the canvas content to be displayed. 
+         * Or a component type that extends NgFlowchartStepComponent
+         */
+        template: TemplateRef<any> | Type<NgFlowchartStepComponent>
+    }
+
+    export interface Step {
+        /**
+         * A unique string indicating the type of step this is.
+         * This type will be used to register steps if you are uploading from json.
+         */
+        type: string,
+        /**
+         * Optional data to give the step. Typically configuration data that users can edit on the step.
+         */
+        data?: any
+    }
+
+
+
+    export type DropTarget = {
+        step: NgFlowchartStepComponent,
+        position: DropPosition
     }
 
     export type DropStatus = 'SUCCESS' | 'PENDING' | 'FAILED';
     export type DropPosition = 'RIGHT' | 'LEFT' | 'BELOW' | 'ABOVE';
 
     export type Callbacks = {
-        canAddStep?: (dropCandidate: DropEvent) => boolean;
-        canMoveStep?: (moveCandidate: DropEvent) => boolean;
-        canDeleteStep?: (step: Step) => boolean;
-        onDropError?: (drop: DropEvent) => void;
-
-        //TODO
+        
+        /**
+         * Called when user drops a new step from the palette or moves an existing step
+         */
         onDropStep?: (drop: DropEvent) => void;
-        onMoveStep?: (drop: DropEvent) => void;
+
+        /**
+         * Called when a new step fails to drop on the canvas
+         */
+        onDropError?: (drop: DropError) => void;
+
+        /**
+         * Called when an existing step fails to move
+         */
+        onMoveError?: (drop: MoveError) => void;
     };
 }
 
