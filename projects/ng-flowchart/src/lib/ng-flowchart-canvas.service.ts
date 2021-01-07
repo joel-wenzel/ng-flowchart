@@ -77,7 +77,7 @@ export class NgFlowchartCanvasService {
       else {
         this.moveError(step, this.noParentError);
       }
-      if (this.options.callbacks.onDropStep && (this.currentDropTarget || step.isRootElement())) {
+      if (this.options.callbacks?.onDropStep && (this.currentDropTarget || step.isRootElement())) {
         this.options.callbacks.onDropStep({
           isMove: true,
           step: step,
@@ -116,7 +116,7 @@ export class NgFlowchartCanvasService {
         this.addChildStep(componentRef, dropTarget);
       }
 
-      if (this.options.callbacks.onDropStep) {
+      if (this.options.callbacks?.onDropStep) {
         this.options.callbacks.onDropStep({
           step: componentRef.instance,
           isMove: false,
@@ -283,7 +283,7 @@ export class NgFlowchartCanvasService {
   }
 
   private dropError(error: NgFlowchart.ErrorMessage) {
-    if (this.options.callbacks.onDropError) {
+    if (this.options.callbacks?.onDropError) {
       let parent = this.currentDropTarget?.position !== 'BELOW' ? this.currentDropTarget?.step.parent : this.currentDropTarget?.step
       this.options.callbacks.onDropError({
         step: (this.drag.dragStep as NgFlowchart.PendingStep),
@@ -294,7 +294,7 @@ export class NgFlowchartCanvasService {
   }
 
   private moveError(step: NgFlowchartStepComponent, error) {
-    if (this.options.callbacks.onMoveError) {
+    if (this.options.callbacks?.onMoveError) {
       let parent = this.currentDropTarget?.position !== 'BELOW' ? this.currentDropTarget?.step.parent : this.currentDropTarget?.step
       this.options.callbacks.onMoveError({
         step: {
