@@ -11,7 +11,6 @@ export class DropDataService {
     dragStep: NgFlowchart.PendingStep | NgFlowchart.MoveStep;
 
     constructor() {
-
     }
 
     public setDragStep(ref: NgFlowchart.PendingStep) {

@@ -54,10 +54,10 @@ export class NgFlowchartStepComponent {
   type: string;
 
   @Input()
-  protected canvas: NgFlowchartCanvasService;
+  canvas: NgFlowchartCanvasService;
 
   @Input()
-  protected compRef: ComponentRef<NgFlowchartStepComponent>;
+  compRef: ComponentRef<NgFlowchartStepComponent>;
 
   @Output()
   viewInit = new EventEmitter();
@@ -76,13 +76,20 @@ export class NgFlowchartStepComponent {
   private _children: Array<NgFlowchartStepComponent>;
   private arrow: ComponentRef<NgFlowchartArrowComponent>;
 
-  constructor(
-    private drop: DropDataService,
-    private viewContainer: ViewContainerRef,
-    private compFactory: ComponentFactoryResolver
-  ) {
-    this._children = [];
+  private drop: DropDataService;
+  private viewContainer: ViewContainerRef;
+  private compFactory: ComponentFactoryResolver;
 
+  constructor( ) {
+    this._children = [];
+    
+
+  }
+
+  init(drop, viewContainer, compFactory) {
+    this.drop = drop;
+    this.viewContainer = viewContainer;
+    this.compFactory = compFactory;
   }
 
   canDeleteStep(): boolean {
