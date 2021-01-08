@@ -3,6 +3,7 @@ import { NgFlowchart } from '../model/flow.model';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
 import { NgFlowchartStepRegistry } from '../ng-flowchart-step-registry.service';
 import { NgFlowchartStepComponent } from '../ng-flowchart-step/ng-flowchart-step.component';
+import { DropDataService } from './dropdata.service';
 
 /**
  * This service handles adding new steps to the canvas
@@ -41,13 +42,13 @@ export class StepManagerService {
   }
 
   public create(pendingStep: NgFlowchart.PendingStep, canvas: NgFlowchartCanvasService): ComponentRef<NgFlowchartStepComponent> {
-    let componentRef;
-
+    let componentRef: ComponentRef<NgFlowchartStepComponent>;
 
     if (pendingStep.template instanceof TemplateRef) {
       const factory = this.componentFactoryResolver.resolveComponentFactory(NgFlowchartStepComponent);
       componentRef = this.viewContainer.createComponent<NgFlowchartStepComponent>(factory);
       componentRef.instance.contentTemplate = pendingStep.template;
+      
     }
     else {
       const factory = this.componentFactoryResolver.resolveComponentFactory(pendingStep.template);
@@ -58,6 +59,12 @@ export class StepManagerService {
     componentRef.instance.type = pendingStep.type;
     componentRef.instance.canvas = canvas;
     componentRef.instance.compRef = componentRef;
+    componentRef.instance.init(
+      componentRef.injector.get(DropDataService),
+      componentRef.injector.get(ViewContainerRef),
+      componentRef.injector.get(ComponentFactoryResolver)
+    )
+    
 
     return componentRef;
   }
