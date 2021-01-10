@@ -415,12 +415,15 @@ export class NgFlowchartStepComponent {
       this.canvas.flow.allSteps.splice(index, 1);
     }
 
+    if(this.isRootElement()){
+      this.canvas.flow.rootStep = null;
+    }
+
     if (this.hasChildren()) {
 
       //this was the root node
       if (this.isRootElement()) {
-        this.canvas.flow.rootStep = null;
-
+        
         if (!recursive) {
 
           let newRoot = this._children[0];
