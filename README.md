@@ -1,6 +1,6 @@
 # NgFlowchart
 
-[Demo](https://joelwenzel.com/projects/flowchart?palette=standard) | [Npm](https://www.npmjs.com/package/@joelwenzel/ng-flowchart) | [Getting started](#getting-started)
+[Demo](https://joelwenzel.com/projects/flowchart?palette=standard) | [Npm](https://www.npmjs.com/package/@joelwenzel/ng-flowchart) | [Getting started](#getting-started) | [Wiki](https://github.com/joel-wenzel/ng-flowchart/wiki)
 
 A lightweight Angular Library for building drag and drop flow charts. Chart behavior and steps are customizable. Data can be exported or uploaded in json format.
 
@@ -61,7 +61,7 @@ export class AppModule { }
 ```
 
 4.  Add the step directives to any elements that you want to drag into your canvas.
-    The directive requires an input, an object containing the templateRef, stepType and optional data. See the [wiki](#) for more information.
+    The directive requires an input, an object containing the templateRef, stepType and optional data. See the [wiki](https://github.com/joel-wenzel/ng-flowchart/wiki/Creating-Steps) for more information.
 
         **NOTE**: The steps do not need to be in the same component as the canvas.
 
@@ -153,7 +153,7 @@ flow.getRoot().children[0].parent
 
 ## Step Object Methods and Properties
 
-See the [wiki](#) for the full list and descriptions
+See the [wiki](https://github.com/joel-wenzel/ng-flowchart/wiki/Creating-Steps) for the full list and descriptions
 
 - #### **data: any**
   The optional config data for the step, passed in the ngFlowchartStep directive
