@@ -9,14 +9,14 @@
     <section>
       <div
         class="plugin-op"
-        *ngFor="let op of pluginOps"
+        *ngFor="let item of items"
         [ngFlowchartStep]="{
           template: normalStep,
-          type: op.type,
-          data: op
+          type: item.type,
+          data: item.data
         }"
       >
-        <span>{{ op.name }}</span>
+        <span>{{ item.name }}</span>
       </div>
       <div
         class="plugin-op"
