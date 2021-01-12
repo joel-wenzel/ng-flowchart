@@ -89,7 +89,7 @@ export class AppModule { }
 
 5. The **template field** on the ngFlowchartStep directive can contain a **TemplateRef**, as seen above, **or a component type** extending from NgFlowchartStepComponent.
 
-   **For more complex steps** that may need to have specific rules or add their own children, you should create a [custom step component](#).
+   **For more complex steps** that may need to have specific rules or add their own children, you should create a [custom step component](#custom-steps).
 
 6. For more features and examples checkout the official documentation
 
