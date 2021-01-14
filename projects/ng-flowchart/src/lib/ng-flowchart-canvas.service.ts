@@ -68,11 +68,11 @@ export class NgFlowchartCanvasService {
     if (step.canDrop(this.currentDropTarget, error)) {
       if (step.isRootElement()) {
         this.renderer.updatePosition(step, drag);
-        this.renderer.render(step);
+        this.renderer.render(this.flow);
       }
       else if (this.currentDropTarget) {
         this.addStepToFlow(step, this.currentDropTarget, true);
-        this.renderer.render(this.flow.rootStep);
+        this.renderer.render(this.flow);
       }
       else {
         this.moveError(step, this.noParentError);
@@ -165,7 +165,7 @@ export class NgFlowchartCanvasService {
   addChildStep(componentRef: ComponentRef<NgFlowchartStepComponent>, dropTarget: NgFlowchart.DropTarget) {
     this.addToCanvas(componentRef);
     this.addStepToFlow(componentRef.instance, dropTarget);
-    this.renderer.render(this.flow.rootStep);
+    this.renderer.render(this.flow);
   }
 
   addToCanvas(componentRef: ComponentRef<NgFlowchartStepComponent>) {
@@ -173,7 +173,7 @@ export class NgFlowchartCanvasService {
   }
 
   reRender(pretty?: boolean) {
-    this.renderer.render(this.flow.rootStep, pretty);
+    this.renderer.render(this.flow, pretty);
   }
 
   async upload(root: any) {
