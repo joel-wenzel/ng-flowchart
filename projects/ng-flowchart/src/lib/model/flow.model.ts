@@ -75,9 +75,10 @@ export namespace NgFlowchart {
         /** Is the flow sequential? If true, then you will not be able to drag parallel steps */
         isSequential?: boolean = false;
 
-        /** When true steps will not snap to 'pretty' positions and instead remain where dropped */
+        /** The default root position when dropped. Default is TOP_CENTER */
         rootPosition?: 'TOP_CENTER' | 'CENTER' | 'FREE' = 'TOP_CENTER';
 
+        /** Should the canvas be centered when a resize is detected? */
         centerOnResize?: boolean = true;
     }
 
@@ -138,7 +139,7 @@ export namespace NgFlowchart {
     export type DropPosition = 'RIGHT' | 'LEFT' | 'BELOW' | 'ABOVE';
 
     export type Callbacks = {
-        
+
         /**
          * Called when user drops a new step from the palette or moves an existing step
          */
