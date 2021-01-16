@@ -29,6 +29,12 @@ export class NgFlowchartCanvasService {
 
   flow: CanvasFlow = new CanvasFlow();
 
+  _disabled: boolean = false;
+
+  get disabled() {
+    return this._disabled;
+  }
+
   noParentError = {
     code: 'NO_PARENT',
     message: 'Step was not dropped under a parent and is not the root node'

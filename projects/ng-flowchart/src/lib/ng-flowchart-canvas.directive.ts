@@ -1,4 +1,4 @@
-import { Directive, ElementRef, HostListener, Input, OnInit, ViewContainerRef } from '@angular/core';
+import { Directive, ElementRef, HostBinding, HostListener, Input, OnInit, ViewContainerRef } from '@angular/core';
 import { NgFlowchart } from './model/flow.model';
 import { CONSTANTS } from './model/flowchart.constants';
 import { NgFlowchartCanvasService } from './ng-flowchart-canvas.service';
@@ -15,10 +15,11 @@ import { OptionsService } from './services/options.service';
         CanvasRendererService
     ]
 })
-export class NgFlowchartCanvasDirective implements OnInit {
+export class NgFlowchartCanvasDirective implements OnInit {   
 
     @HostListener('drop', ['$event'])
     protected onDrop(event: DragEvent) {
+        if (this._disabled) { return; }
 
         const type = event.dataTransfer.getData('type');
         if ('FROM_CANVAS' == type) {
@@ -27,11 +28,13 @@ export class NgFlowchartCanvasDirective implements OnInit {
         else {
             this.canvas.onDrop(event);
         }
+
     }
 
     @HostListener('dragover', ['$event'])
     protected onDragOver(event: DragEvent) {
         event.preventDefault();
+        if (this._disabled) { return; }
         this.canvas.onDragStart(event);
     }
 
@@ -40,10 +43,10 @@ export class NgFlowchartCanvasDirective implements OnInit {
 
     @HostListener('window:resize', ['$event'])
     protected onResize(event) {
-        if(this._options.centerOnResize) {
+        if (this._options.centerOnResize) {
             this.canvas.reRender(true);
         }
-        
+
     }
 
     @Input('ngFlowchartCallbacks')
@@ -56,10 +59,22 @@ export class NgFlowchartCanvasDirective implements OnInit {
         this.optionService.setOptions(options);
         this._options = this.optionService.options;
         this.canvas.reRender();
-       
+
     }
 
+    @Input('disabled')
+    @HostBinding('attr.disabled')
+    set disabled(val: boolean) {
+        this._disabled = val !== false;
+        if(this.canvas) {
+            this.canvas._disabled = this._disabled;
+        }
+    }
+    get disabled() {
+        return this._disabled;
+    }
 
+    _disabled: boolean = false;
 
     constructor(
         protected canvasEle: ElementRef<HTMLElement>,
@@ -77,9 +92,11 @@ export class NgFlowchartCanvasDirective implements OnInit {
     ngOnInit() {
         this.canvas.init(this.viewContainer);
 
-        if(!this._options) {
+        if (!this._options) {
             this.options = new NgFlowchart.Options();
         }
+
+        this.canvas._disabled = this._disabled;
     }
 
     private createCanvasContent(viewContainer: ViewContainerRef) {

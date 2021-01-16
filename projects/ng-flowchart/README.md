@@ -9,11 +9,11 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 # Contents
 
 - [Demo](https://joelwenzel.com/projects/flowchart?palette=standard)
+- [Supported Angular versions](#supported-angular-versions)
 - [Features](#features)
 - [Getting started](#getting-started)
-- [Supported Angular versions](#supported-angular-versions)
 - [FAQ](#faq)
-- [Docs]()
+- [Docs](https://github.com/joel-wenzel/ng-flowchart/wiki)
 
 ## Supported Angular versions
 
@@ -28,7 +28,7 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 - [Custom Steps](#custom-steps)
 - [Theming](#theming)
 - [Storing step data](#storing-step-data)
-- Disabling the chart
+- [Disabling the chart](#disabling-the-chart)
 
 # Getting started
 
@@ -63,7 +63,7 @@ export class AppModule { }
 4.  Add the step directives to any elements that you want to drag into your canvas.
     The directive requires an input, an object containing the templateRef, stepType and optional data. See the [wiki](https://github.com/joel-wenzel/ng-flowchart/wiki/Creating-Steps) for more information.
 
-        **NOTE**: The steps do not need to be in the same component as the canvas.
+    **NOTE**: The steps do not need to be in the same component as the canvas.
 
 ```
 <div class="palette">
@@ -491,8 +491,38 @@ export class EditableStepComponent extends NgFlowchartStepComponent {
 }
 
 ```
+# Disabling the Chart
+The canvas directive binds directly to the html **disabled** attribute.
+```
+//component.ts
+disabled = false;
 
-## FAQ
+//component.html
+<main>
+  <div
+    id="canvas"
+    ngFlowchartCanvas
+    [ngFlowchartOptions]="options"
+    [disabled]="disabled"
+    
+  ></div>
+</main>
+```
+
+When the chart is disabled no styling is applied but easily can be by override the following styles:
+```
+/** Your base selector may be different */
+div#canvas[disabled="true"] {
+    opacity: .7;
+}
+
+/** Ng deep is only needed if not in the root styles sheet*/
+div#canvas[disabled="true"] ::ng-deep.ngflowchart-step-wrapper {
+    opacity: .7;
+}
+```
+
+# FAQ
 
 ### Undefined variables in a callback
 

@@ -56,6 +56,7 @@ export class AppComponent {
   @ViewChild(NgFlowchartCanvasDirective)
   canvas: NgFlowchartCanvasDirective;
 
+  disabled = false;
 
 
   constructor(private stepRegistry: NgFlowchartStepRegistry) {
