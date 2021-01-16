@@ -26,6 +26,7 @@ export class NgFlowchartStepComponent {
 
   @HostListener('dragstart', ['$event'])
   onMoveStart(event: DragEvent) {
+    if (this.canvas.disabled) { return; }
     this.hideTree();
     event.dataTransfer.setData('type', 'FROM_CANVAS');
     event.dataTransfer.setData('id', this.nativeElement.id);
@@ -80,9 +81,9 @@ export class NgFlowchartStepComponent {
   private viewContainer: ViewContainerRef;
   private compFactory: ComponentFactoryResolver;
 
-  constructor( ) {
+  constructor() {
     this._children = [];
-    
+
 
   }
 
@@ -183,7 +184,7 @@ export class NgFlowchartStepComponent {
     return false;
   }
 
-  
+
 
   /**
    * Remove a child from this step. Returns the index at which the child was found or -1 if not found.
@@ -212,7 +213,7 @@ export class NgFlowchartStepComponent {
       return;
     }
     this._parent = newParent;
-    if(!this._parent && this.arrow) {
+    if (!this._parent && this.arrow) {
       this.arrow.destroy();
       this.arrow = null;
     }
@@ -415,7 +416,7 @@ export class NgFlowchartStepComponent {
       this.canvas.flow.allSteps.splice(index, 1);
     }
 
-    if(this.isRootElement()){
+    if (this.isRootElement()) {
       this.canvas.flow.rootStep = null;
     }
 
@@ -423,7 +424,7 @@ export class NgFlowchartStepComponent {
 
       //this was the root node
       if (this.isRootElement()) {
-        
+
         if (!recursive) {
 
           let newRoot = this._children[0];
@@ -472,7 +473,7 @@ export class NgFlowchartStepComponent {
     this._isHidden = true;
     this.nativeElement.style.opacity = '.4';
 
-    if(this.arrow) {
+    if (this.arrow) {
       this.arrow.instance.hideArrow();
     }
 
@@ -486,7 +487,7 @@ export class NgFlowchartStepComponent {
   private showTree() {
     this._isHidden = false;
 
-    if(this.arrow) {
+    if (this.arrow) {
       this.arrow.instance.showArrow();
     }
 

@@ -43,14 +43,12 @@ section {
 }
 
 .sub-section {
-    padding: .5em 0;
+    padding: 0.5em 0;
 }
 
 select {
-    padding: .3em;
+    padding: 0.3em;
 }
-
-
 
 .card {
     padding: 1em;
@@ -59,4 +57,12 @@ select {
     border-radius: 4px;
     min-width: 12em;
     height: 4em;
+}
+
+div#canvas[disabled="true"] {
+    opacity: .7;
+}
+
+div#canvas[disabled="true"] ::ng-deep.ngflowchart-step-wrapper {
+    opacity: .7;
 }
