@@ -22,7 +22,7 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 ## Change Log
 
 - 1.0.0-beta
-  - Support for nested charts/canvases allowing multiple steps to converge back into one. [View StackBlitz](https://stackblitz.com/edit/ng-flowchart-nested?file=src/app/nested-flow/nested-flow.component.css)
+  - Support for nested charts/canvases allowing multiple steps to converge back into one. [View StackBlitz](https://stackblitz.com/edit/ng-flowchart-nested?file=src/app/nested-flow/nested-flow.component.ts)
   - Additional Callbacks and hooks for the following events
     * Step method: shouldEvalDropHover
     * Canvas Callback: beforeRender
@@ -466,7 +466,7 @@ For the most part, the theme is left to the user given they have complete contro
 
 When creating a new step, a data object can be passed to the step. This data object is completely optional but allows you to store/edit configuration data for the step. See [Getting Started](#getting-started) for passing the data.
 
-This can even be a [nested chart](https://stackblitz.com/edit/ng-flowchart-nested?file=src/app/nested-flow/nested-flow.component.css)
+This can even be a [nested chart](https://stackblitz.com/edit/ng-flowchart-nested?file=src/app/nested-flow/nested-flow.component.ts)
 
 ```
 export class AppComponent {
