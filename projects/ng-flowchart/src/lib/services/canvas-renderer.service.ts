@@ -92,6 +92,11 @@ export class CanvasRendererService {
         if (!flow.hasRoot()) {
             return;
         }
+
+        if (this.options.callbacks?.beforeRender) {
+            this.options.callbacks.beforeRender()
+        }
+
         const canvasRect = this.getCanvasContentElement().getBoundingClientRect();
         if (pretty) {
             //this will place the root at the top center of the canvas and render from there
@@ -100,6 +105,10 @@ export class CanvasRendererService {
         this.renderChildTree(flow.rootStep, flow.rootStep.getCurrentRect(canvasRect), canvasRect);
 
         this.adjustDimensions(flow, canvasRect);
+
+        if (this.options.callbacks?.afterRender) {
+            this.options.callbacks.afterRender()
+        }
     }
 
     private adjustDimensions(flow: CanvasFlow, canvasRect: DOMRect) {
@@ -108,7 +117,7 @@ export class CanvasRendererService {
         let maxBottom = 0;
 
         //TODO this can be better
-        flow.allSteps.forEach(
+        flow.steps.forEach(
             ele => {
                 let rect = ele.getCurrentRect(canvasRect);
                 maxRight = Math.max(rect.right, maxRight);
@@ -120,7 +129,7 @@ export class CanvasRendererService {
 
         const widthDiff = canvasRect.width - (maxRight - canvasRect.left);
         if (widthDiff < 100) {
-            this.getCanvasContentElement().style.width = `${canvasRect.width + 200}px`;
+            this.getCanvasContentElement().style.minWidth = `${canvasRect.width + 200}px`;
             if (this.options.options.centerOnResize) {
                 //if we add width, rerender canvas in the middle
                 this.render(flow, true);
@@ -130,12 +139,16 @@ export class CanvasRendererService {
 
         const heightDiff = canvasRect.height - (maxBottom - canvasRect.top);
         if (heightDiff < 100) {
-            this.getCanvasContentElement().style.height = `${canvasRect.height + 200}px`;
+            this.getCanvasContentElement().style.minHeight = `${canvasRect.height + 200}px`;
         }
 
     }
 
-    private findDropLocationForHover(absMouseXY: number[], targetStep: NgFlowchartStepComponent, droppingStep: NgFlowchart.Step): DropProximity | 'deadzone' | null {
+    private findDropLocationForHover(absMouseXY: number[], targetStep: NgFlowchartStepComponent, stepToDrop: NgFlowchart.Step): DropProximity | 'deadzone' | null {
+
+        if (!targetStep.shouldEvalDropHover(absMouseXY, stepToDrop)) {
+            return 'deadzone'
+        }
 
         const stepRect = targetStep.nativeElement.getBoundingClientRect();
 
@@ -177,7 +190,7 @@ export class CanvasRendererService {
         }
 
         if (result && result !== 'deadzone') {
-            if (!targetStep.getDropPositionsForStep(droppingStep).includes(result.position)) {
+            if (!targetStep.getDropPositionsForStep(stepToDrop).includes(result.position)) {
                 //we had a valid drop but the target step doesnt allow this location
                 result = null;
             }
@@ -186,12 +199,7 @@ export class CanvasRendererService {
         return result;
     }
 
-    public findAndShowClosestDrop(dragStep: NgFlowchart.Step, event: DragEvent, steps: Array<NgFlowchartStepComponent>): NgFlowchart.DropTarget {
-        if (!steps || steps.length == 0) {
-            return;
-        }
-
-        //because we arent actually dropping anything just use absolute x,y for everything
+    private findBestMatchForSteps(dragStep: NgFlowchart.Step, event: DragEvent, steps: ReadonlyArray<NgFlowchartStepComponent>): DropProximity | null {
         const absXY = [event.clientX, event.clientY];
 
         let bestMatch: DropProximity = null;
@@ -217,7 +225,17 @@ export class CanvasRendererService {
             }
         }
 
-        //TODO make this more efficient. two loops
+        return bestMatch
+    }
+
+    public findAndShowClosestDrop(dragStep: NgFlowchart.Step, event: DragEvent, steps: ReadonlyArray<NgFlowchartStepComponent>): NgFlowchart.DropTarget {
+        if (!steps || steps.length == 0) {
+            return;
+        }
+
+        let bestMatch: DropProximity = this.findBestMatchForSteps(dragStep, event, steps);
+
+        // TODO make this more efficient. two loops
         steps.forEach(step => {
             if (bestMatch == null || step.nativeElement.id !== bestMatch.step.nativeElement.id) {
 
@@ -242,13 +260,14 @@ export class CanvasRendererService {
 
     }
 
-    public clearAllSnapIndicators(steps: Array<NgFlowchartStepComponent>) {
+    public clearAllSnapIndicators(steps: ReadonlyArray<NgFlowchartStepComponent>) {
         steps.forEach(
             step => step.clearHoverIcons()
         )
     }
 
     private setRootPosition(step: NgFlowchartStepComponent, dragEvent?: DragEvent) {
+     
         if (!dragEvent) {
             const canvasTop = this.getCanvasTopCenterPosition(step.nativeElement);
             step.zsetPosition(canvasTop, true)
@@ -287,7 +306,7 @@ export class CanvasRendererService {
 
         return [
             canvasRect.width / 2,
-            yCoord 
+            yCoord
         ]
     }
 
@@ -304,4 +323,6 @@ export class CanvasRendererService {
         let canvasContent = canvas.getElementsByClassName(CONSTANTS.CANVAS_CONTENT_CLASS).item(0);
         return canvasContent as HTMLElement;
     }
+
+
 }

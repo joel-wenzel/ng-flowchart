@@ -13,17 +13,22 @@ export namespace NgFlowchart {
          * @param indent Optional indent to specify for formatting
          */
         toJSON(indent?: number) {
-            return JSON.stringify({
+            return JSON.stringify(this.toObject(), null, indent);
+        }
+
+        toObject() {
+            return {
                 root: this.canvas.flow.rootStep?.toJSON()
-            }, null, indent);
+            }
         }
 
         /**
          * Create a flow and render it on the canvas from a json string
          * @param json The json string of the flow to render
          */
-        async upload(json: string): Promise<void> {
-            let root: any = JSON.parse(json).root;
+        async upload(json: string | object): Promise<void> {
+            let jsonObj = typeof json === 'string' ? JSON.parse(json) : json
+            let root: any = jsonObj.root;
             this.clear();
 
             await this.canvas.upload(root);
@@ -41,7 +46,7 @@ export namespace NgFlowchart {
          * @param id Id of the step to find. By default, the html id of the step
          */
         getStep(id): NgFlowchartStepComponent {
-            return this.canvas.flow.allSteps.find(child => child.id == id);
+            return this.canvas.flow.steps.find(child => child.id == id);
         }
 
         /**
@@ -60,7 +65,6 @@ export namespace NgFlowchart {
                 this.canvas.flow.rootStep.destroy(true, false);
                 this.canvas.reRender();
             }
-
         }
 
     }
@@ -155,6 +159,16 @@ export namespace NgFlowchart {
          * Called when an existing step fails to move
          */
         onMoveError?: (drop: MoveError) => void;
+
+        /**
+         * Called before the canvas is about to re-render
+         */
+        beforeRender?: () => void
+
+        /**
+         * Called after the canvas completes a re-render
+         */
+        afterRender?: () => void
     };
 }
 

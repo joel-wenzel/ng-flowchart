@@ -1,11 +1,13 @@
 .ngflowchart-canvas {
   overflow: auto;
+  display: flex;
 }
 
 .ngflowchart-canvas-content {
   position: relative;
   min-height: 100%;
   min-width: 100%;
+  flex: 1 1 100%;
 }
 
 .ngflowchart-step-wrapper {
