@@ -1,6 +1,6 @@
 {
   "name": "@joelwenzel/ng-flowchart",
-  "version": "0.1.6",
+  "version": "1.0.0-beta",
   "peerDependencies": {
     "@angular/common": "^10.2.4",
     "@angular/core": "^10.2.4"

@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng-packagr -p projects/ng-flowchart/package.json",
+    "build": "ng build ng-flowchart --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
