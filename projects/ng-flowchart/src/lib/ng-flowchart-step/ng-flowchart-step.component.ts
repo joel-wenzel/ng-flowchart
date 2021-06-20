@@ -22,7 +22,7 @@ export type AddChildOptions = {
   styleUrls: ['./ng-flowchart-step.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class NgFlowchartStepComponent {
+export class NgFlowchartStepComponent<T = any> {
 
   @HostListener('dragstart', ['$event'])
   onMoveStart(event: DragEvent) {
@@ -49,7 +49,7 @@ export class NgFlowchartStepComponent {
   protected view: ElementRef;
 
   @Input()
-  data: any;
+  data: T;
 
   @Input()
   type: string;
@@ -83,8 +83,6 @@ export class NgFlowchartStepComponent {
 
   constructor() {
     this._children = [];
-
-
   }
 
   init(drop, viewContainer, compFactory) {
@@ -101,6 +99,12 @@ export class NgFlowchartStepComponent {
     return true;
   }
 
+  shouldEvalDropHover(coords: number[], stepToDrop: NgFlowchart.Step): boolean {
+    return true
+  }
+
+  async onUpload(data: T) { }
+
   getDropPositionsForStep(step: NgFlowchart.Step): NgFlowchart.DropPosition[] {
     return ['BELOW', 'LEFT', 'RIGHT', 'ABOVE'];
   }
@@ -113,6 +117,7 @@ export class NgFlowchartStepComponent {
     if (!this.nativeElement) {
       throw 'Missing canvasContent ViewChild. Be sure to add #canvasContent to your root html element.'
     }
+
 
     this.nativeElement.classList.add('ngflowchart-step-wrapper');
     this.nativeElement.setAttribute('draggable', 'true');
@@ -154,7 +159,7 @@ export class NgFlowchartStepComponent {
       this.zaddChild0(componentRef.instance);
     }
 
-    this.canvas.flow.allSteps.push(componentRef.instance);
+    this.canvas.flow.addStep(componentRef.instance);
 
     this.canvas.reRender();
 
@@ -330,6 +335,7 @@ export class NgFlowchartStepComponent {
   }
 
   zsetPosition(pos: number[], offsetCenter: boolean = false) {
+
     if (!this.view) {
       console.warn('Trying to set position before view init');
       //save pos and set in after view init
@@ -408,13 +414,12 @@ export class NgFlowchartStepComponent {
 
   private destroy0(parentIndex, recursive: boolean = true) {
 
-    this.compRef.destroy();
+    //this.compRef.instance.nativeElement.remove()
 
-    // //remove from master array
-    let index = this.canvas.flow.allSteps.findIndex(ele => ele.id == this.id);
-    if (index >= 0) {
-      this.canvas.flow.allSteps.splice(index, 1);
-    }
+    this.compRef.destroy();
+    
+    // remove from master array
+    this.canvas.flow.removeStep(this)
 
     if (this.isRootElement()) {
       this.canvas.flow.rootStep = null;

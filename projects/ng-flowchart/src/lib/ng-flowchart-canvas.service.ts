@@ -5,13 +5,32 @@ import { CanvasRendererService } from './services/canvas-renderer.service';
 import { DropDataService as DragService } from './services/dropdata.service';
 import { OptionsService } from './services/options.service';
 import { StepManagerService } from './services/step-manager.service';
+import {first} from 'rxjs/operators'
 
 export class CanvasFlow {
   rootStep: NgFlowchartStepComponent;
-  allSteps: NgFlowchartStepComponent[] = [];
 
+  // steps from this canvas only
+  private _steps: NgFlowchartStepComponent[] = [];
+  
   hasRoot() {
     return !!this.rootStep;
+  }
+
+  addStep(step: NgFlowchartStepComponent) {
+    this._steps.push(step)
+  }
+
+  removeStep(step: NgFlowchartStepComponent) {
+  
+    let index = this._steps.findIndex(ele => ele.id == step.id);
+    if (index >= 0) {
+      this._steps.splice(index, 1);
+    }
+  }
+
+  get steps(): ReadonlyArray<NgFlowchartStepComponent> {
+    return this._steps;
   }
 
   constructor() {
@@ -46,7 +65,7 @@ export class NgFlowchartCanvasService {
     private renderer: CanvasRendererService,
     private stepmanager: StepManagerService
   ) {
-    window['flow'] = this.flow;
+    
 
   }
 
@@ -67,9 +86,9 @@ export class NgFlowchartCanvasService {
   }
 
   public moveStep(drag: DragEvent, id: any) {
-    this.renderer.clearAllSnapIndicators(this.flow.allSteps);
+    this.renderer.clearAllSnapIndicators(this.flow.steps);
 
-    let step: NgFlowchartStepComponent = this.flow.allSteps.find(step => step.nativeElement.id === id);
+    let step: NgFlowchartStepComponent = this.flow.steps.find(step => step.nativeElement.id === id);
     let error = {};
     if (step.canDrop(this.currentDropTarget, error)) {
       if (step.isRootElement()) {
@@ -97,11 +116,10 @@ export class NgFlowchartCanvasService {
 
   }
 
-
+ 
 
   public async onDrop(drag: DragEvent) {
-    this.renderer.clearAllSnapIndicators(this.flow.allSteps);
-
+    this.renderer.clearAllSnapIndicators(this.flow.steps);
 
     if (this.flow.hasRoot() && !this.currentDropTarget) {
       this.dropError(this.noParentError);
@@ -142,20 +160,23 @@ export class NgFlowchartCanvasService {
 
     this.isDragging = true;
 
-    this.currentDropTarget = this.renderer.findAndShowClosestDrop(this.drag.dragStep, drag, this.flow.allSteps);
+    this.currentDropTarget = this.renderer.findAndShowClosestDrop(this.drag.dragStep, drag, this.flow.steps);
   }
 
   public createStepFromType(id: string, type: string, data: any): Promise<ComponentRef<NgFlowchartStepComponent>> {
     let compRef = this.stepmanager.createFromRegistry(id, type, data, this);
     return new Promise((resolve) => {
-      let sub = compRef.instance.viewInit.subscribe(() => {
+      let sub = compRef.instance.viewInit.subscribe(async () => {
         sub.unsubscribe();
+        setTimeout(() => {
+          compRef.instance.onUpload(data)
+        })
         resolve(compRef);
       })
     })
   }
 
-  public createStep(pending: NgFlowchart.PendingStep): Promise<ComponentRef<NgFlowchartStepComponent>> {
+   public createStep(pending: NgFlowchart.PendingStep): Promise<ComponentRef<NgFlowchartStepComponent>> {
     let componentRef: ComponentRef<NgFlowchartStepComponent>;
 
     componentRef = this.stepmanager.create(pending, this);
@@ -164,7 +185,7 @@ export class NgFlowchartCanvasService {
       let sub = componentRef.instance.viewInit.subscribe(() => {
         sub.unsubscribe();
         resolve(componentRef);
-      })
+      }, error => console.error(error))
     })
   }
 
@@ -195,7 +216,7 @@ export class NgFlowchartCanvasService {
     }
     else {
       this.renderer.renderNonRoot(comp);
-      this.flow.allSteps.push(comp.instance);
+      this.flow.addStep(comp.instance);
     }
 
     for (let i = 0; i < node.children.length; i++) {
@@ -224,8 +245,7 @@ export class NgFlowchartCanvasService {
       this.flow.rootStep = step;
     }
 
-    this.flow.allSteps.push(step);
-
+    this.flow.addStep(step);
   }
 
   private addStepToFlow(step: NgFlowchartStepComponent, dropTarget: NgFlowchart.DropTarget, isMove = false): boolean {
@@ -250,7 +270,7 @@ export class NgFlowchartCanvasService {
     }
 
     if (!isMove && added) {
-      this.flow.allSteps.push(step);
+      this.flow.addStep(step);
     }
     return added;
   }

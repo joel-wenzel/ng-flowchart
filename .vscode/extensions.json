@@ -10,7 +10,7 @@
 		"esbenp.prettier-vscode",
 		"sibiraj-s.vscode-scss-formatter",
 		"msjsdiag.debugger-for-chrome",
-		"pkief.material-icon-theme",
+	
 	],
 	// List of extensions recommended by VS Code that should not be recommended for users of this workspace.
 	"unwantedRecommendations": [

@@ -8,9 +8,7 @@ import { DropDataService } from './dropdata.service';
 /**
  * This service handles adding new steps to the canvas
  */
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class StepManagerService {
 
   private viewContainer: ViewContainerRef;
@@ -54,7 +52,7 @@ export class StepManagerService {
       const factory = this.componentFactoryResolver.resolveComponentFactory(pendingStep.template);
       componentRef = this.viewContainer.createComponent<any>(factory);
     }
-
+    
     componentRef.instance.data = pendingStep.data;
     componentRef.instance.type = pendingStep.type;
     componentRef.instance.canvas = canvas;

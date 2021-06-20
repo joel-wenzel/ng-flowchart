@@ -3,6 +3,7 @@ import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
 import { NgFlowchartStepRegistry } from 'projects/ng-flowchart/src/lib/ng-flowchart-step-registry.service';
 import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src/public-api';
 import { CustomStepComponent } from './custom-step/custom-step.component';
+import { NestedFlowComponent } from './nested-flow/nested-flow.component';
 
 @Component({
   selector: 'app-root',
@@ -14,13 +15,14 @@ export class AppComponent {
 
   callbacks: NgFlowchart.Callbacks = {};
   options: NgFlowchart.Options = {
-    stepGap: 40
+    stepGap: 40,
+    rootPosition: 'TOP_CENTER'
   }
 
   @ViewChild('normalStep')
   normalStepTemplate: TemplateRef<any>;
 
-  sampleJson = '{"root":{"id":"s1609806130549","type":"rest-get","data":{"name":"REST Get","type":"rest-get","inputs":[]},"children":[{"id":"s1609806132473","type":"filter","data":{"name":"Filter","type":"filter","condition":""},"children":[]},{"id":"s1609899756883","type":"filter","data":{"name":"Filter","type":"filter","condition":""},"children":[{"id":"s1609899758149","type":"filter","data":{"name":"Filter","type":"filter","condition":""},"children":[{"id":"s1609899796612","type":"router","data":{"name":"Routing Block"},"children":[]}]},{"id":"s1609899760490","type":"filter","data":{"name":"Filter","type":"filter","condition":""},"children":[{"id":"s1609899794381","type":"rest-get","data":{"name":"REST Get","type":"rest-get","inputs":[]},"children":[]}]}]}]}}';
+  sampleJson = '{"root":{"id":"s1624206175876","type":"nested-flow","data":{"name":"Nested Flow","nested":{"root":{"id":"s1624206177187","type":"log","data":{"name":"Log","icon":{"name":"log-icon","color":"blue"},"config":{"message":null,"severity":null}},"children":[{"id":"s1624206178618","type":"log","data":{"name":"Log","icon":{"name":"log-icon","color":"blue"},"config":{"message":null,"severity":null}},"children":[]},{"id":"s1624206180286","type":"log","data":{"name":"Log","icon":{"name":"log-icon","color":"blue"},"config":{"message":null,"severity":null}},"children":[]}]}}},"children":[{"id":"s1624206181654","type":"log","data":{"name":"Log","icon":{"name":"log-icon","color":"blue"},"config":{"message":null,"severity":null}},"children":[]}]}}';
 
   items = [
     {
@@ -47,6 +49,16 @@ export class AppComponent {
           name: 'Routing Block'
         }
       }
+    },
+    {
+      paletteName: 'Nested Flow',
+      step: {
+        template: NestedFlowComponent,
+        type: 'nested-flow',
+        data: {
+          name: 'Nested Flow'
+        }
+      }
 
     }
   ]
@@ -66,9 +78,10 @@ export class AppComponent {
   }
 
   ngAfterViewInit() {
-    this.stepRegistry.registerStep('rest-get', this.normalStepTemplate);
-    this.stepRegistry.registerStep('filter', this.normalStepTemplate);
+    // this.stepRegistry.registerStep('rest-get', this.normalStepTemplate);
+    this.stepRegistry.registerStep('log', this.normalStepTemplate);
     this.stepRegistry.registerStep('router', CustomStepComponent);
+    this.stepRegistry.registerStep('nested-flow', NestedFlowComponent);
   }
 
   onDropError(error: NgFlowchart.DropError) {
@@ -96,7 +109,6 @@ export class AppComponent {
 
   clearData() {
     this.canvas.getFlow().clear();
-
   }
 
   onGapChanged(event) {

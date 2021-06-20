@@ -4,6 +4,7 @@ import { NgFlowchartModule } from 'projects/ng-flowchart/src/lib/ng-flowchart.mo
 import { AppComponent } from './app.component';
 import { CustomStepComponent } from './custom-step/custom-step.component';
 import { RouteStepComponent } from './custom-step/route-step/route-step.component';
+import { NestedFlowComponent } from './nested-flow/nested-flow.component';
 
 
 
@@ -11,7 +12,8 @@ import { RouteStepComponent } from './custom-step/route-step/route-step.componen
   declarations: [
     AppComponent,
     CustomStepComponent,
-    RouteStepComponent
+    RouteStepComponent,
+    NestedFlowComponent
   ],
   imports: [
     BrowserModule,
