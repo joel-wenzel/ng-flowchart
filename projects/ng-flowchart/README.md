@@ -19,6 +19,15 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 
 - Angular 10.2.0+
 
+## Change Log
+
+- 1.0.0-beta
+  - Support for nested charts/canvases allowing multiple steps to converge back into one. [View StackBlitz](https://stackblitz.com/edit/ng-flowchart-nested?file=src/app/nested-flow/nested-flow.component.css)
+  - Additional Callbacks and hooks for the following events
+    * Step method: shouldEvalDropHover
+    * Canvas Callback: beforeRender
+    * Canvas Callback: afterRender
+
 ## Current and Upcoming Feature List
 
 - [Chart API](#chart-api)
@@ -366,6 +375,12 @@ onDropStep(dropEvent: NgFlowchart.DropEvent) {
 - #### **onDropStep?**: (drop: DropEvent) => void;
   Called whenever a new step or existing step is successfully dropped on the canvas
 
+- #### **beforeRender?**: () => void;
+  Called before the canvas is about to re-render
+
+- #### **afterRender?**: (drop: DropEvent) => void;
+  Called after the canvas completes a re-render
+
 # Custom Steps
 
 Custom steps can be created if you need any kind of complex logic for specific steps. The example below is a custom step for a router which can be seen elsewhere on this page.
@@ -450,6 +465,8 @@ For the most part, the theme is left to the user given they have complete contro
 # Storing Step Data
 
 When creating a new step, a data object can be passed to the step. This data object is completely optional but allows you to store/edit configuration data for the step. See [Getting Started](#getting-started) for passing the data.
+
+This can even be a [nested chart](https://stackblitz.com/edit/ng-flowchart-nested?file=src/app/nested-flow/nested-flow.component.css)
 
 ```
 export class AppComponent {
