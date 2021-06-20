@@ -250,7 +250,7 @@ export class CanvasRendererService {
 
     private setRootPosition(step: NgFlowchartStepComponent, dragEvent?: DragEvent) {
         if (!dragEvent) {
-            const canvasTop = this.getCanvasTopCenterPosition();
+            const canvasTop = this.getCanvasTopCenterPosition(step.nativeElement);
             step.zsetPosition(canvasTop, true)
             return;
         }
@@ -261,7 +261,7 @@ export class CanvasRendererService {
                 step.zsetPosition(canvasCenter, true);
                 return;
             case 'TOP_CENTER':
-                const canvasTop = this.getCanvasTopCenterPosition();
+                const canvasTop = this.getCanvasTopCenterPosition(step.nativeElement);
                 step.zsetPosition(canvasTop, true)
                 return;
             default:
@@ -280,11 +280,14 @@ export class CanvasRendererService {
         ]
     }
 
-    private getCanvasTopCenterPosition() {
+    private getCanvasTopCenterPosition(htmlRootElement: HTMLElement) {
         const canvasRect = this.getCanvasContentElement().getBoundingClientRect();
+        const rootElementHeight = htmlRootElement.getBoundingClientRect().height
+        const yCoord = rootElementHeight / 2 + this.options.options.stepGap
+
         return [
             canvasRect.width / 2,
-            100 //100 is a magic number somewhat. Should be getting from dropped element height instead
+            yCoord 
         ]
     }
 
