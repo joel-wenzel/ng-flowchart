@@ -53,7 +53,7 @@ export class StepManagerService {
       componentRef = this.viewContainer.createComponent<any>(factory);
     }
     
-    componentRef.instance.data = pendingStep.data;
+    componentRef.instance.data = JSON.parse(JSON.stringify(pendingStep.data));
     componentRef.instance.type = pendingStep.type;
     componentRef.instance.canvas = canvas;
     componentRef.instance.compRef = componentRef;
