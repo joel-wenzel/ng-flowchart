@@ -2,8 +2,9 @@
   <div
     id="canvas"
     ngFlowchartCanvas
+    [ngFlowchartCallbacks]="callbacks"
     [ngFlowchartOptions]="options"
-    [disabled]="disabled"    
+    [disabled]="disabled"  
   ></div>
   <div id="palette">
     <section>
@@ -63,6 +64,7 @@
       </div>
     </section>
     <section>
+      <button (click)="pretty()">Pretty</button>
       <button (click)="clearData()">Clear Flow</button>
     </section>
     <ng-template #normalStep let-data>

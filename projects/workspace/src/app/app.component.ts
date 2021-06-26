@@ -1,4 +1,4 @@
-import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild, HostListener } from '@angular/core';
 import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
 import { NgFlowchartStepRegistry } from 'projects/ng-flowchart/src/lib/ng-flowchart-step-registry.service';
 import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src/public-api';
@@ -59,22 +59,18 @@ export class AppComponent {
           name: 'Nested Flow'
         }
       }
-
     }
   ]
 
-
-
   @ViewChild(NgFlowchartCanvasDirective)
   canvas: NgFlowchartCanvasDirective;
-
   disabled = false;
-
+  scaleVal: number = 1;
 
   constructor(private stepRegistry: NgFlowchartStepRegistry) {
-
     this.callbacks.onDropError = this.onDropError;
     this.callbacks.onMoveError = this.onMoveError;
+    this.callbacks.onDropStep = this.onDropStep;
   }
 
   ngAfterViewInit() {
@@ -82,7 +78,15 @@ export class AppComponent {
     this.stepRegistry.registerStep('log', this.normalStepTemplate);
     this.stepRegistry.registerStep('router', CustomStepComponent);
     this.stepRegistry.registerStep('nested-flow', NestedFlowComponent);
+
+    document
+      .querySelector('.ngflowchart-canvas-content')
+      .addEventListener('wheel', this.zooming);
   }
+
+  onDropStep = (dropEvent: NgFlowchart.DropEvent) => {
+    this.scale();
+  };
 
   onDropError(error: NgFlowchart.DropError) {
     console.log(error);
@@ -97,22 +101,20 @@ export class AppComponent {
   }
 
   showFlowData() {
-
     let json = this.canvas.getFlow().toJSON(4);
 
     var x = window.open();
     x.document.open();
     x.document.write('<html><head><title>Flowchart Json</title></head><body><pre>' + json + '</pre></body></html>');
     x.document.close();
-
   }
 
   clearData() {
     this.canvas.getFlow().clear();
+    this.resetZoom();
   }
 
   onGapChanged(event) {
-
     this.options = {
       ...this.options,
       stepGap: parseInt(event.target.value)
@@ -128,5 +130,49 @@ export class AppComponent {
 
   onDelete(id) {
     this.canvas.getFlow().getStep(id).destroy(true);
+    this.scale();
   }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event) {
+    this.scale();
+  }
+
+  zooming = (event) => {
+    if (JSON.parse(this.canvas.getFlow().toJSON()).root) {
+      event.preventDefault();
+      this.scaleVal += event.deltaY * -0.001;
+      this.scaleVal = Math.min(Math.max(0.125, this.scaleVal), 4);
+      const canvasContent = document.querySelector('.ngflowchart-canvas-content');
+      canvasContent['style'].transform = `scale(${this.scaleVal})`;
+    }
+  };
+
+  scale() {
+    if (this.scaleVal != 1) {
+      const tempScale = this.scaleVal;
+      this.scaleVal = 1;
+      const canvasContent = document.querySelector('.ngflowchart-canvas-content');
+      canvasContent['style'].opacity = 0;
+      canvasContent['style'].transform = `scale(${this.scaleVal})`;
+      this.canvas.getFlow().upload(this.canvas.getFlow().toJSON());
+      setTimeout(() => {
+        canvasContent['style'].transform = `scale(${tempScale})`;
+        canvasContent['style'].opacity = 1;
+        this.scaleVal = tempScale;
+      }, 1);
+    }
+  }
+
+  pretty() {
+    this.resetZoom();
+    this.canvas.getFlow().render(true);
+  }
+
+  resetZoom() {
+    this.scaleVal = 1;
+    const canvasContent = document.querySelector('.ngflowchart-canvas-content');
+    canvasContent['style'].transform = `scale(${this.scaleVal})`;
+  }
+
 }

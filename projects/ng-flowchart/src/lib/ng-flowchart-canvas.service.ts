@@ -5,14 +5,14 @@ import { CanvasRendererService } from './services/canvas-renderer.service';
 import { DropDataService as DragService } from './services/dropdata.service';
 import { OptionsService } from './services/options.service';
 import { StepManagerService } from './services/step-manager.service';
-import {first} from 'rxjs/operators'
+import { first } from 'rxjs/operators'
 
 export class CanvasFlow {
   rootStep: NgFlowchartStepComponent;
 
   // steps from this canvas only
   private _steps: NgFlowchartStepComponent[] = [];
-  
+
   hasRoot() {
     return !!this.rootStep;
   }
@@ -22,7 +22,7 @@ export class CanvasFlow {
   }
 
   removeStep(step: NgFlowchartStepComponent) {
-  
+
     let index = this._steps.findIndex(ele => ele.id == step.id);
     if (index >= 0) {
       this._steps.splice(index, 1);
@@ -65,7 +65,7 @@ export class NgFlowchartCanvasService {
     private renderer: CanvasRendererService,
     private stepmanager: StepManagerService
   ) {
-    
+
 
   }
 
@@ -116,7 +116,7 @@ export class NgFlowchartCanvasService {
 
   }
 
- 
+
 
   public async onDrop(drag: DragEvent) {
     this.renderer.clearAllSnapIndicators(this.flow.steps);
@@ -176,7 +176,7 @@ export class NgFlowchartCanvasService {
     })
   }
 
-   public createStep(pending: NgFlowchart.PendingStep): Promise<ComponentRef<NgFlowchartStepComponent>> {
+  public createStep(pending: NgFlowchart.PendingStep): Promise<ComponentRef<NgFlowchartStepComponent>> {
     let componentRef: ComponentRef<NgFlowchartStepComponent>;
 
     componentRef = this.stepmanager.create(pending, this);
@@ -209,24 +209,28 @@ export class NgFlowchartCanvasService {
   }
 
   private async uploadNode(node: any, parentNode?: NgFlowchartStepComponent): Promise<NgFlowchartStepComponent> {
-    let comp = await this.createStepFromType(node.id, node.type, node.data);
-    if (!parentNode) {
-      this.setRoot(comp.instance);
-      this.renderer.renderRoot(comp, null);
-    }
-    else {
-      this.renderer.renderNonRoot(comp);
-      this.flow.addStep(comp.instance);
+    try {
+      let comp = await this.createStepFromType(node.id, node.type, node.data);
+      if (!parentNode) {
+        this.setRoot(comp.instance);
+        this.renderer.renderRoot(comp, null);
+      }
+      else {
+        this.renderer.renderNonRoot(comp);
+        this.flow.addStep(comp.instance);
+      }
+
+      for (let i = 0; i < node.children.length; i++) {
+        let child = node.children[i];
+        let childComp = await this.uploadNode(child, comp.instance);
+        comp.instance.children.push(childComp);
+        childComp.setParent(comp.instance, true);
+      }
+      return comp.instance;
+    } catch (error) {
+      console.log(error);
     }
 
-    for (let i = 0; i < node.children.length; i++) {
-      let child = node.children[i];
-      let childComp = await this.uploadNode(child, comp.instance);
-      comp.instance.children.push(childComp);
-      childComp.setParent(comp.instance, true);
-    }
-
-    return comp.instance;
   }
 
   private setRoot(step: NgFlowchartStepComponent, force: boolean = true) {
