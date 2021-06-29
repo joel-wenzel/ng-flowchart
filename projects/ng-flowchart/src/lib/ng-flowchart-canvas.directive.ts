@@ -54,15 +54,12 @@ export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewI
         if (this._options.centerOnResize) {
             this.canvas.reRender(true);
         }
-        if(this._options.zoom.rescaleOnResize) {
-
-        }
     }
 
     @HostListener('wheel', ['$event'])
     protected onZoom(event) {
         if (this._options.zoom.mode === 'WHEEL') {
-            this.adjustScale(event)
+            this.adjustWheelScale(event)
         }
     }
 
@@ -93,10 +90,8 @@ export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewI
     }
 
     private _disabled: boolean = false;
-    private _scaleVal: number = 1;
     private _id: string = null
     private canvasContent: HTMLElement;
-    private scaleDebounceTimer
 
     constructor(
         protected canvasEle: ElementRef<HTMLElement>,
@@ -118,7 +113,6 @@ export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewI
         }
 
         this.canvas._disabled = this._disabled;
-
     }
 
     ngAfterViewInit() {
@@ -153,34 +147,33 @@ export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewI
         return new NgFlowchart.Flow(this.canvas);
     }
 
-    private adjustScale(event) {
+    public scaleDown() {
+        this.canvas.scaleDown()
+    }
+
+    public scaleUp() {
+        this.canvas.scaleUp()
+    }
+
+    public setScale(scaleValue: number) {
         
+        const scaleVal = Math.max(0, scaleValue)
+        this.canvas.setScale(scaleVal)
+    }
+
+    private adjustWheelScale(event) {
+
         if (this.canvas.flow.hasRoot()) {
             event.preventDefault();
             // scale down / zoom out
-
-            if(event.deltaY > 0) {
-                this._scaleVal -= this._scaleVal * .1
+            if (event.deltaY > 0) {
+                this.scaleDown()
             }
             // scale up / zoom in
-            else if(event.deltaY < 0) {
-                this._scaleVal += this._scaleVal * .1
+            else if (event.deltaY < 0) {
+                this.scaleUp()
             }
-            const minDimAdjust = `${1/this._scaleVal * 100}%`
-            
-            this.canvasContent.style.transform = `scale(${this._scaleVal})`;
-            this.canvasContent.style.minHeight = minDimAdjust
-            this.canvasContent.style.minWidth = minDimAdjust
-            this.canvasContent.style.transformOrigin = 'top left'
-            this.canvasContent.classList.add('scaling')
 
-            this.canvas.setScale(this._scaleVal)
-            this.canvas.reRender(true)
-            
-            this.scaleDebounceTimer && clearTimeout(this.scaleDebounceTimer)
-            this.scaleDebounceTimer = setTimeout(() => {
-                this.canvasContent.classList.remove('scaling')
-            }, 300)
         }
     };
 }

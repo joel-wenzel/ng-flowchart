@@ -16,15 +16,12 @@ export class CanvasRendererService {
     private viewContainer: ViewContainerRef;
 
     private scale: number = 1;
+    private scaleDebounceTimer = null
 
     constructor(
         private options: OptionsService
     ) {
 
-    }
-
-    public setScale(scale: number) {
-        this.scale = scale;
     }
 
     public init(viewContainer: ViewContainerRef) {
@@ -346,31 +343,45 @@ export class CanvasRendererService {
         return canvasContent as HTMLElement;
     }
 
-    // public scaleUp() {
-    //     const minDimAdjust = `${1/this._scaleVal * 100}%`
-            
-    //     this.canvasContent.style.transform = `scale(${this._scaleVal})`;
-    //     this.canvasContent.style.minHeight = minDimAdjust
-    //     this.canvasContent.style.minWidth = minDimAdjust
-    //     this.canvasContent.style.transformOrigin = 'top left'
-    //     this.canvasContent.classList.add('scaling')
+    public resetScale(flow: CanvasFlow) {
+        this.setScale(flow, 1)
+    }
 
-    //     this.canvas.setScale(this._scaleVal)
-    //     this.canvas.reRender(true)
+    public scaleUp(flow: CanvasFlow, step? : number) {
+        const newScale = this.scale + (this.scale * step || this.options.options.zoom.defaultStep)
+        this.setScale(flow, newScale)
+       
+    }
+
+    public scaleDown(flow: CanvasFlow, step? : number) {
+        const newScale = this.scale - (this.scale * step || this.options.options.zoom.defaultStep)
+        this.setScale(flow, newScale)
+    }
+
+    public setScale(flow: CanvasFlow, scaleValue: number) {
+        const minDimAdjust = `${1/scaleValue * 100}%`
+
+        const canvasContent = this.getCanvasContentElement()
+
+        canvasContent.style.transform = `scale(${scaleValue})`;
+        canvasContent.style.minHeight = minDimAdjust
+        canvasContent.style.minWidth = minDimAdjust
+        canvasContent.style.transformOrigin = 'top left'
+        canvasContent.classList.add('scaling')
+
+        this.scale = scaleValue
+        this.render(flow, true)
+
+        if(this.options.callbacks?.afterScale) {
+            this.options.callbacks.afterScale(this.scale)
+        }
         
-    //     this.scaleDebounceTimer && clearTimeout(this.scaleDebounceTimer)
-    //     this.scaleDebounceTimer = setTimeout(() => {
-    //         this.canvasContent.classList.remove('scaling')
-    //     }, 300)
-    // }
+        this.scaleDebounceTimer && clearTimeout(this.scaleDebounceTimer)
+        this.scaleDebounceTimer = setTimeout(() => {
+            canvasContent.classList.remove('scaling')
+        }, 300)
 
-    // public scaleDown() {
-
-    // }
-
-    // private scale() {
-        
-    // }
+    }
 
 
 }

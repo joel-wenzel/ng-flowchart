@@ -87,11 +87,11 @@ export namespace NgFlowchart {
 
         /** Canvas zoom options. Defaults to mouse wheel zoom */
         zoom?: {
-            mode: 'WHEEL' | 'NONE'
-            rescaleOnResize: boolean
+            mode: 'WHEEL' | 'MANUAL' | 'DISABLED'
+            defaultStep: number
         } = {
             mode: 'WHEEL',
-            rescaleOnResize: true
+            defaultStep: .1
         }
     }
 
@@ -177,5 +177,10 @@ export namespace NgFlowchart {
          * Called after the canvas completes a re-render
          */
         afterRender?: () => void
+
+        /**
+         * Called after the canvas has been scaled
+         */
+        afterScale?: (newScale: number) => void
     };
 }
