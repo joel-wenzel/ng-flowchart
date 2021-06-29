@@ -3,6 +3,7 @@ import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
 import { NgFlowchartStepRegistry } from 'projects/ng-flowchart/src/lib/ng-flowchart-step-registry.service';
 import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src/public-api';
 import { CustomStepComponent } from './custom-step/custom-step.component';
+import { FormStepComponent, MyForm } from './form-step/form-step.component';
 import { NestedFlowComponent } from './nested-flow/nested-flow.component';
 
 @Component({
@@ -51,6 +52,14 @@ export class AppComponent {
       }
     },
     {
+      paletteName: 'Form Step',
+      step: {
+        template: FormStepComponent,
+        type: 'form-step',
+        data: '123'
+      }
+    },
+    {
       paletteName: 'Nested Flow',
       step: {
         template: NestedFlowComponent,
@@ -82,6 +91,7 @@ export class AppComponent {
     this.stepRegistry.registerStep('log', this.normalStepTemplate);
     this.stepRegistry.registerStep('router', CustomStepComponent);
     this.stepRegistry.registerStep('nested-flow', NestedFlowComponent);
+    this.stepRegistry.registerStep('form-step', FormStepComponent);
   }
 
   onDropError(error: NgFlowchart.DropError) {

@@ -15,10 +15,16 @@ export type DropProximity = {
 export class CanvasRendererService {
     private viewContainer: ViewContainerRef;
 
+    private scale: number = 1;
+
     constructor(
         private options: OptionsService
     ) {
 
+    }
+
+    public setScale(scale: number) {
+        this.scale = scale;
     }
 
     public init(viewContainer: ViewContainerRef) {
@@ -35,8 +41,14 @@ export class CanvasRendererService {
     }
 
     public updatePosition(step: NgFlowchartStepComponent, dragEvent: DragEvent) {
-        const relativeXY = this.getRelativeXY(dragEvent);
+        let relativeXY = this.getRelativeXY(dragEvent);
+
+        relativeXY = relativeXY.map(coord => coord / this.scale)
         step.zsetPosition(relativeXY, true);
+    }
+
+    private getStepGap() {
+        return this.options.options.stepGap;
     }
 
     private renderChildTree(rootNode: NgFlowchartStepComponent, rootRect: Partial<DOMRect>, canvasRect: DOMRect) {
@@ -47,22 +59,27 @@ export class CanvasRendererService {
         }
 
         //top of the child row is simply the relative bottom of the root + stepGap
-        const childYTop = (rootRect.bottom - canvasRect.top) + this.options.options.stepGap;
-        const rootXCenter = (rootRect.left - canvasRect.left) + (rootRect.width / 2);
+        const childYTop = (rootRect.bottom - canvasRect.top * this.scale) + this.getStepGap();
+  
+        const rootWidth = rootRect.width / this.scale
+
+        const rootXCenter = (rootRect.left - canvasRect.left) + (rootWidth / 2);
+
 
         //get the width of the child trees
         let childTreeWidths = {};
         let totalTreeWidth = 0;
 
         rootNode.children.forEach(child => {
-            let totalChildWidth = child.getNodeTreeWidth(this.options.options.stepGap);
+            let totalChildWidth = child.getNodeTreeWidth(this.getStepGap());
+            totalChildWidth = totalChildWidth / this.scale
             childTreeWidths[child.nativeElement.id] = totalChildWidth;
 
             totalTreeWidth += totalChildWidth;
         });
 
         //add length for stepGaps between child trees
-        totalTreeWidth += (rootNode.children.length - 1) * this.options.options.stepGap;
+        totalTreeWidth += (rootNode.children.length - 1) * this.getStepGap();
 
         //if we have more than 1 child, we want half the extent on the left and half on the right
         let leftXTree = rootXCenter - (totalTreeWidth / 2);
@@ -72,17 +89,21 @@ export class CanvasRendererService {
             let childExtent = childTreeWidths[child.nativeElement.id];
 
             let childLeft = leftXTree + (childExtent / 2) - (child.nativeElement.offsetWidth / 2);
+
+
             child.zsetPosition([childLeft, childYTop]);
 
             const currentChildRect = child.getCurrentRect(canvasRect);
 
+            const childWidth = currentChildRect.width / this.scale
+           
             child.zdrawArrow(
-                [rootXCenter, (rootRect.bottom - canvasRect.top)],
-                [currentChildRect.left + currentChildRect.width / 2 - canvasRect.left, currentChildRect.top - canvasRect.top]
+                [rootXCenter, (rootRect.bottom - canvasRect.top * this.scale)],
+                [currentChildRect.left + childWidth / 2 - canvasRect.left, currentChildRect.top - canvasRect.top]
             );
 
             this.renderChildTree(child, currentChildRect, canvasRect);
-            leftXTree += childExtent + this.options.options.stepGap;
+            leftXTree += childExtent + this.getStepGap();
         })
 
     }
@@ -113,34 +134,34 @@ export class CanvasRendererService {
 
     private adjustDimensions(flow: CanvasFlow, canvasRect: DOMRect) {
 
-        let maxRight = 0;
-        let maxBottom = 0;
+        // let maxRight = 0;
+        // let maxBottom = 0;
 
-        //TODO this can be better
-        flow.steps.forEach(
-            ele => {
-                let rect = ele.getCurrentRect(canvasRect);
-                maxRight = Math.max(rect.right, maxRight);
-                maxBottom = Math.max(rect.bottom, maxBottom);
-            }
-        );
+        // //TODO this can be better
+        // flow.steps.forEach(
+        //     ele => {
+        //         let rect = ele.getCurrentRect(canvasRect);
+        //         maxRight = Math.max(rect.right, maxRight);
+        //         maxBottom = Math.max(rect.bottom, maxBottom);
+        //     }
+        // );
 
 
 
-        const widthDiff = canvasRect.width - (maxRight - canvasRect.left);
-        if (widthDiff < 100) {
-            this.getCanvasContentElement().style.minWidth = `${canvasRect.width + 200}px`;
-            if (this.options.options.centerOnResize) {
-                //if we add width, rerender canvas in the middle
-                this.render(flow, true);
-            }
+        // const widthDiff = canvasRect.width - (maxRight - canvasRect.left);
+        // if (widthDiff < 100) {
+        //     this.getCanvasContentElement().style.minWidth = `${canvasRect.width + 200}px`;
+        //     if (this.options.options.centerOnResize) {
+        //         //if we add width, rerender canvas in the middle
+        //         this.render(flow, true);
+        //     }
 
-        }
+        // }
 
-        const heightDiff = canvasRect.height - (maxBottom - canvasRect.top);
-        if (heightDiff < 100) {
-            this.getCanvasContentElement().style.minHeight = `${canvasRect.height + 200}px`;
-        }
+        // const heightDiff = canvasRect.height - (maxBottom - canvasRect.top);
+        // if (heightDiff < 100) {
+        //     this.getCanvasContentElement().style.minHeight = `${canvasRect.height + 200}px`;
+        // }
 
     }
 
@@ -267,7 +288,7 @@ export class CanvasRendererService {
     }
 
     private setRootPosition(step: NgFlowchartStepComponent, dragEvent?: DragEvent) {
-     
+
         if (!dragEvent) {
             const canvasTop = this.getCanvasTopCenterPosition(step.nativeElement);
             step.zsetPosition(canvasTop, true)
@@ -303,10 +324,11 @@ export class CanvasRendererService {
         const canvasRect = this.getCanvasContentElement().getBoundingClientRect();
         const rootElementHeight = htmlRootElement.getBoundingClientRect().height
         const yCoord = rootElementHeight / 2 + this.options.options.stepGap
-
+        const scaleYOffset = (1 - this.scale) * 100
+            
         return [
-            canvasRect.width / 2,
-            yCoord
+            canvasRect.width / (this.scale * 2),
+            yCoord + scaleYOffset
         ]
     }
 
@@ -323,6 +345,32 @@ export class CanvasRendererService {
         let canvasContent = canvas.getElementsByClassName(CONSTANTS.CANVAS_CONTENT_CLASS).item(0);
         return canvasContent as HTMLElement;
     }
+
+    // public scaleUp() {
+    //     const minDimAdjust = `${1/this._scaleVal * 100}%`
+            
+    //     this.canvasContent.style.transform = `scale(${this._scaleVal})`;
+    //     this.canvasContent.style.minHeight = minDimAdjust
+    //     this.canvasContent.style.minWidth = minDimAdjust
+    //     this.canvasContent.style.transformOrigin = 'top left'
+    //     this.canvasContent.classList.add('scaling')
+
+    //     this.canvas.setScale(this._scaleVal)
+    //     this.canvas.reRender(true)
+        
+    //     this.scaleDebounceTimer && clearTimeout(this.scaleDebounceTimer)
+    //     this.scaleDebounceTimer = setTimeout(() => {
+    //         this.canvasContent.classList.remove('scaling')
+    //     }, 300)
+    // }
+
+    // public scaleDown() {
+
+    // }
+
+    // private scale() {
+        
+    // }
 
 
 }

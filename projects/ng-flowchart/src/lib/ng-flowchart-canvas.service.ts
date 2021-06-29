@@ -69,6 +69,10 @@ export class NgFlowchartCanvasService {
 
   }
 
+  public setScale(scale: number) {
+    this.renderer.setScale(scale)
+  }
+
   public init(view: ViewContainerRef) {
     this.viewContainer = view;
     this.renderer.init(view);
