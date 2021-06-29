@@ -5,6 +5,8 @@ import { AppComponent } from './app.component';
 import { CustomStepComponent } from './custom-step/custom-step.component';
 import { RouteStepComponent } from './custom-step/route-step/route-step.component';
 import { NestedFlowComponent } from './nested-flow/nested-flow.component';
+import { FormStepComponent } from './form-step/form-step.component';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -13,11 +15,13 @@ import { NestedFlowComponent } from './nested-flow/nested-flow.component';
     AppComponent,
     CustomStepComponent,
     RouteStepComponent,
-    NestedFlowComponent
+    NestedFlowComponent,
+    FormStepComponent
   ],
   imports: [
     BrowserModule,
-    NgFlowchartModule
+    NgFlowchartModule,
+    FormsModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
