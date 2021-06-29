@@ -17,18 +17,18 @@ import { StepManagerService } from './services/step-manager.service';
         CanvasRendererService
     ]
 })
-export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewInit {   
+export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewInit {
 
     @HostListener('drop', ['$event'])
     protected onDrop(event: DragEvent) {
         if (this._disabled) { return; }
-        
+
         // its possible multiple canvases exist so make sure we only move/drop on the closest one
         const closestCanvasId = (event.target as HTMLElement).closest('.ngflowchart-canvas-content')?.id
-        if(this._id !== closestCanvasId) {
+        if (this._id !== closestCanvasId) {
             return;
         }
- 
+
         const type = event.dataTransfer.getData('type');
         if ('FROM_CANVAS' == type) {
             this.canvas.moveStep(event, event.dataTransfer.getData('id'));
@@ -54,7 +54,13 @@ export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewI
         if (this._options.centerOnResize) {
             this.canvas.reRender(true);
         }
+    }
 
+    @HostListener('wheel', ['$event'])
+    protected onZoom(event) {
+        if (this._options.zoom.mode === 'WHEEL') {
+            this.adjustWheelScale(event)
+        }
     }
 
     @Input('ngFlowchartCallbacks')
@@ -74,26 +80,30 @@ export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewI
     @HostBinding('attr.disabled')
     set disabled(val: boolean) {
         this._disabled = val !== false;
-        if(this.canvas) {
+        if (this.canvas) {
             this.canvas._disabled = this._disabled;
         }
     }
+
     get disabled() {
         return this._disabled;
     }
 
-    _disabled: boolean = false;
-    _id: string = null
+    private _disabled: boolean = false;
+    private _id: string = null
+    private canvasContent: HTMLElement;
+
     constructor(
         protected canvasEle: ElementRef<HTMLElement>,
         private viewContainer: ViewContainerRef,
         private canvas: NgFlowchartCanvasService,
         private optionService: OptionsService
     ) {
-        
+
         this.canvasEle.nativeElement.classList.add(CONSTANTS.CANVAS_CLASS);
-        this._id = this.createCanvasContent(this.viewContainer);
-        
+        this.canvasContent = this.createCanvasContent(this.viewContainer);
+        this._id = this.canvasContent.id
+
     }
 
     ngOnInit() {
@@ -103,35 +113,31 @@ export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewI
         }
 
         this.canvas._disabled = this._disabled;
-       
     }
 
     ngAfterViewInit() {
-       
+
     }
 
     ngOnDestroy() {
-        
-        for(let i = 0 ; i < this.viewContainer.length; i++){
+
+        for (let i = 0; i < this.viewContainer.length; i++) {
             this.viewContainer.remove(i)
         }
         this.canvasEle.nativeElement.remove()
         this.viewContainer.element.nativeElement.remove()
-        // this.canvas = undefined
-        // this.canvasEle = undefined
-        // this.optionService = undefined
         this.viewContainer = undefined
     }
 
-    private createCanvasContent(viewContainer: ViewContainerRef): string {
+    private createCanvasContent(viewContainer: ViewContainerRef): HTMLElement {
         const canvasId = 'c' + Date.now();
-        
+
         let canvasEle = viewContainer.element.nativeElement as HTMLElement;
         let canvasContent = document.createElement('div');
         canvasContent.id = canvasId;
         canvasContent.classList.add(CONSTANTS.CANVAS_CONTENT_CLASS);
         canvasEle.appendChild(canvasContent);
-        return canvasId
+        return canvasContent
     }
 
     /**
@@ -140,4 +146,34 @@ export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewI
     public getFlow() {
         return new NgFlowchart.Flow(this.canvas);
     }
+
+    public scaleDown() {
+        this.canvas.scaleDown()
+    }
+
+    public scaleUp() {
+        this.canvas.scaleUp()
+    }
+
+    public setScale(scaleValue: number) {
+        
+        const scaleVal = Math.max(0, scaleValue)
+        this.canvas.setScale(scaleVal)
+    }
+
+    private adjustWheelScale(event) {
+
+        if (this.canvas.flow.hasRoot()) {
+            event.preventDefault();
+            // scale down / zoom out
+            if (event.deltaY > 0) {
+                this.scaleDown()
+            }
+            // scale up / zoom in
+            else if (event.deltaY < 0) {
+                this.scaleUp()
+            }
+
+        }
+    };
 }

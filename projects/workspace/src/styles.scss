@@ -25,3 +25,20 @@ body {
     stroke: darkgrey;
   }
 }
+
+.step {
+  background: #fbfbfb;
+  color: #444;
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+  padding: 1em;
+  min-width: 200px;
+  min-height: 100px;
+}
+
+// TODO move this to the library
+.ngflowchart-canvas-content.scaling .ngflowchart-step-wrapper,
+.ngflowchart-canvas-content.scaling svg {
+  transition: none !important;
+}

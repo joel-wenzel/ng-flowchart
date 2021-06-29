@@ -84,6 +84,15 @@ export namespace NgFlowchart {
 
         /** Should the canvas be centered when a resize is detected? */
         centerOnResize?: boolean = true;
+
+        /** Canvas zoom options. Defaults to mouse wheel zoom */
+        zoom?: {
+            mode: 'WHEEL' | 'MANUAL' | 'DISABLED'
+            defaultStep: number
+        } = {
+            mode: 'WHEEL',
+            defaultStep: .1
+        }
     }
 
     export type DropEvent = {
@@ -169,6 +178,11 @@ export namespace NgFlowchart {
          * Called after the canvas completes a re-render
          */
         afterRender?: () => void
+
+        /**
+         * Called after the canvas has been scaled
+         */
+        afterScale?: (newScale: number) => void
     };
 }
 

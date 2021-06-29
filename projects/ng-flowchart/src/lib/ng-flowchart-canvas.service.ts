@@ -5,14 +5,14 @@ import { CanvasRendererService } from './services/canvas-renderer.service';
 import { DropDataService as DragService } from './services/dropdata.service';
 import { OptionsService } from './services/options.service';
 import { StepManagerService } from './services/step-manager.service';
-import {first} from 'rxjs/operators'
+import { first } from 'rxjs/operators'
 
 export class CanvasFlow {
   rootStep: NgFlowchartStepComponent;
 
   // steps from this canvas only
   private _steps: NgFlowchartStepComponent[] = [];
-  
+
   hasRoot() {
     return !!this.rootStep;
   }
@@ -22,7 +22,7 @@ export class CanvasFlow {
   }
 
   removeStep(step: NgFlowchartStepComponent) {
-  
+
     let index = this._steps.findIndex(ele => ele.id == step.id);
     if (index >= 0) {
       this._steps.splice(index, 1);
@@ -65,7 +65,7 @@ export class NgFlowchartCanvasService {
     private renderer: CanvasRendererService,
     private stepmanager: StepManagerService
   ) {
-    
+
 
   }
 
@@ -116,7 +116,7 @@ export class NgFlowchartCanvasService {
 
   }
 
- 
+
 
   public async onDrop(drag: DragEvent) {
     this.renderer.clearAllSnapIndicators(this.flow.steps);
@@ -176,7 +176,7 @@ export class NgFlowchartCanvasService {
     })
   }
 
-   public createStep(pending: NgFlowchart.PendingStep): Promise<ComponentRef<NgFlowchartStepComponent>> {
+  public createStep(pending: NgFlowchart.PendingStep): Promise<ComponentRef<NgFlowchartStepComponent>> {
     let componentRef: ComponentRef<NgFlowchartStepComponent>;
 
     componentRef = this.stepmanager.create(pending, this);
@@ -188,6 +188,37 @@ export class NgFlowchartCanvasService {
       }, error => console.error(error))
     })
   }
+
+  public resetScale() {
+    if(this.options.options.zoom.mode === 'DISABLED') {
+      return
+    }
+    this.renderer.resetScale(this.flow)
+  }
+
+  public scaleUp(step?: number) {
+    if(this.options.options.zoom.mode === 'DISABLED') {
+      return
+    }
+    this.renderer.scaleUp(this.flow, step);
+
+  }
+
+  public scaleDown(step?: number) {
+    if(this.options.options.zoom.mode === 'DISABLED') {
+      return
+    }
+    this.renderer.scaleDown(this.flow, step);
+
+  }
+
+  public setScale(scaleValue: number) {
+    if(this.options.options.zoom.mode === 'DISABLED') {
+      return
+    }
+    this.renderer.setScale(this.flow, scaleValue)
+  }
+
 
   addChildStep(componentRef: ComponentRef<NgFlowchartStepComponent>, dropTarget: NgFlowchart.DropTarget) {
     this.addToCanvas(componentRef);
