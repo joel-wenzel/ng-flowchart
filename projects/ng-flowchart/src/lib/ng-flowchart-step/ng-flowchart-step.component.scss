@@ -3,6 +3,11 @@
   display: flex;
 }
 
+.ngflowchart-canvas-content.scaling .ngflowchart-step-wrapper,
+.ngflowchart-canvas-content.scaling svg {
+  transition: none !important;
+}
+
 .ngflowchart-canvas-content {
   position: relative;
   min-height: 100%;
