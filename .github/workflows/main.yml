@@ -26,10 +26,6 @@ jobs:
       
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
-      # Update version
-      - name: Update version
-        run: npm version prerelease --preid beta
         
       # Build
       - name: Build Library
