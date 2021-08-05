@@ -33,9 +33,7 @@ jobs:
           npm install
           npm run build
 
-      # Runs a set of commands using the runners shell
-      - name: Publish
-        run: npm publish
+      - uses: JS-DevTools/npm-publish@v1
         working-directory: projects/ng-flowchart/dist
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
+        with:
+          token: ${{secrets.NPM_AUTH_TOKEN}}
