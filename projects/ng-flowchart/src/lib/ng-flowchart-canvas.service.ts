@@ -324,13 +324,13 @@ export class NgFlowchartCanvasService {
   }
 
   private placeStepAbove(newStep: NgFlowchartStepComponent, childStep: NgFlowchartStepComponent) {
-
+  
     let newParent = childStep.parent;
     if (newParent) {
       //we want to remove child and insert our newStep at the same index
       let index = newParent.removeChild(childStep);
       newStep.zaddChild0(childStep);
-      //adjParent.addChild(newStep, index);
+      newParent.zaddChild0(newStep);
     }
     else { // new root node
       this.setRoot(newStep);
