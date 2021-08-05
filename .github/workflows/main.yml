@@ -29,7 +29,9 @@ jobs:
         
       # Build
       - name: Build Library
-        run: npm run build
+        run: |
+          npm install
+          npm run build
 
       # Runs a set of commands using the runners shell
       - name: Publish
