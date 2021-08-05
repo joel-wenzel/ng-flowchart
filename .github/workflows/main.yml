@@ -23,7 +23,10 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/setup-node@v2.3.2
-      
+        with:
+          node-version: '12.x'
+          registry-url: 'https://registry.npmjs.org'
+          
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
         
@@ -33,7 +36,8 @@ jobs:
           npm install
           npm run build
 
-      - uses: JS-DevTools/npm-publish@v1
+      - name: Publish
+        run: npm publish --access public
         working-directory: projects/ng-flowchart/dist
-        with:
-          token: ${{secrets.NPM_AUTH_TOKEN}}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
