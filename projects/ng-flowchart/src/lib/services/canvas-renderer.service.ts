@@ -80,6 +80,9 @@ export class CanvasRendererService {
 
         //if we have more than 1 child, we want half the extent on the left and half on the right
         let leftXTree = rootXCenter - (totalTreeWidth / 2);
+        
+        // dont allow it to go negative since you cant scroll that way
+        leftXTree = Math.max(0, leftXTree)
 
         rootNode.children.forEach(child => {
 
