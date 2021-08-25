@@ -248,6 +248,11 @@ export class NgFlowchartCanvasService {
   }
 
   private async uploadNode(node: any, parentNode?: NgFlowchartStepComponent): Promise<NgFlowchartStepComponent> {
+    if(!node){
+      // no node to upload when uploading empty nested flow
+      return;
+    }
+
     let comp = await this.createStepFromType(node.id, node.type, node.data);
     if (!parentNode) {
       this.setRoot(comp.instance);
