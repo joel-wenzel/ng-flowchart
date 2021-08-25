@@ -90,6 +90,10 @@ export class NgFlowchartCanvasService {
 
     let step: NgFlowchartStepComponent = this.flow.steps.find(step => step.nativeElement.id === id);
     let error = {};
+    if(!step) {
+      // step cannot be moved if not in this canvas
+      return;
+    }
     if (step.canDrop(this.currentDropTarget, error)) {
       if (step.isRootElement()) {
         this.renderer.updatePosition(step, drag);
