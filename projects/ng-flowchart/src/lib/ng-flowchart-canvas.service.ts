@@ -141,6 +141,10 @@ export class NgFlowchartCanvasService {
         this.setRoot(componentRef.instance);
       }
       else {
+         // if root is replaced by another step, rerender root to proper position
+         if(dropTarget.step.isRootElement() && dropTarget.position === 'ABOVE') {
+          this.renderer.renderRoot(componentRef, drag);
+        }
         this.addChildStep(componentRef, dropTarget);
       }
 
