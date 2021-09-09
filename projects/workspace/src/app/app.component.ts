@@ -18,7 +18,10 @@ export class AppComponent {
   callbacks: NgFlowchart.Callbacks = {};
   options: NgFlowchart.Options = {
     stepGap: 40,
-    rootPosition: 'TOP_CENTER'
+    rootPosition: 'TOP_CENTER',
+    zoom: {
+      mode: 'DISABLED'
+    }
   }
 
   @ViewChild('normalStep')

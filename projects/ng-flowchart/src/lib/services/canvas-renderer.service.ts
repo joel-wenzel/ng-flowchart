@@ -125,6 +125,11 @@ export class CanvasRendererService {
         }
         this.renderChildTree(flow.rootStep, flow.rootStep.getCurrentRect(canvasRect), canvasRect);
 
+        if(this.options.options.zoom.mode === 'DISABLED') {
+            this.adjustDimensions(flow, canvasRect);
+        }
+        
+
         if (this.options.callbacks?.afterRender) {
             this.options.callbacks.afterRender()
         }
@@ -183,6 +188,39 @@ export class CanvasRendererService {
         }
 
         return result;
+    }
+
+    private adjustDimensions(flow: CanvasFlow, canvasRect: DOMRect) {
+
+        let maxRight = 0;
+        let maxBottom = 0;
+
+        //TODO this can be better
+        flow.steps.forEach(
+            ele => {
+                let rect = ele.getCurrentRect(canvasRect);
+                maxRight = Math.max(rect.right, maxRight);
+                maxBottom = Math.max(rect.bottom, maxBottom);
+            }
+        );
+
+
+
+        const widthDiff = canvasRect.width - (maxRight - canvasRect.left);
+        if (widthDiff < 100) {
+            this.getCanvasContentElement().style.minWidth = `${canvasRect.width + 200}px`;
+            if (this.options.options.centerOnResize) {
+                //if we add width, rerender canvas in the middle
+                this.render(flow, true);
+            }
+
+        }
+
+        const heightDiff = canvasRect.height - (maxBottom - canvasRect.top);
+        if (heightDiff < 100) {
+            this.getCanvasContentElement().style.minHeight = `${canvasRect.height + 200}px`;
+        }
+
     }
 
     private findBestMatchForSteps(dragStep: NgFlowchart.Step, event: DragEvent, steps: ReadonlyArray<NgFlowchartStepComponent>): DropProximity | null {
