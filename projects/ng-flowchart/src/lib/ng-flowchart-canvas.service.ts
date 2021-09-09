@@ -7,6 +7,16 @@ import { OptionsService } from './services/options.service';
 import { StepManagerService } from './services/step-manager.service';
 import { first } from 'rxjs/operators';
 
+type DropResponse = {
+  added: boolean;
+  prettyRender: boolean;
+};
+
+type DropResponse = {
+  added: boolean;
+  prettyRender: boolean;
+};
+
 export class CanvasFlow {
   rootStep: NgFlowchartStepComponent;
 
@@ -96,8 +106,8 @@ export class NgFlowchartCanvasService {
         this.renderer.updatePosition(step, drag);
         this.renderer.render(this.flow);
       } else if (this.currentDropTarget) {
-        this.addStepToFlow(step, this.currentDropTarget, true);
-        this.renderer.render(this.flow);
+        const response = this.addStepToFlow(step, this.currentDropTarget, true);
+        this.renderer.render(this.flow, response.prettyRender);
       } else {
         this.moveError(step, this.noParentError);
       }
@@ -231,8 +241,8 @@ export class NgFlowchartCanvasService {
     dropTarget: NgFlowchart.DropTarget
   ) {
     this.addToCanvas(componentRef);
-    this.addStepToFlow(componentRef.instance, dropTarget);
-    this.renderer.render(this.flow);
+    const response = this.addStepToFlow(componentRef.instance, dropTarget);
+    this.renderer.render(this.flow, response.prettyRender);
   }
 
   addToCanvas(componentRef: ComponentRef<NgFlowchartStepComponent>) {
@@ -298,44 +308,51 @@ export class NgFlowchartCanvasService {
     step: NgFlowchartStepComponent,
     dropTarget: NgFlowchart.DropTarget,
     isMove = false
-  ): boolean {
-    let added = false;
+  ): DropResponse {
+    let response = {
+      added: false,
+      prettyRender: false,
+    };
 
     switch (dropTarget.position) {
       case 'ABOVE':
-        added = this.placeStepAbove(step, dropTarget.step);
+        response = this.placeStepAbove(step, dropTarget.step);
         break;
       case 'BELOW':
-        added = this.placeStepBelow(step, dropTarget.step);
+        response = this.placeStepBelow(step, dropTarget.step);
+        console.log(response, [...dropTarget.step.children]);
         break;
       case 'LEFT':
-        added = this.placeStepAdjacent(step, dropTarget.step, true);
+        response = this.placeStepAdjacent(step, dropTarget.step, true);
         break;
       case 'RIGHT':
-        added = this.placeStepAdjacent(step, dropTarget.step, false);
+        response = this.placeStepAdjacent(step, dropTarget.step, false);
         break;
       default:
         break;
     }
 
-    if (!isMove && added) {
+    if (!isMove && response.added) {
       this.flow.addStep(step);
     }
-    return added;
+    return response;
   }
 
   private placeStepBelow(
     newStep: NgFlowchartStepComponent,
     parentStep: NgFlowchartStepComponent
-  ): boolean {
-    return parentStep.zaddChild0(newStep);
+  ): DropResponse {
+    return {
+      added: parentStep.zaddChild0(newStep),
+      prettyRender: false,
+    };
   }
 
   private placeStepAdjacent(
     newStep: NgFlowchartStepComponent,
     siblingStep: NgFlowchartStepComponent,
     isLeft: boolean = true
-  ) {
+  ): DropResponse {
     if (siblingStep.parent) {
       //find the adjacent steps index in the parents child array
       const adjacentIndex = siblingStep.parent.children.findIndex(
@@ -347,15 +364,22 @@ export class NgFlowchartCanvasService {
       );
     } else {
       console.warn('Parallel actions must have a common parent');
-      return false;
+      return {
+        added: false,
+        prettyRender: false,
+      };
     }
-    return true;
+    return {
+      added: true,
+      prettyRender: false,
+    };
   }
 
   private placeStepAbove(
     newStep: NgFlowchartStepComponent,
     childStep: NgFlowchartStepComponent
-  ) {
+  ): DropResponse {
+    let prettyRender = false;
     let newParent = childStep.parent;
     if (newParent) {
       //we want to remove child and insert our newStep at the same index
@@ -364,10 +388,19 @@ export class NgFlowchartCanvasService {
       newParent.zaddChild0(newStep);
     } else {
       // new root node
+      newStep.parent?.removeChild(newStep);
+      newStep.setParent(null, true);
+
+      //if the new step was a direct child of the root step, we need to break that connection
+      childStep.removeChild(newStep);
       this.setRoot(newStep);
-      newStep.zaddChild0(childStep);
+
+      prettyRender = true;
     }
-    return true;
+    return {
+      added: true,
+      prettyRender,
+    };
   }
 
   private dropError(error: NgFlowchart.ErrorMessage) {

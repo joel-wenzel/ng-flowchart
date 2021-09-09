@@ -353,9 +353,9 @@ export class NgFlowchartStepComponent<T = any> {
   }
 
   zaddChild0(newChild: NgFlowchartStepComponent): boolean {
-
+    let oldChildIndex = null
     if (newChild._parent) {
-      newChild._parent.removeChild(newChild);
+      oldChildIndex = newChild._parent.removeChild(newChild);
     }
 
     if (this.hasChildren()) {
@@ -363,6 +363,7 @@ export class NgFlowchartStepComponent<T = any> {
         //if we have children and the child has children we need to confirm the child doesnt have multiple children at any point
         let newChildLastChild = newChild.findLastSingleChild();
         if (!newChildLastChild) {
+          newChild._parent.zaddChildSibling0(newChild, oldChildIndex)
           console.error('Invalid move. A node cannot have multiple parents');
           return false;
         }
