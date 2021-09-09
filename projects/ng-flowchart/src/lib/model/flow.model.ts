@@ -88,7 +88,7 @@ export namespace NgFlowchart {
         /** Canvas zoom options. Defaults to mouse wheel zoom */
         zoom?: {
             mode: 'WHEEL' | 'MANUAL' | 'DISABLED'
-            defaultStep: number
+            defaultStep?: number
         } = {
             mode: 'WHEEL',
             defaultStep: .1
