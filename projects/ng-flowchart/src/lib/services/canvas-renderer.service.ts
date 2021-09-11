@@ -109,8 +109,16 @@ export class CanvasRendererService {
     }
 
 
-    public render(flow: CanvasFlow, pretty?: boolean) {
+    public render(flow: CanvasFlow, pretty?: boolean, skipAdjustDimensions = false) {
         if (!flow.hasRoot()) {
+            if (this.options.options.zoom.mode === 'DISABLED') {
+                this.resetAdjustDimensions();
+                // Trigger afterRender to allow nested canvas to redraw parent canvas.
+                // Not sure if this scenario should also trigger beforeRender.
+                if (this.options.callbacks?.afterRender) {
+                    this.options.callbacks.afterRender()
+                }
+            }
             return;
         }
 
@@ -124,16 +132,25 @@ export class CanvasRendererService {
             this.setRootPosition(flow.rootStep, null);
         }
         this.renderChildTree(flow.rootStep, flow.rootStep.getCurrentRect(canvasRect), canvasRect);
-
-        if(this.options.options.zoom.mode === 'DISABLED') {
+        
+        if (!skipAdjustDimensions && this.options.options.zoom.mode === 'DISABLED') {
             this.adjustDimensions(flow, canvasRect);
         }
-        
 
         if (this.options.callbacks?.afterRender) {
             this.options.callbacks.afterRender()
         }
     }
+
+    private resetAdjustDimensions(): void {
+        // reset canvas auto sizing to original size if empty
+        if (this.viewContainer) {
+            const canvasWrapper = this.getCanvasContentElement();
+            canvasWrapper.style.minWidth = null;
+            canvasWrapper.style.minHeight = null;
+        }
+    }
+           
 
     private findDropLocationForHover(absMouseXY: number[], targetStep: NgFlowchartStepComponent, stepToDrop: NgFlowchart.Step): DropProximity | 'deadzone' | null {
 
@@ -190,8 +207,7 @@ export class CanvasRendererService {
         return result;
     }
 
-    private adjustDimensions(flow: CanvasFlow, canvasRect: DOMRect) {
-
+    private adjustDimensions(flow: CanvasFlow, canvasRect: DOMRect): void {
         let maxRight = 0;
         let maxBottom = 0;
 
@@ -204,23 +220,59 @@ export class CanvasRendererService {
             }
         );
 
-
-
+        const borderGap = 100;
         const widthDiff = canvasRect.width - (maxRight - canvasRect.left);
-        if (widthDiff < 100) {
-            this.getCanvasContentElement().style.minWidth = `${canvasRect.width + 200}px`;
+        if (widthDiff < borderGap) {
+            this.getCanvasContentElement().style.minWidth = `${canvasRect.width + borderGap * 2}px`;
             if (this.options.options.centerOnResize) {
-                //if we add width, rerender canvas in the middle
-                this.render(flow, true);
+                this.render(flow, true, true);
             }
-
+        } else {
+            var totalTreeWidth = this.getTotalTreeWidth(flow);
+            const shouldShrink = totalTreeWidth < canvasRect.width - borderGap * 4;
+            if(shouldShrink) {
+                if(this.isNestedCanvas()) {
+                    this.getCanvasContentElement().style.minWidth = `${totalTreeWidth + borderGap * 2}px`;
+                    if (this.options.options.centerOnResize) {
+                        this.render(flow, true, true);
+                    }
+                } else if(this.getCanvasContentElement().style.minWidth) {
+                    // reset normal canvas width if auto width set
+                    this.getCanvasContentElement().style.minWidth = null;
+                    if (this.options.options.centerOnResize) {
+                        this.render(flow, true, true);
+                    }
+                }
+            }
         }
-
-        const heightDiff = canvasRect.height - (maxBottom - canvasRect.top);
-        if (heightDiff < 100) {
-            this.getCanvasContentElement().style.minHeight = `${canvasRect.height + 200}px`;
+        
+        const totalTreeHeight = maxBottom - canvasRect.top;
+        const heightDiff = canvasRect.height - totalTreeHeight;
+        if (heightDiff < borderGap) {
+            this.getCanvasContentElement().style.minHeight = `${totalTreeHeight + borderGap}px`;
+        } else {
+            const shouldShrink = totalTreeHeight < canvasRect.height - borderGap * 2;
+            if(shouldShrink) {
+                if(this.isNestedCanvas()) {
+                    this.getCanvasContentElement().style.minHeight = `${totalTreeHeight + borderGap}px`;
+                } else if(this.getCanvasContentElement().style.minHeight) {
+                    // reset normal canvas height if auto height set
+                    this.getCanvasContentElement().style.minHeight = null;
+                }
+            }
         }
+    }
 
+    private getTotalTreeWidth(flow: CanvasFlow): number {
+        let totalTreeWidth = 0;
+        const rootWidth = flow.rootStep.getCurrentRect().width / this.scale;
+        flow.rootStep.children.forEach(child => {
+            let totalChildWidth = child.getNodeTreeWidth(this.getStepGap());
+            totalTreeWidth += totalChildWidth / this.scale;
+        });
+        totalTreeWidth += (flow.rootStep.children.length - 1) * this.getStepGap();
+        // total tree width doesn't give root width
+        return Math.max(totalTreeWidth, rootWidth);
     }
 
     private findBestMatchForSteps(dragStep: NgFlowchart.Step, event: DragEvent, steps: ReadonlyArray<NgFlowchartStepComponent>): DropProximity | null {
@@ -347,6 +399,16 @@ export class CanvasRendererService {
         const canvas = this.viewContainer.element.nativeElement as HTMLElement;
         let canvasContent = canvas.getElementsByClassName(CONSTANTS.CANVAS_CONTENT_CLASS).item(0);
         return canvasContent as HTMLElement;
+    }
+
+    private isNestedCanvas(): boolean {
+        if (this.viewContainer) {
+            const canvasWrapper = (this.viewContainer.element.nativeElement as HTMLElement).parentElement;
+            if (canvasWrapper) {
+                return canvasWrapper.classList.contains('ngflowchart-step-wrapper');
+            }
+        }
+        return false;
     }
 
     public resetScale(flow: CanvasFlow) {
