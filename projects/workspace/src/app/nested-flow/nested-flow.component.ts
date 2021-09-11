@@ -52,11 +52,9 @@ export class NestedFlowComponent extends NgFlowchartStepComponent implements OnI
 
   // add nested-alt class to alternate nested flows for better visibility
   addAlternateClass(): void {  
-    const parentClasses = (this.canvas.viewContainer.element.nativeElement as HTMLElement).parentElement.classList;
-    if(parentClasses.contains('nested-flow-step')){
-      if(!parentClasses.contains('nested-alt')) {
-        this.nativeElement.classList.add('nested-alt');
-      } 
+    const parentCanvasWrapperClasses = (this.canvas.viewContainer.element.nativeElement as HTMLElement).parentElement.classList;
+    if(parentCanvasWrapperClasses.contains('nested-flow-step') && !parentCanvasWrapperClasses.contains('nested-alt')){
+      this.nativeElement.classList.add('nested-alt');
     }
   }
 
