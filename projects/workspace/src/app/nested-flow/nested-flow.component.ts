@@ -20,9 +20,17 @@ export class NestedFlowComponent extends NgFlowchartStepComponent implements OnI
 
   callbacks: NgFlowchart.Callbacks = {
     afterRender: () => {
-      this.canvas.reRender()
+      this.canvas.reRender(true)
     }
   };
+
+  options: NgFlowchart.Options = {
+    stepGap: 40,
+    rootPosition: 'TOP_CENTER',
+    zoom: {
+      mode: 'DISABLED'
+    }
+  }
 
 
   constructor() {
