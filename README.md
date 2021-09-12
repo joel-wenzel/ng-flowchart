@@ -12,6 +12,7 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 - [Supported Angular versions](#supported-angular-versions)
 - [Features](#features)
 - [Getting started](#getting-started)
+- [Contributers](#contributers)
 - [FAQ](#faq)
 - [Docs](https://github.com/joel-wenzel/ng-flowchart/wiki/NgFlowchart)
 
@@ -550,6 +551,9 @@ div#canvas[disabled="true"] ::ng-deep.ngflowchart-step-wrapper {
     opacity: .7;
 }
 ```
+
+# Contributers
+  * [michaelmarcuccio](https://github.com/michaelmarcuccio)
 
 # FAQ
 
