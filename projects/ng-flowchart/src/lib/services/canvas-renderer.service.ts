@@ -220,45 +220,48 @@ export class CanvasRendererService {
             }
         );
 
-        const borderGap = 100;
+        const widthBorderGap = 100;
         const widthDiff = canvasRect.width - (maxRight - canvasRect.left);
-        if (widthDiff < borderGap) {
-            this.getCanvasContentElement().style.minWidth = `${canvasRect.width + borderGap * 2}px`;
+        if (widthDiff < widthBorderGap) {
+            let growWidth = widthBorderGap;
+            if(widthDiff < 0) {
+                growWidth += Math.abs(widthDiff);
+            }
+            this.getCanvasContentElement().style.minWidth = `${canvasRect.width + growWidth}px`;
             if (this.options.options.centerOnResize) {
                 this.render(flow, true, true);
             }
-        } else {
+        } else if(widthDiff > widthBorderGap) {
             var totalTreeWidth = this.getTotalTreeWidth(flow);
-            const shouldShrink = totalTreeWidth < canvasRect.width - borderGap * 4;
-            if(shouldShrink) {
-                if(this.isNestedCanvas()) {
-                    this.getCanvasContentElement().style.minWidth = `${totalTreeWidth + borderGap * 2}px`;
-                    if (this.options.options.centerOnResize) {
-                        this.render(flow, true, true);
-                    }
-                } else if(this.getCanvasContentElement().style.minWidth) {
-                    // reset normal canvas width if auto width set
-                    this.getCanvasContentElement().style.minWidth = null;
-                    if (this.options.options.centerOnResize) {
-                        this.render(flow, true, true);
-                    }
+            if(this.isNestedCanvas()) {
+                this.getCanvasContentElement().style.minWidth = `${totalTreeWidth + widthBorderGap}px`;
+                if (this.options.options.centerOnResize) {
+                    this.render(flow, true, true);
+                }
+            } else if(this.getCanvasContentElement().style.minWidth) {
+                // reset normal canvas width if auto width set
+                this.getCanvasContentElement().style.minWidth = null;
+                if (this.options.options.centerOnResize) {
+                    this.render(flow, true, true);
                 }
             }
         }
         
-        const totalTreeHeight = maxBottom - canvasRect.top;
-        const heightDiff = canvasRect.height - totalTreeHeight;
-        if (heightDiff < borderGap) {
-            this.getCanvasContentElement().style.minHeight = `${totalTreeHeight + borderGap}px`;
-        } else {
-            const shouldShrink = totalTreeHeight < canvasRect.height - borderGap * 2;
-            if(shouldShrink) {
-                if(this.isNestedCanvas()) {
-                    this.getCanvasContentElement().style.minHeight = `${totalTreeHeight + borderGap}px`;
-                } else if(this.getCanvasContentElement().style.minHeight) {
-                    // reset normal canvas height if auto height set
-                    this.getCanvasContentElement().style.minHeight = null;
-                }
+        const heightBorderGap = 50;
+        const heightDiff = canvasRect.height - (maxBottom - canvasRect.top);
+        if (heightDiff < heightBorderGap) {
+            let growHeight = heightBorderGap;
+            if(heightDiff < 0) {
+                growHeight += Math.abs(heightDiff);
+            }
+            this.getCanvasContentElement().style.minHeight = `${canvasRect.height + growHeight}px`;
+        } else if(heightDiff > heightBorderGap){
+            if(this.isNestedCanvas()) {
+                let shrinkHeight = heightDiff - heightBorderGap;
+                this.getCanvasContentElement().style.minHeight = `${canvasRect.height - shrinkHeight}px`;
+            } else if(this.getCanvasContentElement().style.minHeight) {
+                // reset normal canvas height if auto height set
+                this.getCanvasContentElement().style.minHeight = null;
             }
         }
     }
