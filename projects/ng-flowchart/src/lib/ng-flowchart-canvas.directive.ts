@@ -76,6 +76,10 @@ export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewI
 
     }
 
+    get options() {
+        return this._options
+    }
+
     @Input('disabled')
     @HostBinding('attr.disabled')
     set disabled(val: boolean) {
