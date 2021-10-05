@@ -1,7 +1,7 @@
 import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
 import { NgFlowchartStepRegistry } from 'projects/ng-flowchart/src/lib/ng-flowchart-step-registry.service';
-import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src/public-api';
+import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src';
 import { CustomStepComponent } from './custom-step/custom-step.component';
 import { RouteStepComponent } from './custom-step/route-step/route-step.component';
 import { FormStepComponent, MyForm } from './form-step/form-step.component';
