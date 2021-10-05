@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NgFlowchartStepComponent } from 'projects/ng-flowchart/src/lib/ng-flowchart-step/ng-flowchart-step.component';
-import { NgFlowchart } from 'projects/ng-flowchart/src/public-api';
+import { NgFlowchart } from 'projects/ng-flowchart/src';
 
 @Component({
   selector: 'app-route-step',
