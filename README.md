@@ -383,6 +383,16 @@ onDropStep(dropEvent: NgFlowchart.DropEvent) {
 
   Called whenever an existing canvas step fails to move
 
+
+- #### **beforeDeleteStep?**: (step: NgFlowchartStepComponent) => void;
+
+  Called when the delete method has been called on the step
+
+- #### **afterDeleteStep?**: (step: NgFlowchartStepComponent) => void;
+
+  Called after the delete method has run on the step. If you need to access
+  step children or parents, use beforeDeleteStep
+
 - #### **onDropStep?**: (drop: DropEvent) => void;
   Called whenever a new step or existing step is successfully dropped on the canvas
 

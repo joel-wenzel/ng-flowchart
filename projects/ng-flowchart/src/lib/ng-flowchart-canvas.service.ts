@@ -5,7 +5,6 @@ import { CanvasRendererService } from './services/canvas-renderer.service';
 import { DropDataService as DragService } from './services/dropdata.service';
 import { OptionsService } from './services/options.service';
 import { StepManagerService } from './services/step-manager.service';
-import { first } from 'rxjs/operators';
 
 type DropResponse = {
   added: boolean;
@@ -67,7 +66,7 @@ export class NgFlowchartCanvasService {
 
   constructor(
     private drag: DragService,
-    private options: OptionsService,
+    public options: OptionsService,
     private renderer: CanvasRendererService,
     private stepmanager: StepManagerService
   ) {}

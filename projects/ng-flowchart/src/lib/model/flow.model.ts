@@ -159,6 +159,17 @@ export namespace NgFlowchart {
         onDropStep?: (drop: DropEvent) => void;
 
         /**
+         * Called when the delete method has been called on the step
+         */
+        beforeDeleteStep?: (step: NgFlowchartStepComponent) => void;
+
+        /**
+         * Called after the delete method has run on the step. If you need to access
+         * step children or parents, use beforeDeleteStep
+         */
+        afterDeleteStep?: (step: NgFlowchartStepComponent) => void;
+
+        /**
          * Called when a new step fails to drop on the canvas
          */
         onDropError?: (drop: DropError) => void;
@@ -176,7 +187,7 @@ export namespace NgFlowchart {
         /**
          * Called after the canvas completes a re-render
          */
-        afterRender?: () => void
+        afterRender?: () => void        
 
         /**
          * Called after the canvas has been scaled
