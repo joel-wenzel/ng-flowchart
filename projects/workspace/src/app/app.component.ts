@@ -88,6 +88,8 @@ export class AppComponent {
 
     this.callbacks.onDropError = this.onDropError;
     this.callbacks.onMoveError = this.onMoveError;
+    this.callbacks.afterDeleteStep = this.afterDeleteStep;
+    this.callbacks.beforeDeleteStep = this.beforeDeleteStep;
   }
 
   ngAfterViewInit() {
@@ -105,6 +107,14 @@ export class AppComponent {
 
   onMoveError(error: NgFlowchart.MoveError) {
     console.log(error);
+  }
+
+  beforeDeleteStep(step) {
+    console.log(JSON.stringify(step.children))
+  }
+
+  afterDeleteStep(step) {
+    console.log(JSON.stringify(step.children))
   }
 
   showUpload() {
