@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewChildren } from '@angular/core';
-import { NgFlowchart, NgFlowchartCanvasDirective, NgFlowchartStepComponent } from 'projects/ng-flowchart/src';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, ViewChildren } from '@angular/core';
+import { NgFlowchart, NgFlowchartCanvasDirective, NgFlowchartStepComponent } from 'projects/ng-flowchart/src/public-api';
 
 export type NestedData = {
   nested: any
@@ -10,7 +10,7 @@ export type NestedData = {
   templateUrl: './nested-flow.component.html',
   styleUrls: ['./nested-flow.component.scss']
 })
-export class NestedFlowComponent extends NgFlowchartStepComponent implements OnInit, OnDestroy, AfterViewInit {
+export class NestedFlowComponent extends NgFlowchartStepComponent implements OnInit, OnDestroy {
 
   @ViewChild(NgFlowchartCanvasDirective)
   nestedCanvas: NgFlowchartCanvasDirective;
@@ -20,17 +20,9 @@ export class NestedFlowComponent extends NgFlowchartStepComponent implements OnI
 
   callbacks: NgFlowchart.Callbacks = {
     afterRender: () => {
-      this.canvas.reRender(true)
+      this.canvas.reRender()
     }
   };
-
-  options: NgFlowchart.Options = {
-    stepGap: 40,
-    rootPosition: 'TOP_CENTER',
-    zoom: {
-      mode: 'DISABLED'
-    }
-  }
 
 
   constructor() {
@@ -38,24 +30,11 @@ export class NestedFlowComponent extends NgFlowchartStepComponent implements OnI
   }
 
   ngOnInit(): void {
-    super.ngOnInit();
-  }
-
-  ngAfterViewInit(): void {
-    super.ngAfterViewInit();
-    this.addAlternateClass();
+    super.ngOnInit()
   }
 
   ngOnDestroy() {
     this.nestedCanvas?.getFlow().clear()
-  }
-
-  // add nested-alt class to alternate nested flows for better visibility
-  addAlternateClass(): void {  
-    const parentCanvasWrapperClasses = (this.canvas.viewContainer.element.nativeElement as HTMLElement).parentElement.classList;
-    if(parentCanvasWrapperClasses.contains('nested-flow-step') && !parentCanvasWrapperClasses.contains('nested-alt')){
-      this.nativeElement.classList.add('nested-alt');
-    }
   }
 
   shouldEvalDropHover(coords: number[], stepToDrop: NgFlowchart.Step): boolean {

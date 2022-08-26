@@ -10,10 +10,6 @@ import { NgFlowchartStepComponent } from './ng-flowchart-step/ng-flowchart-step.
   imports: [
     CommonModule
   ],
-  exports: [NgFlowchartCanvasDirective, NgFlowchartStepDirective, NgFlowchartStepComponent, NgFlowchartArrowComponent],
-  entryComponents: [
-    NgFlowchartStepComponent,
-    NgFlowchartArrowComponent
-  ]
+  exports: [NgFlowchartCanvasDirective, NgFlowchartStepDirective, NgFlowchartStepComponent, NgFlowchartArrowComponent]
 })
 export class NgFlowchartModule { }

@@ -10,7 +10,7 @@ export type MyForm = {
   templateUrl: './form-step.component.html',
   styleUrls: ['./form-step.component.scss']
 })
-export class FormStepComponent extends NgFlowchartStepComponent<MyForm> implements OnInit {
+export class FormStepComponent<MyForm> extends NgFlowchartStepComponent implements OnInit {
 
   constructor() { 
     super()

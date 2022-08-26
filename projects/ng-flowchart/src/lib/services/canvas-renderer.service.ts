@@ -80,9 +80,6 @@ export class CanvasRendererService {
 
         //if we have more than 1 child, we want half the extent on the left and half on the right
         let leftXTree = rootXCenter - (totalTreeWidth / 2);
-        
-        // dont allow it to go negative since you cant scroll that way
-        leftXTree = Math.max(0, leftXTree)
 
         rootNode.children.forEach(child => {
 
@@ -109,16 +106,8 @@ export class CanvasRendererService {
     }
 
 
-    public render(flow: CanvasFlow, pretty?: boolean, skipAdjustDimensions = false) {
+    public render(flow: CanvasFlow, pretty?: boolean) {
         if (!flow.hasRoot()) {
-            if (this.options.options.zoom.mode === 'DISABLED') {
-                this.resetAdjustDimensions();
-                // Trigger afterRender to allow nested canvas to redraw parent canvas.
-                // Not sure if this scenario should also trigger beforeRender.
-                if (this.options.callbacks?.afterRender) {
-                    this.options.callbacks.afterRender()
-                }
-            }
             return;
         }
 
@@ -132,25 +121,46 @@ export class CanvasRendererService {
             this.setRootPosition(flow.rootStep, null);
         }
         this.renderChildTree(flow.rootStep, flow.rootStep.getCurrentRect(canvasRect), canvasRect);
-        
-        if (!skipAdjustDimensions && this.options.options.zoom.mode === 'DISABLED') {
-            this.adjustDimensions(flow, canvasRect);
-        }
+
+        this.adjustDimensions(flow, canvasRect);
 
         if (this.options.callbacks?.afterRender) {
             this.options.callbacks.afterRender()
         }
     }
 
-    private resetAdjustDimensions(): void {
-        // reset canvas auto sizing to original size if empty
-        if (this.viewContainer) {
-            const canvasWrapper = this.getCanvasContentElement();
-            canvasWrapper.style.minWidth = null;
-            canvasWrapper.style.minHeight = null;
-        }
+    private adjustDimensions(flow: CanvasFlow, canvasRect: DOMRect) {
+
+        // let maxRight = 0;
+        // let maxBottom = 0;
+
+        // //TODO this can be better
+        // flow.steps.forEach(
+        //     ele => {
+        //         let rect = ele.getCurrentRect(canvasRect);
+        //         maxRight = Math.max(rect.right, maxRight);
+        //         maxBottom = Math.max(rect.bottom, maxBottom);
+        //     }
+        // );
+
+
+
+        // const widthDiff = canvasRect.width - (maxRight - canvasRect.left);
+        // if (widthDiff < 100) {
+        //     this.getCanvasContentElement().style.minWidth = `${canvasRect.width + 200}px`;
+        //     if (this.options.options.centerOnResize) {
+        //         //if we add width, rerender canvas in the middle
+        //         this.render(flow, true);
+        //     }
+
+        // }
+
+        // const heightDiff = canvasRect.height - (maxBottom - canvasRect.top);
+        // if (heightDiff < 100) {
+        //     this.getCanvasContentElement().style.minHeight = `${canvasRect.height + 200}px`;
+        // }
+
     }
-           
 
     private findDropLocationForHover(absMouseXY: number[], targetStep: NgFlowchartStepComponent, stepToDrop: NgFlowchart.Step): DropProximity | 'deadzone' | null {
 
@@ -205,77 +215,6 @@ export class CanvasRendererService {
         }
 
         return result;
-    }
-
-    private adjustDimensions(flow: CanvasFlow, canvasRect: DOMRect): void {
-        let maxRight = 0;
-        let maxBottom = 0;
-
-        //TODO this can be better
-        flow.steps.forEach(
-            ele => {
-                let rect = ele.getCurrentRect(canvasRect);
-                maxRight = Math.max(rect.right, maxRight);
-                maxBottom = Math.max(rect.bottom, maxBottom);
-            }
-        );
-
-        const widthBorderGap = 100;
-        const widthDiff = canvasRect.width - (maxRight - canvasRect.left);
-        if (widthDiff < widthBorderGap) {
-            let growWidth = widthBorderGap;
-            if(widthDiff < 0) {
-                growWidth += Math.abs(widthDiff);
-            }
-            this.getCanvasContentElement().style.minWidth = `${canvasRect.width + growWidth}px`;
-            if (this.options.options.centerOnResize) {
-                this.render(flow, true, true);
-            }
-        } else if(widthDiff > widthBorderGap) {
-            var totalTreeWidth = this.getTotalTreeWidth(flow);
-            if(this.isNestedCanvas()) {
-                this.getCanvasContentElement().style.minWidth = `${totalTreeWidth + widthBorderGap}px`;
-                if (this.options.options.centerOnResize) {
-                    this.render(flow, true, true);
-                }
-            } else if(this.getCanvasContentElement().style.minWidth) {
-                // reset normal canvas width if auto width set
-                this.getCanvasContentElement().style.minWidth = null;
-                if (this.options.options.centerOnResize) {
-                    this.render(flow, true, true);
-                }
-            }
-        }
-        
-        const heightBorderGap = 50;
-        const heightDiff = canvasRect.height - (maxBottom - canvasRect.top);
-        if (heightDiff < heightBorderGap) {
-            let growHeight = heightBorderGap;
-            if(heightDiff < 0) {
-                growHeight += Math.abs(heightDiff);
-            }
-            this.getCanvasContentElement().style.minHeight = `${canvasRect.height + growHeight}px`;
-        } else if(heightDiff > heightBorderGap){
-            if(this.isNestedCanvas()) {
-                let shrinkHeight = heightDiff - heightBorderGap;
-                this.getCanvasContentElement().style.minHeight = `${canvasRect.height - shrinkHeight}px`;
-            } else if(this.getCanvasContentElement().style.minHeight) {
-                // reset normal canvas height if auto height set
-                this.getCanvasContentElement().style.minHeight = null;
-            }
-        }
-    }
-
-    private getTotalTreeWidth(flow: CanvasFlow): number {
-        let totalTreeWidth = 0;
-        const rootWidth = flow.rootStep.getCurrentRect().width / this.scale;
-        flow.rootStep.children.forEach(child => {
-            let totalChildWidth = child.getNodeTreeWidth(this.getStepGap());
-            totalTreeWidth += totalChildWidth / this.scale;
-        });
-        totalTreeWidth += (flow.rootStep.children.length - 1) * this.getStepGap();
-        // total tree width doesn't give root width
-        return Math.max(totalTreeWidth, rootWidth);
     }
 
     private findBestMatchForSteps(dragStep: NgFlowchart.Step, event: DragEvent, steps: ReadonlyArray<NgFlowchartStepComponent>): DropProximity | null {
@@ -402,16 +341,6 @@ export class CanvasRendererService {
         const canvas = this.viewContainer.element.nativeElement as HTMLElement;
         let canvasContent = canvas.getElementsByClassName(CONSTANTS.CANVAS_CONTENT_CLASS).item(0);
         return canvasContent as HTMLElement;
-    }
-
-    private isNestedCanvas(): boolean {
-        if (this.viewContainer) {
-            const canvasWrapper = (this.viewContainer.element.nativeElement as HTMLElement).parentElement;
-            if (canvasWrapper) {
-                return canvasWrapper.classList.contains('ngflowchart-step-wrapper');
-            }
-        }
-        return false;
     }
 
     public resetScale(flow: CanvasFlow) {

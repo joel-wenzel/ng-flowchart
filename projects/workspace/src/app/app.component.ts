@@ -1,9 +1,8 @@
 import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
 import { NgFlowchartStepRegistry } from 'projects/ng-flowchart/src/lib/ng-flowchart-step-registry.service';
-import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src';
+import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src/public-api';
 import { CustomStepComponent } from './custom-step/custom-step.component';
-import { RouteStepComponent } from './custom-step/route-step/route-step.component';
 import { FormStepComponent, MyForm } from './form-step/form-step.component';
 import { NestedFlowComponent } from './nested-flow/nested-flow.component';
 
@@ -19,10 +18,8 @@ export class AppComponent {
   options: NgFlowchart.Options = {
     stepGap: 40,
     rootPosition: 'TOP_CENTER',
-    zoom: {
-      mode: 'DISABLED'
-    }
-  }
+    zoom: { mode: 'DISABLED', defaultStep: .1 }
+  };
 
   @ViewChild('normalStep')
   normalStepTemplate: TemplateRef<any>;
@@ -42,7 +39,7 @@ export class AppComponent {
         }
       }
     }
-  ]
+  ];
 
   customOps = [
     {
@@ -74,7 +71,7 @@ export class AppComponent {
       }
 
     }
-  ]
+  ];
 
 
 
@@ -88,8 +85,6 @@ export class AppComponent {
 
     this.callbacks.onDropError = this.onDropError;
     this.callbacks.onMoveError = this.onMoveError;
-    this.callbacks.afterDeleteStep = this.afterDeleteStep;
-    this.callbacks.beforeDeleteStep = this.beforeDeleteStep;
   }
 
   ngAfterViewInit() {
@@ -98,7 +93,6 @@ export class AppComponent {
     this.stepRegistry.registerStep('router', CustomStepComponent);
     this.stepRegistry.registerStep('nested-flow', NestedFlowComponent);
     this.stepRegistry.registerStep('form-step', FormStepComponent);
-    this.stepRegistry.registerStep('route-step', RouteStepComponent);
   }
 
   onDropError(error: NgFlowchart.DropError) {
@@ -109,23 +103,15 @@ export class AppComponent {
     console.log(error);
   }
 
-  beforeDeleteStep(step) {
-    console.log(JSON.stringify(step.children))
-  }
-
-  afterDeleteStep(step) {
-    console.log(JSON.stringify(step.children))
-  }
-
   showUpload() {
     this.canvas.getFlow().upload(this.sampleJson);
   }
 
   showFlowData() {
 
-    let json = this.canvas.getFlow().toJSON(4);
+    const json = this.canvas.getFlow().toJSON(4);
 
-    var x = window.open();
+    const x = window.open();
     x.document.open();
     x.document.write('<html><head><title>Flowchart Json</title></head><body><pre>' + json + '</pre></body></html>');
     x.document.close();
@@ -148,7 +134,7 @@ export class AppComponent {
     this.options = {
       ...this.options,
       isSequential: event.target.checked
-    }
+    };
   }
 
   onDelete(id) {
