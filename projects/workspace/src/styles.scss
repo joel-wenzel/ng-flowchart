@@ -36,3 +36,9 @@ body {
   min-width: 200px;
   min-height: 100px;
 }
+
+// TODO move this to the library
+.ngflowchart-canvas-content.scaling .ngflowchart-step-wrapper,
+.ngflowchart-canvas-content.scaling svg {
+  transition: none !important;
+}

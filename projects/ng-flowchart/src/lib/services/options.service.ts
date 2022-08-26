@@ -5,7 +5,7 @@ import { NgFlowchart } from '../model/flow.model';
 export class OptionsService {
 
     private _options: NgFlowchart.Options;
-    private _callbacks: NgFlowchart.Callbacks = {};
+    private _callbacks: NgFlowchart.Callbacks;
 
     constructor() {
         this._options = new NgFlowchart.Options();

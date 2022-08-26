@@ -174,9 +174,7 @@ export class NgFlowchartStepComponent<T = any> {
   destroy(recursive: boolean = true, checkCallbacks: boolean = true): boolean {
 
     if (!checkCallbacks || this.canDeleteStep()) {
-      this.canvas.options.callbacks.beforeDeleteStep && 
-      this.canvas.options.callbacks.beforeDeleteStep(this)
-      
+
       let parentIndex;
       if (this._parent) {
         parentIndex = this._parent.removeChild(this);
@@ -185,9 +183,6 @@ export class NgFlowchartStepComponent<T = any> {
       this.destroy0(parentIndex, recursive);
 
       this.canvas.reRender();
-
-      this.canvas.options.callbacks.afterDeleteStep && 
-      this.canvas.options.callbacks.afterDeleteStep(this)
 
       return true;
     }
@@ -348,8 +343,8 @@ export class NgFlowchartStepComponent<T = any> {
       return;
     }
 
-    let adjustedX = Math.max(pos[0] - (offsetCenter ? this.nativeElement.offsetWidth / 2 : 0), 0);
-    let adjustedY = Math.max(pos[1] - (offsetCenter ? this.nativeElement.offsetHeight / 2 : 0), 0);
+    let adjustedX = pos[0] - (offsetCenter ? this.nativeElement.offsetWidth / 2 : 0);
+    let adjustedY = pos[1] - (offsetCenter ? this.nativeElement.offsetHeight / 2 : 0);
 
     this.nativeElement.style.left = `${adjustedX}px`;
     this.nativeElement.style.top = `${adjustedY}px`;
@@ -358,9 +353,9 @@ export class NgFlowchartStepComponent<T = any> {
   }
 
   zaddChild0(newChild: NgFlowchartStepComponent): boolean {
-    let oldChildIndex = null
+
     if (newChild._parent) {
-      oldChildIndex = newChild._parent.removeChild(newChild);
+      newChild._parent.removeChild(newChild);
     }
 
     if (this.hasChildren()) {
@@ -368,7 +363,6 @@ export class NgFlowchartStepComponent<T = any> {
         //if we have children and the child has children we need to confirm the child doesnt have multiple children at any point
         let newChildLastChild = newChild.findLastSingleChild();
         if (!newChildLastChild) {
-          newChild._parent.zaddChildSibling0(newChild, oldChildIndex)
           console.error('Invalid move. A node cannot have multiple parents');
           return false;
         }
@@ -419,6 +413,8 @@ export class NgFlowchartStepComponent<T = any> {
   // PRIVATE IMPL
 
   private destroy0(parentIndex, recursive: boolean = true) {
+
+    //this.compRef.instance.nativeElement.remove()
 
     this.compRef.destroy();
     

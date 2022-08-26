@@ -5,11 +5,7 @@ import { CanvasRendererService } from './services/canvas-renderer.service';
 import { DropDataService as DragService } from './services/dropdata.service';
 import { OptionsService } from './services/options.service';
 import { StepManagerService } from './services/step-manager.service';
-
-type DropResponse = {
-  added: boolean,
-  prettyRender: boolean
-}
+import { first } from 'rxjs/operators'
 
 export class CanvasFlow {
   rootStep: NgFlowchartStepComponent;
@@ -65,7 +61,7 @@ export class NgFlowchartCanvasService {
 
   constructor(
     private drag: DragService,
-    public options: OptionsService,
+    private options: OptionsService,
     private renderer: CanvasRendererService,
     private stepmanager: StepManagerService
   ) {
@@ -94,18 +90,14 @@ export class NgFlowchartCanvasService {
 
     let step: NgFlowchartStepComponent = this.flow.steps.find(step => step.nativeElement.id === id);
     let error = {};
-    if(!step) {
-      // step cannot be moved if not in this canvas
-      return;
-    }
     if (step.canDrop(this.currentDropTarget, error)) {
       if (step.isRootElement()) {
         this.renderer.updatePosition(step, drag);
         this.renderer.render(this.flow);
       }
       else if (this.currentDropTarget) {
-        const response = this.addStepToFlow(step, this.currentDropTarget, true);
-        this.renderer.render(this.flow, response.prettyRender);
+        this.addStepToFlow(step, this.currentDropTarget, true);
+        this.renderer.render(this.flow);
       }
       else {
         this.moveError(step, this.noParentError);
@@ -145,10 +137,6 @@ export class NgFlowchartCanvasService {
         this.setRoot(componentRef.instance);
       }
       else {
-         // if root is replaced by another step, rerender root to proper position
-         if(dropTarget.step.isRootElement() && dropTarget.position === 'ABOVE') {
-          this.renderer.renderRoot(componentRef, drag);
-        }
         this.addChildStep(componentRef, dropTarget);
       }
 
@@ -234,8 +222,8 @@ export class NgFlowchartCanvasService {
 
   addChildStep(componentRef: ComponentRef<NgFlowchartStepComponent>, dropTarget: NgFlowchart.DropTarget) {
     this.addToCanvas(componentRef);
-    const response = this.addStepToFlow(componentRef.instance, dropTarget);
-    this.renderer.render(this.flow, response.prettyRender);
+    this.addStepToFlow(componentRef.instance, dropTarget);
+    this.renderer.render(this.flow);
   }
 
   addToCanvas(componentRef: ComponentRef<NgFlowchartStepComponent>) {
@@ -252,11 +240,6 @@ export class NgFlowchartCanvasService {
   }
 
   private async uploadNode(node: any, parentNode?: NgFlowchartStepComponent): Promise<NgFlowchartStepComponent> {
-    if(!node){
-      // no node to upload when uploading empty nested flow
-      return;
-    }
-
     let comp = await this.createStepFromType(node.id, node.type, node.data);
     if (!parentNode) {
       this.setRoot(comp.instance);
@@ -296,45 +279,38 @@ export class NgFlowchartCanvasService {
     this.flow.addStep(step);
   }
 
-  private addStepToFlow(step: NgFlowchartStepComponent, dropTarget: NgFlowchart.DropTarget, isMove = false): DropResponse {
+  private addStepToFlow(step: NgFlowchartStepComponent, dropTarget: NgFlowchart.DropTarget, isMove = false): boolean {
 
-    let response = {
-        added: false,
-        prettyRender: false,
-    };
+    let added = false;
 
     switch (dropTarget.position) {
       case 'ABOVE':
-        response = this.placeStepAbove(step, dropTarget.step);
+        added = this.placeStepAbove(step, dropTarget.step);
         break;
       case 'BELOW':
-        response = this.placeStepBelow(step, dropTarget.step);
-        console.log(response, [...dropTarget.step.children])
+        added = this.placeStepBelow(step, dropTarget.step);
         break;
       case 'LEFT':
-        response = this.placeStepAdjacent(step, dropTarget.step, true);
+        added = this.placeStepAdjacent(step, dropTarget.step, true);
         break;
       case 'RIGHT':
-        response = this.placeStepAdjacent(step, dropTarget.step, false);
+        added = this.placeStepAdjacent(step, dropTarget.step, false);
         break;
       default:
         break;
     }
 
-    if (!isMove && response.added) {
+    if (!isMove && added) {
       this.flow.addStep(step);
     }
-    return response;
+    return added;
   }
 
-  private placeStepBelow(newStep: NgFlowchartStepComponent, parentStep: NgFlowchartStepComponent): DropResponse {
-    return {
-      added: parentStep.zaddChild0(newStep),
-      prettyRender: false,
-    }
+  private placeStepBelow(newStep: NgFlowchartStepComponent, parentStep: NgFlowchartStepComponent): boolean {
+    return parentStep.zaddChild0(newStep)
   }
 
-  private placeStepAdjacent(newStep: NgFlowchartStepComponent, siblingStep: NgFlowchartStepComponent, isLeft: boolean = true): DropResponse {
+  private placeStepAdjacent(newStep: NgFlowchartStepComponent, siblingStep: NgFlowchartStepComponent, isLeft: boolean = true) {
     if (siblingStep.parent) {
       //find the adjacent steps index in the parents child array
       const adjacentIndex = siblingStep.parent.children.findIndex(child => child.nativeElement.id == siblingStep.nativeElement.id);
@@ -342,41 +318,25 @@ export class NgFlowchartCanvasService {
     }
     else {
       console.warn('Parallel actions must have a common parent');
-      return {
-        added: false,
-        prettyRender: false,
-      };
+      return false;
     }
-    return {
-      added: true,
-      prettyRender: false,
-    };
+    return true;
   }
 
-  private placeStepAbove(newStep: NgFlowchartStepComponent, childStep: NgFlowchartStepComponent): DropResponse {
-    let prettyRender = false
+  private placeStepAbove(newStep: NgFlowchartStepComponent, childStep: NgFlowchartStepComponent) {
+
     let newParent = childStep.parent;
     if (newParent) {
       //we want to remove child and insert our newStep at the same index
       let index = newParent.removeChild(childStep);
       newStep.zaddChild0(childStep);
-      newParent.zaddChild0(newStep);
+      //adjParent.addChild(newStep, index);
     }
     else { // new root node
-      newStep.parent?.removeChild(newStep)
-      newStep.setParent(null, true)
-      
-      //if the new step was a direct child of the root step, we need to break that connection
-      childStep.removeChild(newStep)
       this.setRoot(newStep);
-
-      prettyRender = true
-      
+      newStep.zaddChild0(childStep);
     }
-    return {
-      added: true,
-      prettyRender
-    };
+    return true;
   }
 
   private dropError(error: NgFlowchart.ErrorMessage) {
