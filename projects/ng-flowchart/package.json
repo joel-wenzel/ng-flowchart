@@ -1,6 +1,6 @@
 {
-  "name": "@joelwenzel/ng-flowchart",
-  "version": "1.0.2-beta",
+  "name": "@modoro/ng-flowchart",
+  "version": "1.1.5",
   "peerDependencies": {
     "@angular/common": "^10.2.4",
     "@angular/core": "^10.2.4"
@@ -9,11 +9,21 @@
     "tslib": "^2.0.0"
   },
   "repository": {
-    "url": "https://github.com/joel-wenzel/ng-flowchart/tree/master/projects/ng-flowchart"
+    "url": "https://github.com/modoro-digital/ng-flowchart/tree/v1.1.0/projects/ng-flowchart"
   },
   "ngPackage": {
     "lib": {
       "entryFile": "src/public-api.ts"
     }
-  }
+  },
+  "description": "Flow chart",
+  "main": "karma.conf.js",
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json"
+  },
+  "keywords": [
+    "flow"
+  ],
+  "author": "modoro",
+  "license": "ISC"
 }
