@@ -1,6 +1,6 @@
 {
   "name": "@modoro/ng-flowchart",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "peerDependencies": {
     "@angular/common": "^10.2.4",
     "@angular/core": "^10.2.4"
@@ -9,7 +9,7 @@
     "tslib": "^2.0.0"
   },
   "repository": {
-    "url": "https://github.com/modoro-digital/ng-flowchart/tree/v1.1.0/projects/ng-flowchart"
+    "url": "https://github.com/modoro-digital/ng-flowchart/tree/master/projects/ng-flowchart"
   },
   "ngPackage": {
     "lib": {
