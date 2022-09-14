@@ -16,12 +16,14 @@ export class CustomStepComponent extends NgFlowchartStepComponent {
   }
 
   canDrop(dropEvent: NgFlowchart.DropTarget): boolean {
+
     return true;
   }
 
   canDeleteStep(): boolean {
     return true;
   }
+
 
   getDropPositionsForStep(pendingStep: NgFlowchart.PendingStep): NgFlowchart.DropPosition[] {
     if (pendingStep.template !== RouteStepComponent) {
@@ -33,12 +35,12 @@ export class CustomStepComponent extends NgFlowchartStepComponent {
   }
 
   onAddRoute() {
-    let route = {
+    const route = {
       name: 'New Route',
       condition: '',
       sequence: null
-    }
-    let index = this.routes.push(route);
+    };
+    const index = this.routes.push(route);
     route.sequence = index;
 
     this.addChild({
@@ -48,11 +50,13 @@ export class CustomStepComponent extends NgFlowchartStepComponent {
     }, {
       sibling: true
     });
+    this.canvas.reRender(true);
   }
 
   delete() {
-    //recursively delete
+    // recursively delete
     this.destroy(true);
   }
+
 
 }

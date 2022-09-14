@@ -11,10 +11,10 @@ export type AddChildOptions = {
    * */
   sibling?: boolean,
   /** The index of the child. Only used when sibling is true.
-   * Defaults to the end of the child array. 
+   * Defaults to the end of the child array.
    */
   index?: number
-}
+};
 
 @Component({
   selector: 'ng-flowchart-step',
@@ -24,27 +24,37 @@ export type AddChildOptions = {
 })
 export class NgFlowchartStepComponent<T = any> {
 
-  @HostListener('dragstart', ['$event'])
-  onMoveStart(event: DragEvent) {
-    if (this.canvas.disabled) { return; }
-    this.hideTree();
-    event.dataTransfer.setData('type', 'FROM_CANVAS');
-    event.dataTransfer.setData('id', this.nativeElement.id);
+  constructor() {
+    this._children = [];
+  }
 
-
-    this.drop.dragStep = {
-      type: this.type,
-      data: this.data,
-      instance: this
+  get id() {
+    if (this._id == null) {
+      this._id = 's' + Date.now();
     }
+    return this._id;
   }
 
-  @HostListener('dragend', ['$event'])
-  onMoveEnd(event: DragEvent) {
-    this.showTree();
+  get currentPosition() {
+    return this._currentPosition;
   }
 
-  //could potentially try to make this abstract
+  /** Array of children steps for this step */
+  get children() {
+    return this._children;
+  }
+
+  /** The parent step of this step */
+  get parent() {
+    return this._parent;
+  }
+
+  /** The native HTMLElement of this step */
+  get nativeElement(): HTMLElement {
+    return this.view?.nativeElement;
+  }
+
+  // could potentially try to make this abstract
   @ViewChild('canvasContent')
   protected view: ElementRef;
 
@@ -70,7 +80,7 @@ export class NgFlowchartStepComponent<T = any> {
   private _id: any;
   private _currentPosition = [0, 0];
 
-  //only used if something tries to set the position before view has been initialized
+  // only used if something tries to set the position before view has been initialized
   private _initPosition;
   private _isHidden = false;
   private _parent: NgFlowchartStepComponent;
@@ -81,8 +91,24 @@ export class NgFlowchartStepComponent<T = any> {
   private viewContainer: ViewContainerRef;
   private compFactory: ComponentFactoryResolver;
 
-  constructor() {
-    this._children = [];
+  @HostListener('dragstart', ['$event'])
+  onMoveStart(event: DragEvent) {
+    if (this.canvas.disabled) { return; }
+    this.hideTree();
+    event.dataTransfer.setData('type', 'FROM_CANVAS');
+    event.dataTransfer.setData('id', this.nativeElement.id);
+
+
+    this.drop.dragStep = {
+      type: this.type,
+      data: this.data,
+      instance: this
+    };
+  }
+
+  @HostListener('dragend', ['$event'])
+  onMoveEnd(event: DragEvent) {
+    this.showTree();
   }
 
   init(drop, viewContainer, compFactory) {
@@ -100,7 +126,7 @@ export class NgFlowchartStepComponent<T = any> {
   }
 
   shouldEvalDropHover(coords: number[], stepToDrop: NgFlowchart.Step): boolean {
-    return true
+    return true;
   }
 
   async onUpload(data: T) { }
@@ -115,7 +141,7 @@ export class NgFlowchartStepComponent<T = any> {
 
   ngAfterViewInit() {
     if (!this.nativeElement) {
-      throw 'Missing canvasContent ViewChild. Be sure to add #canvasContent to your root html element.'
+      throw new Error('Missing canvasContent ViewChild. Be sure to add #canvasContent to your root html element.');
     }
 
 
@@ -126,31 +152,20 @@ export class NgFlowchartStepComponent<T = any> {
       this.zsetPosition(this._initPosition);
     }
 
-    //force id creation if not already there
+    // force id creation if not already there
     this.nativeElement.id = this.id;
 
     this.viewInit.emit();
   }
 
-  get id() {
-    if (this._id == null) {
-      this._id = 's' + Date.now();
-    }
-    return this._id;
-  }
-
-  get currentPosition() {
-    return this._currentPosition;
-  }
-
   /**
    * Creates and adds a child to this step
    * @param template The template or component type to create
-   * @param options Add options 
+   * @param options Add options
    */
   async addChild(pending: NgFlowchart.PendingStep, options: AddChildOptions): Promise<NgFlowchartStepComponent | null> {
 
-    let componentRef = await this.canvas.createStep(pending);
+    const componentRef = await this.canvas.createStep(pending);
     this.canvas.addToCanvas(componentRef);
     if (options?.sibling) {
       this.zaddChildSibling0(componentRef.instance, options?.index);
@@ -168,8 +183,8 @@ export class NgFlowchartStepComponent<T = any> {
 
   /**
    * Destroys this step component and updates all necessary child and parent relationships
-   * @param recursive 
-   * @param checkCallbacks 
+   * @param recursive
+   * @param checkCallbacks
    */
   destroy(recursive: boolean = true, checkCallbacks: boolean = true): boolean {
 
@@ -199,7 +214,7 @@ export class NgFlowchartStepComponent<T = any> {
     if (!this.children) {
       return -1;
     }
-    const i = this.children.findIndex(child => child.id == childToRemove.id);
+    const i = this.children.findIndex(child => child.id === childToRemove.id);
     if (i > -1) {
       this.children.splice(i, 1);
     }
@@ -256,16 +271,6 @@ export class NgFlowchartStepComponent<T = any> {
     return this.children && this.children.length >= count;
   }
 
-  /** Array of children steps for this step */
-  get children() {
-    return this._children;
-  }
-
-  /** The parent step of this step */
-  get parent() {
-    return this._parent;
-  }
-
   /**
    * Returns the total width extent (in pixels) of this node tree
    * @param stepGap The current step gap for the flow canvas
@@ -279,7 +284,7 @@ export class NgFlowchartStepComponent<T = any> {
 
     let childWidth = this._children.reduce((childTreeWidth, child) => {
       return childTreeWidth += child.getNodeTreeWidth(stepGap);
-    }, 0)
+    }, 0);
 
     childWidth += stepGap * (this._children.length - 1);
 
@@ -294,12 +299,12 @@ export class NgFlowchartStepComponent<T = any> {
   }
 
   /**
-   * Return current rect of this step. The position can be animated so getBoundingClientRect cannot 
+   * Return current rect of this step. The position can be animated so getBoundingClientRect cannot
    * be reliable for positions
    * @param canvasRect Optional canvasRect to provide to offset the values
    */
   getCurrentRect(canvasRect?: DOMRect): Partial<DOMRect> {
-    let clientRect = this.nativeElement.getBoundingClientRect();
+    const clientRect = this.nativeElement.getBoundingClientRect();
 
     return {
       bottom: this._currentPosition[1] + clientRect.height + (canvasRect?.top || 0),
@@ -308,7 +313,7 @@ export class NgFlowchartStepComponent<T = any> {
       width: clientRect.width,
       right: this._currentPosition[0] + clientRect.width + (canvasRect?.left || 0),
       top: this._currentPosition[1] + (canvasRect?.top || 0)
-    }
+    };
   }
 
   /**
@@ -320,14 +325,9 @@ export class NgFlowchartStepComponent<T = any> {
       type: this.type,
       data: this.data,
       children: this.hasChildren() ? this._children.map(child => {
-        return child.toJSON()
+        return child.toJSON();
       }) : []
-    }
-  }
-
-  /** The native HTMLElement of this step */
-  get nativeElement(): HTMLElement {
-    return this.view?.nativeElement;
+    };
   }
 
   setId(id) {
@@ -335,17 +335,15 @@ export class NgFlowchartStepComponent<T = any> {
   }
 
   zsetPosition(pos: number[], offsetCenter: boolean = false) {
-
     if (!this.view) {
       console.warn('Trying to set position before view init');
-      //save pos and set in after view init
+      // save pos and set in after view init
       this._initPosition = [...pos];
       return;
     }
 
-    let adjustedX = pos[0] - (offsetCenter ? this.nativeElement.offsetWidth / 2 : 0);
-    let adjustedY = pos[1] - (offsetCenter ? this.nativeElement.offsetHeight / 2 : 0);
-
+    const adjustedX = pos[0] - (offsetCenter ? this.nativeElement.offsetWidth / 2 : 0);
+    const adjustedY = pos[1] - (offsetCenter ? this.nativeElement.offsetHeight / 2 : 0);
     this.nativeElement.style.left = `${adjustedX}px`;
     this.nativeElement.style.top = `${adjustedY}px`;
 
@@ -360,22 +358,22 @@ export class NgFlowchartStepComponent<T = any> {
 
     if (this.hasChildren()) {
       if (newChild.hasChildren()) {
-        //if we have children and the child has children we need to confirm the child doesnt have multiple children at any point
-        let newChildLastChild = newChild.findLastSingleChild();
+        // if we have children and the child has children we need to confirm the child doesnt have multiple children at any point
+        const newChildLastChild = newChild.findLastSingleChild();
         if (!newChildLastChild) {
           console.error('Invalid move. A node cannot have multiple parents');
           return false;
         }
-        //move the this nodes children to last child of the step arg
+        // move the this nodes children to last child of the step arg
         newChildLastChild.setChildren(this._children.slice());
       }
       else {
-        //move adjacent's children to newStep
+        // move adjacent's children to newStep
         newChild.setChildren(this._children.slice());
       }
 
     }
-    //finally reset this nodes to children to the single new child
+    // finally reset this nodes to children to the single new child
     this.setChildren([newChild]);
     return true;
   }
@@ -395,7 +393,7 @@ export class NgFlowchartStepComponent<T = any> {
       this.children.splice(index, 0, child);
     }
 
-    //since we are adding a new child here, it is safe to force set the parent
+    // since we are adding a new child here, it is safe to force set the parent
     child.setParent(this, true);
   }
 
@@ -404,8 +402,8 @@ export class NgFlowchartStepComponent<T = any> {
       this.createArrow();
     }
     this.arrow.instance.position = {
-      start: start,
-      end: end
+      start,
+      end
     };
   }
 
@@ -414,12 +412,12 @@ export class NgFlowchartStepComponent<T = any> {
 
   private destroy0(parentIndex, recursive: boolean = true) {
 
-    //this.compRef.instance.nativeElement.remove()
+    // this.compRef.instance.nativeElement.remove()
 
     this.compRef.destroy();
-    
+
     // remove from master array
-    this.canvas.flow.removeStep(this)
+    this.canvas.flow.removeStep(this);
 
     if (this.isRootElement()) {
       this.canvas.flow.rootStep = null;
@@ -427,20 +425,20 @@ export class NgFlowchartStepComponent<T = any> {
 
     if (this.hasChildren()) {
 
-      //this was the root node
+      // this was the root node
       if (this.isRootElement()) {
 
         if (!recursive) {
 
-          let newRoot = this._children[0];
-          //set first child as new root
+          const newRoot = this._children[0];
+          // set first child as new root
           this.canvas.flow.rootStep = newRoot;
           newRoot.setParent(null, true);
 
-          //make previous siblings children of the new root
+          // make previous siblings children of the new root
           if (this.hasChildren(2)) {
             for (let i = 1; i < this._children.length; i++) {
-              let child = this._children[i];
+              const child = this._children[i];
               child.setParent(newRoot, true);
               newRoot._children.push(child);
             }
@@ -449,15 +447,15 @@ export class NgFlowchartStepComponent<T = any> {
 
       }
 
-      //update children
-      let length = this._children.length;
+      // update children
+      const length = this._children.length;
       for (let i = 0; i < length; i++) {
-        let child = this._children[i];
+        const child = this._children[i];
         if (recursive) {
           (child as NgFlowchartStepComponent).destroy0(null, true);
         }
 
-        //not the original root node
+        // not the original root node
         else if (!!this._parent) {
           this._parent._children.splice(i + parentIndex, 0, child);
           child.setParent(this._parent, true);
@@ -469,7 +467,7 @@ export class NgFlowchartStepComponent<T = any> {
   }
 
   private createArrow() {
-    const factory = this.compFactory.resolveComponentFactory(NgFlowchartArrowComponent)
+    const factory = this.compFactory.resolveComponentFactory(NgFlowchartArrowComponent);
     this.arrow = this.viewContainer.createComponent(factory);
     this.nativeElement.parentElement.appendChild(this.arrow.location.nativeElement);
   }
@@ -485,7 +483,7 @@ export class NgFlowchartStepComponent<T = any> {
     if (this.hasChildren()) {
       this._children.forEach(child => {
         child.hideTree();
-      })
+      });
     }
   }
 
@@ -500,28 +498,28 @@ export class NgFlowchartStepComponent<T = any> {
     if (this.hasChildren()) {
       this._children.forEach(child => {
         child.showTree();
-      })
+      });
     }
   }
 
   private findLastSingleChild() {
-    //two or more children means we have no single child
+    // two or more children means we have no single child
     if (this.hasChildren(2)) {
       return null;
     }
-    //if one child.. keep going down the tree until we find no children or 2 or more
+    // if one child.. keep going down the tree until we find no children or 2 or more
     else if (this.hasChildren()) {
       return this._children[0].findLastSingleChild();
     }
-    //if no children then this is the last single child
-    else return this;
+    // if no children then this is the last single child
+    else { return this; }
   }
 
   private setChildren(children: Array<NgFlowchartStepComponent>): void {
     this._children = children;
     this.children.forEach(child => {
       child.setParent(this, true);
-    })
+    });
   }
 
 }

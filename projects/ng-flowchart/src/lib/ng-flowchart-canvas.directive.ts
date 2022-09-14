@@ -19,50 +19,6 @@ import { StepManagerService } from './services/step-manager.service';
 })
 export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewInit {
 
-    @HostListener('drop', ['$event'])
-    protected onDrop(event: DragEvent) {
-        if (this._disabled) { return; }
-
-        // its possible multiple canvases exist so make sure we only move/drop on the closest one
-        const closestCanvasId = (event.target as HTMLElement).closest('.ngflowchart-canvas-content')?.id
-        if (this._id !== closestCanvasId) {
-            return;
-        }
-
-        const type = event.dataTransfer.getData('type');
-        if ('FROM_CANVAS' == type) {
-            this.canvas.moveStep(event, event.dataTransfer.getData('id'));
-        }
-        else {
-            this.canvas.onDrop(event);
-        }
-
-    }
-
-    @HostListener('dragover', ['$event'])
-    protected onDragOver(event: DragEvent) {
-        event.preventDefault();
-        if (this._disabled) { return; }
-        this.canvas.onDragStart(event);
-    }
-
-    _options: NgFlowchart.Options;
-    _callbacks: NgFlowchart.Callbacks;
-
-    @HostListener('window:resize', ['$event'])
-    protected onResize(event) {
-        if (this._options.centerOnResize) {
-            this.canvas.reRender(true);
-        }
-    }
-
-    @HostListener('wheel', ['$event'])
-    protected onZoom(event) {
-        if (this._options.zoom.mode === 'WHEEL') {
-            this.adjustWheelScale(event)
-        }
-    }
-
     @Input('ngFlowchartCallbacks')
     set callbacks(callbacks: NgFlowchart.Callbacks) {
         this.optionService.setCallbacks(callbacks);
@@ -89,10 +45,6 @@ export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewI
         return this._disabled;
     }
 
-    private _disabled: boolean = false;
-    private _id: string = null
-    private canvasContent: HTMLElement;
-
     constructor(
         protected canvasEle: ElementRef<HTMLElement>,
         private viewContainer: ViewContainerRef,
@@ -102,8 +54,56 @@ export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewI
 
         this.canvasEle.nativeElement.classList.add(CONSTANTS.CANVAS_CLASS);
         this.canvasContent = this.createCanvasContent(this.viewContainer);
-        this._id = this.canvasContent.id
+        this._id = this.canvasContent.id;
 
+    }
+
+    _options: NgFlowchart.Options;
+    _callbacks: NgFlowchart.Callbacks;
+
+    private _disabled = false;
+    private _id: string = null;
+    private canvasContent: HTMLElement;
+
+    @HostListener('drop', ['$event'])
+    protected onDrop(event: DragEvent) {
+        if (this._disabled) { return; }
+
+        // its possible multiple canvases exist so make sure we only move/drop on the closest one
+        const closestCanvasId = (event.target as HTMLElement).closest('.ngflowchart-canvas-content')?.id;
+        if (this._id !== closestCanvasId) {
+            return;
+        }
+
+        const type = event.dataTransfer.getData('type');
+        if ('FROM_CANVAS' === type) {
+            this.canvas.moveStep(event, event.dataTransfer.getData('id'));
+        }
+        else {
+            this.canvas.onDrop(event);
+        }
+
+    }
+
+    @HostListener('dragover', ['$event'])
+    protected onDragOver(event: DragEvent) {
+        event.preventDefault();
+        if (this._disabled) { return; }
+        this.canvas.onDragStart(event);
+    }
+
+    @HostListener('window:resize', ['$event'])
+    protected onResize(event) {
+        if (this._options.centerOnResize) {
+            this.canvas.reRender(true);
+        }
+    }
+
+    @HostListener('wheel', ['$event'])
+    protected onZoom(event) {
+        if (this._options.zoom.mode === 'WHEEL') {
+            this.adjustWheelScale(event);
+        }
     }
 
     ngOnInit() {
@@ -122,22 +122,22 @@ export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewI
     ngOnDestroy() {
 
         for (let i = 0; i < this.viewContainer.length; i++) {
-            this.viewContainer.remove(i)
+            this.viewContainer.remove(i);
         }
-        this.canvasEle.nativeElement.remove()
-        this.viewContainer.element.nativeElement.remove()
-        this.viewContainer = undefined
+        this.canvasEle.nativeElement.remove();
+        this.viewContainer.element.nativeElement.remove();
+        this.viewContainer = undefined;
     }
 
     private createCanvasContent(viewContainer: ViewContainerRef): HTMLElement {
         const canvasId = 'c' + Date.now();
 
-        let canvasEle = viewContainer.element.nativeElement as HTMLElement;
-        let canvasContent = document.createElement('div');
+        const canvasEle = viewContainer.element.nativeElement as HTMLElement;
+        const canvasContent = document.createElement('div');
         canvasContent.id = canvasId;
         canvasContent.classList.add(CONSTANTS.CANVAS_CONTENT_CLASS);
         canvasEle.appendChild(canvasContent);
-        return canvasContent
+        return canvasContent;
     }
 
     /**
@@ -148,17 +148,17 @@ export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewI
     }
 
     public scaleDown() {
-        this.canvas.scaleDown()
+        this.canvas.scaleDown();
     }
 
     public scaleUp() {
-        this.canvas.scaleUp()
+        this.canvas.scaleUp();
     }
 
     public setScale(scaleValue: number) {
-        
-        const scaleVal = Math.max(0, scaleValue)
-        this.canvas.setScale(scaleVal)
+
+        const scaleVal = Math.max(0, scaleValue);
+        this.canvas.setScale(scaleVal);
     }
 
     private adjustWheelScale(event) {
@@ -167,13 +167,13 @@ export class NgFlowchartCanvasDirective implements OnInit, OnDestroy, AfterViewI
             event.preventDefault();
             // scale down / zoom out
             if (event.deltaY > 0) {
-                this.scaleDown()
+                this.scaleDown();
             }
             // scale up / zoom in
             else if (event.deltaY < 0) {
-                this.scaleUp()
+                this.scaleUp();
             }
 
         }
-    };
+    }
 }

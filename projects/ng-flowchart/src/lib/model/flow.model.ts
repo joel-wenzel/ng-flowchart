@@ -80,7 +80,7 @@ export namespace NgFlowchart {
         isSequential?: boolean = false;
 
         /** The default root position when dropped. Default is TOP_CENTER */
-        rootPosition?: 'TOP_CENTER' | 'CENTER' | 'FREE' = 'TOP_CENTER';
+        rootPosition?: 'TOP_CENTER' | 'TOP_START' | 'CENTER' | 'FREE' = 'TOP_CENTER';
 
         /** Should the canvas be centered when a resize is detected? */
         centerOnResize?: boolean = true;

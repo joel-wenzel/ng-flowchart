@@ -9,7 +9,8 @@ main {
 }
 
 #canvas {
-    height: calc(100% - 50px);
+    height: calc(100vh - 50px);
+    width: calc(100% - 500px);;
     background: #f0f0f0;
     flex: 1;
     margin: 50px 0 0 50px;

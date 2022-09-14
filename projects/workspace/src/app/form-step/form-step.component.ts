@@ -17,7 +17,6 @@ export class FormStepComponent<MyForm> extends NgFlowchartStepComponent implemen
   }
 
   ngOnInit(): void {
-    console.log(this.data)
   }
 
   

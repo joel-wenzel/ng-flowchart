@@ -2,7 +2,9 @@ import { Component, TemplateRef, ViewChild } from '@angular/core';
 import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
 import { NgFlowchartStepRegistry } from 'projects/ng-flowchart/src/lib/ng-flowchart-step-registry.service';
 import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src/public-api';
+import { JsonDel } from './app.model';
 import { CustomStepComponent } from './custom-step/custom-step.component';
+import { RouteStepComponent } from './custom-step/route-step/route-step.component';
 import { FormStepComponent, MyForm } from './form-step/form-step.component';
 import { NestedFlowComponent } from './nested-flow/nested-flow.component';
 
@@ -17,14 +19,14 @@ export class AppComponent {
   callbacks: NgFlowchart.Callbacks = {};
   options: NgFlowchart.Options = {
     stepGap: 40,
-    rootPosition: 'TOP_CENTER',
-    zoom: { mode: 'DISABLED', defaultStep: .1 }
+    rootPosition: 'TOP_START',
+    zoom: { mode: 'WHEEL', defaultStep: .1 }
   };
 
   @ViewChild('normalStep')
   normalStepTemplate: TemplateRef<any>;
 
-  sampleJson = '{"root":{"id":"s1624206175876","type":"nested-flow","data":{"name":"Nested Flow","nested":{"root":{"id":"s1624206177187","type":"log","data":{"name":"Log","icon":{"name":"log-icon","color":"blue"},"config":{"message":null,"severity":null}},"children":[{"id":"s1624206178618","type":"log","data":{"name":"Log","icon":{"name":"log-icon","color":"blue"},"config":{"message":null,"severity":null}},"children":[]},{"id":"s1624206180286","type":"log","data":{"name":"Log","icon":{"name":"log-icon","color":"blue"},"config":{"message":null,"severity":null}},"children":[]}]}}},"children":[{"id":"s1624206181654","type":"log","data":{"name":"Log","icon":{"name":"log-icon","color":"blue"},"config":{"message":null,"severity":null}},"children":[]}]}}';
+  sampleJson = JsonDel;
 
   items = [
     {
@@ -91,20 +93,21 @@ export class AppComponent {
     // this.stepRegistry.registerStep('rest-get', this.normalStepTemplate);
     this.stepRegistry.registerStep('log', this.normalStepTemplate);
     this.stepRegistry.registerStep('router', CustomStepComponent);
+    this.stepRegistry.registerStep('route-step', RouteStepComponent);
     this.stepRegistry.registerStep('nested-flow', NestedFlowComponent);
     this.stepRegistry.registerStep('form-step', FormStepComponent);
+
   }
 
   onDropError(error: NgFlowchart.DropError) {
-    console.log(error);
   }
 
   onMoveError(error: NgFlowchart.MoveError) {
-    console.log(error);
   }
 
   showUpload() {
     this.canvas.getFlow().upload(this.sampleJson);
+
   }
 
   showFlowData() {
