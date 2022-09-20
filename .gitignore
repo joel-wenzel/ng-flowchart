@@ -2,7 +2,6 @@
 
 # compiled output
 dist/
-.angular/
 
 /tmp
 /out-tsc
@@ -34,6 +33,7 @@ speed-measure-plugin*.json
 .history/*
 
 # misc
+/.angular/cache
 /.sass-cache
 /connect.lock
 /coverage

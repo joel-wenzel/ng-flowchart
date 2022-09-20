@@ -6,14 +6,10 @@ import { NgFlowchartStepDirective } from './ng-flowchart-step.directive';
 import { NgFlowchartStepComponent } from './ng-flowchart-step/ng-flowchart-step.component';
 
 @NgModule({
-  declarations: [NgFlowchartCanvasDirective, NgFlowchartStepDirective, NgFlowchartStepComponent, NgFlowchartArrowComponent],
-  imports: [
-    CommonModule
-  ],
-  exports: [NgFlowchartCanvasDirective, NgFlowchartStepDirective, NgFlowchartStepComponent, NgFlowchartArrowComponent],
-  entryComponents: [
-    NgFlowchartStepComponent,
-    NgFlowchartArrowComponent
-  ]
+    declarations: [NgFlowchartCanvasDirective, NgFlowchartStepDirective, NgFlowchartStepComponent, NgFlowchartArrowComponent],
+    imports: [
+        CommonModule
+    ],
+    exports: [NgFlowchartCanvasDirective, NgFlowchartStepDirective, NgFlowchartStepComponent, NgFlowchartArrowComponent]
 })
 export class NgFlowchartModule { }
