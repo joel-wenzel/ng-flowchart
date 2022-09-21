@@ -18,7 +18,7 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 
 ## Supported Angular versions
 
-- Angular 10.2.0+
+- Angular 14.2.2+
 
 ## Change Log
 - 1.0.2-beta
