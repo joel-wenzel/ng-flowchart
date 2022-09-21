@@ -1,4 +1,4 @@
-import { Component, ComponentFactoryResolver, ComponentRef, ElementRef, EventEmitter, HostListener, Input, Output, TemplateRef, ViewChild, ViewContainerRef, ViewEncapsulation } from '@angular/core';
+import { Component, ComponentRef, ElementRef, EventEmitter, HostListener, Input, Output, TemplateRef, ViewChild, ViewContainerRef, ViewEncapsulation } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { CONSTANTS } from '../model/flowchart.constants';
 import { NgFlowchartArrowComponent } from '../ng-flowchart-arrow/ng-flowchart-arrow.component';
@@ -79,16 +79,14 @@ export class NgFlowchartStepComponent<T = any> {
 
   private drop: DropDataService;
   private viewContainer: ViewContainerRef;
-  private compFactory: ComponentFactoryResolver;
 
   constructor() {
     this._children = [];
   }
 
-  init(drop, viewContainer, compFactory) {
+  init(drop, viewContainer) {
     this.drop = drop;
     this.viewContainer = viewContainer;
-    this.compFactory = compFactory;
   }
 
   canDeleteStep(): boolean {
@@ -473,8 +471,7 @@ export class NgFlowchartStepComponent<T = any> {
   }
 
   private createArrow() {
-    const factory = this.compFactory.resolveComponentFactory(NgFlowchartArrowComponent)
-    this.arrow = this.viewContainer.createComponent(factory);
+    this.arrow = this.viewContainer.createComponent(NgFlowchartArrowComponent);
     this.nativeElement.parentElement.appendChild(this.arrow.location.nativeElement);
   }
 

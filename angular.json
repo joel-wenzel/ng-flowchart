@@ -28,18 +28,6 @@
             "tsConfig": "projects/ng-flowchart/tsconfig.spec.json",
             "karmaConfig": "projects/ng-flowchart/karma.conf.js"
           }
-        },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "projects/ng-flowchart/tsconfig.lib.json",
-              "projects/ng-flowchart/tsconfig.spec.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
         }
       }
     },
@@ -62,7 +50,6 @@
             "main": "projects/workspace/src/main.ts",
             "polyfills": "projects/workspace/src/polyfills.ts",
             "tsConfig": "projects/workspace/tsconfig.app.json",
-            "aot": true,
             "assets": [
               "projects/workspace/src/favicon.ico",
               "projects/workspace/src/assets"
@@ -70,7 +57,13 @@
             "styles": [
               "projects/workspace/src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true
           },
           "configurations": {
             "production": {
@@ -83,7 +76,6 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "extractLicenses": true,
               "vendorChunk": false,
@@ -101,7 +93,8 @@
                 }
               ]
             }
-          }
+          },
+          "defaultConfiguration": ""
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -137,19 +130,6 @@
             "scripts": []
           }
         },
-        "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
-          "options": {
-            "tsConfig": [
-              "projects/workspace/tsconfig.app.json",
-              "projects/workspace/tsconfig.spec.json",
-              "projects/workspace/e2e/tsconfig.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
-            ]
-          }
-        },
         "e2e": {
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
@@ -163,6 +143,5 @@
           }
         }
       }
-    }},
-  "defaultProject": "workspace"
+    }}
 }
