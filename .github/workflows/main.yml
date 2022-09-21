@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v2.3.2
         with:
-          node-version: '12.x'
+          node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
           
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
