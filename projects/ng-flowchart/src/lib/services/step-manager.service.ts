@@ -1,4 +1,4 @@
-import { ComponentFactoryResolver, ComponentRef, Injectable, TemplateRef, Type, ViewContainerRef } from '@angular/core';
+import { ComponentRef, Injectable, TemplateRef, Type, ViewContainerRef } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
 import { NgFlowchartStepRegistry } from '../ng-flowchart-step-registry.service';
@@ -13,7 +13,7 @@ export class StepManagerService {
 
   private viewContainer: ViewContainerRef;
 
-  constructor(private componentFactoryResolver: ComponentFactoryResolver, private registry: NgFlowchartStepRegistry) {
+  constructor(private registry: NgFlowchartStepRegistry) {
 
   }
 
@@ -43,14 +43,12 @@ export class StepManagerService {
     let componentRef: ComponentRef<NgFlowchartStepComponent>;
 
     if (pendingStep.template instanceof TemplateRef) {
-      const factory = this.componentFactoryResolver.resolveComponentFactory(NgFlowchartStepComponent);
-      componentRef = this.viewContainer.createComponent<NgFlowchartStepComponent>(factory);
+      componentRef = this.viewContainer.createComponent(NgFlowchartStepComponent);
       componentRef.instance.contentTemplate = pendingStep.template;
       
     }
     else {
-      const factory = this.componentFactoryResolver.resolveComponentFactory(pendingStep.template);
-      componentRef = this.viewContainer.createComponent<any>(factory);
+      componentRef = this.viewContainer.createComponent(pendingStep.template);
     }
     
     componentRef.instance.data = JSON.parse(JSON.stringify(pendingStep.data));
@@ -59,8 +57,7 @@ export class StepManagerService {
     componentRef.instance.compRef = componentRef;
     componentRef.instance.init(
       componentRef.injector.get(DropDataService),
-      componentRef.injector.get(ViewContainerRef),
-      componentRef.injector.get(ComponentFactoryResolver)
+      componentRef.injector.get(ViewContainerRef)
     )
     
 
