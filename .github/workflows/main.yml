@@ -37,6 +37,6 @@ jobs:
 
       - name: Publish
         run: npm publish --access public
-        working-directory: projects/ng-flowchart/dist
+        working-directory: dist/ng-flowchart
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
