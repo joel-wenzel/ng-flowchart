@@ -37,6 +37,9 @@ export class OptionsService {
     options.stepGap = Math.max(options.stepGap, 20) || 40;
     options.hoverDeadzoneRadius =
       Math.max(options.hoverDeadzoneRadius, 0) || 20;
+    if (options.zoom && options.zoom.mode !== 'DISABLED') {
+      options.zoom.defaultStep = options.zoom.defaultStep || 0.1;
+    }
 
     return options;
   }
