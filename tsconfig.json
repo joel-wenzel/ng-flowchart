@@ -16,5 +16,10 @@
       "ng-flowchart": ["dist/ng-flowchart/ng-flowchart", "dist/ng-flowchart"]
     },
     "useDefineForClassFields": false
+  },
+  "angularCompilerOptions": {
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
   }
 }

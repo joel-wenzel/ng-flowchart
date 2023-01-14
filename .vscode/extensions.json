@@ -7,7 +7,6 @@
     "angular.ng-template",
     "infinity1207.angular2-switcher",
     "esbenp.prettier-vscode",
-    "sibiraj-s.vscode-scss-formatter",
     "dbaeumer.vscode-eslint"
   ],
   // List of extensions recommended by VS Code that should not be recommended for users of this workspace.

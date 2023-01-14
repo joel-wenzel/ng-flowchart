@@ -54,7 +54,7 @@
         <input
           type="checkbox"
           name="disabled"
-          (change)="disabled = $event.target.checked" />
+          (change)="disabled = $any($event).target.checked" />
       </div>
     </section>
     <section>
