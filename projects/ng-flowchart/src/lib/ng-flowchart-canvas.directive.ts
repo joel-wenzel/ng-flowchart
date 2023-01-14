@@ -9,6 +9,7 @@ import {
   OnInit,
   ViewContainerRef,
 } from '@angular/core';
+import { debounceTime, fromEvent, Subscription } from 'rxjs';
 import { NgFlowchart } from './model/flow.model';
 import { CONSTANTS } from './model/flowchart.constants';
 import { NgFlowchartCanvasService } from './ng-flowchart-canvas.service';
@@ -62,13 +63,6 @@ export class NgFlowchartCanvasDirective
   _options: NgFlowchart.Options;
   _callbacks: NgFlowchart.Callbacks;
 
-  @HostListener('window:resize', ['$event'])
-  protected onResize(event) {
-    if (this._options.centerOnResize) {
-      this.canvas.reRender(true);
-    }
-  }
-
   @HostListener('wheel', ['$event'])
   protected onZoom(event) {
     if (this._options.zoom.mode === 'WHEEL') {
@@ -108,6 +102,7 @@ export class NgFlowchartCanvasDirective
   private _disabled: boolean = false;
   private _id: string = null;
   private canvasContent: HTMLElement;
+  private windowResizeSubscription: Subscription;
 
   constructor(
     protected canvasEle: ElementRef<HTMLElement>,
@@ -127,6 +122,8 @@ export class NgFlowchartCanvasDirective
     }
 
     this.canvas._disabled = this._disabled;
+
+    this.handleWindowResize();
   }
 
   ngAfterViewInit() {}
@@ -138,6 +135,20 @@ export class NgFlowchartCanvasDirective
     this.canvasEle.nativeElement.remove();
     this.viewContainer.element.nativeElement.remove();
     this.viewContainer = undefined;
+
+    this.windowResizeSubscription.unsubscribe();
+  }
+
+  private handleWindowResize(): void {
+    this.windowResizeSubscription = fromEvent(window, 'resize')
+      .pipe(
+        debounceTime(100) // emits once, then ignores subsequent emissions for 300ms, repeat...
+      )
+      .subscribe(() => {
+        if (this._options.centerOnResize) {
+          this.canvas.reRender(true);
+        }
+      });
   }
 
   private createCanvasContent(viewContainer: ViewContainerRef): HTMLElement {
