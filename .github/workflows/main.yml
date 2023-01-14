@@ -6,8 +6,7 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the 1.0.0-beta branch
   push:
-    branches: [ 1.0.0-beta ]
-
+    branches: [1.0.0-beta]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -25,10 +24,10 @@ jobs:
         with:
           node-version: 16
           registry-url: 'https://registry.npmjs.org'
-          
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-        
+
       # Build
       - name: Build Library
         run: |

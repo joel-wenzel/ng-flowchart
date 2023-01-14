@@ -7,6 +7,7 @@
     "build": "ng build ng-flowchart --configuration production",
     "test": "ng test",
     "lint": "ng lint --fix",
+    "prettier": "npx prettier --write .",
     "e2e": "ng e2e"
   },
   "private": true,

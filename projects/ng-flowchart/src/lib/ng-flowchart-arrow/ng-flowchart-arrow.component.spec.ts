@@ -8,9 +8,8 @@ describe('NgFlowchartArrowComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ NgFlowchartArrowComponent ]
-    })
-    .compileComponents();
+      declarations: [NgFlowchartArrowComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {

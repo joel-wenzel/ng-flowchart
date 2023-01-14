@@ -1,23 +1,23 @@
 .nested-flow-step {
-    background: #f8f8f8;
-    color: #444;
-    display: flex;
-    flex-direction: column;
-    border-radius: 4px;
-    padding: 1em;
-    min-width: 300px;
-    min-height: 300px;
+  background: #f8f8f8;
+  color: #444;
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
+  padding: 1em;
+  min-width: 300px;
+  min-height: 300px;
 
-    &.nested-alt {
-        background: #f0f0f0;
-    }
+  &.nested-alt {
+    background: #f0f0f0;
+  }
 }
 
 .nested-canvas-content {
-    width: 100%;
-    flex: 1 0 100%;
-    display: flex;
-    background-size: 30px 30px;
-    background-image: linear-gradient(to right, #d9d9d9 1px, transparent 1px),
-        linear-gradient(to bottom, #d9d9d9 1px, transparent 1px);
+  width: 100%;
+  flex: 1 0 100%;
+  display: flex;
+  background-size: 30px 30px;
+  background-image: linear-gradient(to right, #d9d9d9 1px, transparent 1px),
+    linear-gradient(to bottom, #d9d9d9 1px, transparent 1px);
 }
