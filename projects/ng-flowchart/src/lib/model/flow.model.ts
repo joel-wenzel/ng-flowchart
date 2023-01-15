@@ -90,6 +90,9 @@ export namespace NgFlowchart {
       mode: 'WHEEL',
       defaultStep: 0.1,
     };
+
+    /** Drag canvas to scroll */
+    dragScroll?: boolean = false;
   }
 
   export type DropEvent = {

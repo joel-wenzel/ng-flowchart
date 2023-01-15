@@ -70,6 +70,25 @@ export class NgFlowchartCanvasDirective
     }
   }
 
+  pos = { top: 0, left: 0, x: 0, y: 0 };
+  @HostListener('mousedown', ['$event'])
+  protected onMouseDown(e) {
+    if (this.options.dragScroll && e.target == this.canvasContent) {
+      this.pos = {
+        // The current scroll
+        left: this.canvasEle.nativeElement.scrollLeft,
+        top: this.canvasEle.nativeElement.scrollTop,
+        // Get the current mouse position
+        x: e.clientX,
+        y: e.clientY,
+      };
+
+      this.canvasEle.nativeElement.style.cursor = 'all-scroll';
+      document.addEventListener('mousemove', this.mouseMoveHandler);
+      document.addEventListener('mouseup', this.mouseUpHandler);
+    }
+  }
+
   @Input()
   set ngFlowchartCallbacks(callbacks: NgFlowchart.Callbacks) {
     this.optionService.setCallbacks(callbacks);
@@ -113,6 +132,8 @@ export class NgFlowchartCanvasDirective
     this.canvasEle.nativeElement.classList.add(CONSTANTS.CANVAS_CLASS);
     this.canvasContent = this.createCanvasContent(this.viewContainer);
     this._id = this.canvasContent.id;
+    this.mouseMoveHandler = this.mouseMoveHandler.bind(this);
+    this.mouseUpHandler = this.mouseUpHandler.bind(this);
   }
 
   ngOnInit() {
@@ -194,5 +215,22 @@ export class NgFlowchartCanvasDirective
         this.scaleUp();
       }
     }
+  }
+
+  private mouseMoveHandler(e) {
+    // How far the mouse has been moved
+    const dx = e.clientX - this.pos.x;
+    const dy = e.clientY - this.pos.y;
+
+    // Scroll the element
+    this.canvasEle.nativeElement.scrollTop = this.pos.top - dy;
+    this.canvasEle.nativeElement.scrollLeft = this.pos.left - dx;
+  }
+
+  private mouseUpHandler() {
+    document.removeEventListener('mousemove', this.mouseMoveHandler);
+    document.removeEventListener('mouseup', this.mouseUpHandler);
+
+    this.canvasEle.nativeElement.style.cursor = 'auto';
   }
 }
