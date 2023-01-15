@@ -91,7 +91,7 @@ export namespace NgFlowchart {
       defaultStep: 0.1,
     };
 
-    /** Drag canvas to scroll */
+    /** Drag canvas to scroll. Left click directly on canvas or middle mouse click anywhere on canvas. */
     dragScroll?: boolean = false;
   }
 
