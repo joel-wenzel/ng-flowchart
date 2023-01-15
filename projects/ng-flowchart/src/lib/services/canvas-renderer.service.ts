@@ -69,9 +69,10 @@ export class CanvasRendererService {
       return;
     }
 
+    const rootBottom =
+      rootRect.top - canvasRect.top + rootRect.height / this.scale;
     //top of the child row is simply the relative bottom of the root + stepGap
-    const childYTop =
-      rootRect.bottom - canvasRect.top * this.scale + this.getStepGap();
+    const childYTop = rootBottom + this.getStepGap();
 
     const rootWidth = rootRect.width / this.scale;
 
@@ -111,7 +112,7 @@ export class CanvasRendererService {
       const childWidth = currentChildRect.width / this.scale;
 
       child.zdrawArrow(
-        [rootXCenter, rootRect.bottom - canvasRect.top * this.scale],
+        [rootXCenter, rootBottom],
         [
           currentChildRect.left + childWidth / 2 - canvasRect.left,
           currentChildRect.top - canvasRect.top,
