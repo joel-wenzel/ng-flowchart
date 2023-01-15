@@ -3,19 +3,21 @@ import {
   Component,
   TemplateRef,
   ViewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
 import { NgFlowchartStepRegistry } from 'projects/ng-flowchart/src/lib/ng-flowchart-step-registry.service';
 import { NgFlowchartCanvasDirective } from 'projects/ng-flowchart/src';
 import { CustomStepComponent } from './custom-step/custom-step.component';
 import { RouteStepComponent } from './custom-step/route-step/route-step.component';
-import { FormStepComponent, MyForm } from './form-step/form-step.component';
+import { FormStepComponent } from './form-step/form-step.component';
 import { NestedFlowComponent } from './nested-flow/nested-flow.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements AfterViewInit {
   title = 'workspace';
@@ -25,8 +27,9 @@ export class AppComponent implements AfterViewInit {
     stepGap: 40,
     rootPosition: 'TOP_CENTER',
     zoom: {
-      mode: 'DISABLED',
+      mode: 'WHEEL',
     },
+    dragScroll: true,
   };
 
   @ViewChild('normalStep')
@@ -155,5 +158,14 @@ export class AppComponent implements AfterViewInit {
 
   onDelete(id) {
     this.canvas.getFlow().getStep(id).destroy(true);
+  }
+  onGrow() {
+    this.canvas.scaleUp();
+  }
+  onShrink() {
+    this.canvas.scaleDown();
+  }
+  onReset() {
+    this.canvas.setScale(1);
   }
 }

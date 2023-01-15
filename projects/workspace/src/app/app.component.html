@@ -60,6 +60,11 @@
     <section>
       <button (click)="clearData()">Clear Flow</button>
     </section>
+    <section>
+      <button (click)="onGrow()">+</button>
+      <button (click)="onShrink()">-</button>
+      <button (click)="onReset()">Reset</button>
+    </section>
     <ng-template #normalStep let-data>
       <div
         class="card"

@@ -1,4 +1,9 @@
-import { ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  ComponentRef,
+  Injectable,
+  ViewContainerRef,
+} from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { CONSTANTS } from '../model/flowchart.constants';
 import { CanvasFlow } from '../ng-flowchart-canvas.service';
@@ -18,7 +23,10 @@ export class CanvasRendererService {
   private scale: number = 1;
   private scaleDebounceTimer = null;
 
-  constructor(private options: OptionsService) {}
+  constructor(
+    private options: OptionsService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   public init(viewContainer: ViewContainerRef) {
     this.viewContainer = viewContainer;
@@ -153,6 +161,8 @@ export class CanvasRendererService {
     ) {
       this.adjustDimensions(flow, canvasRect);
     }
+
+    this.cdr.markForCheck();
 
     if (this.options.callbacks?.afterRender) {
       this.options.callbacks.afterRender();
@@ -466,13 +476,13 @@ export class CanvasRendererService {
 
   public scaleUp(flow: CanvasFlow, step?: number) {
     const newScale =
-      this.scale + (this.scale * step || this.options.options.zoom.defaultStep);
+      this.scale + this.scale * (step || this.options.options.zoom.defaultStep);
     this.setScale(flow, newScale);
   }
 
   public scaleDown(flow: CanvasFlow, step?: number) {
     const newScale =
-      this.scale - (this.scale * step || this.options.options.zoom.defaultStep);
+      this.scale - this.scale * (step || this.options.options.zoom.defaultStep);
     this.setScale(flow, newScale);
   }
 

@@ -1,4 +1,9 @@
-import { ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  ComponentRef,
+  Injectable,
+  ViewContainerRef,
+} from '@angular/core';
 import { NgFlowchart } from './model/flow.model';
 import { NgFlowchartStepComponent } from './ng-flowchart-step/ng-flowchart-step.component';
 import { CanvasRendererService } from './services/canvas-renderer.service';
@@ -63,7 +68,8 @@ export class NgFlowchartCanvasService {
     private drag: DragService,
     public options: OptionsService,
     private renderer: CanvasRendererService,
-    private stepmanager: StepManagerService
+    private stepmanager: StepManagerService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   public init(view: ViewContainerRef) {
@@ -185,6 +191,7 @@ export class NgFlowchartCanvasService {
         sub.unsubscribe();
         setTimeout(() => {
           compRef.instance.onUpload(data);
+          this.cdr.markForCheck();
         });
         resolve(compRef);
       });
