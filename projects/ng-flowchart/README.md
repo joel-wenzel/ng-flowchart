@@ -21,15 +21,17 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 - Angular 10.2.0+
 
 ## Change Log
+
 - 1.0.2-beta
+
   - Support for canvas zoom/scale via mouse scroll or manual
 
 - 1.0.0-beta
   - Support for nested charts/canvases allowing multiple steps to converge back into one. [View StackBlitz](https://stackblitz.com/edit/ng-flowchart-nested?file=src/app/nested-flow/nested-flow.component.ts)
   - Additional Callbacks and hooks for the following events
-    * Step method: shouldEvalDropHover
-    * Canvas Callback: beforeRender
-    * Canvas Callback: afterRender
+    - Step method: shouldEvalDropHover
+    - Canvas Callback: beforeRender
+    - Canvas Callback: afterRender
 
 ## Current and Upcoming Feature List
 
@@ -327,6 +329,7 @@ Options are passed via the **ngFlowchartOptions** input on the **ngFlowchartCanv
   - FREE - Leave the root node wherever dropped
 
 - #### **centerOnResize**
+
   When a canvas resize is detected, should the flow be re-centered? Default is true
 
 - #### **zoom**
@@ -383,7 +386,6 @@ onDropStep(dropEvent: NgFlowchart.DropEvent) {
 
   Called whenever an existing canvas step fails to move
 
-
 - #### **beforeDeleteStep?**: (step: NgFlowchartStepComponent) => void;
 
   Called when the delete method has been called on the step
@@ -394,16 +396,20 @@ onDropStep(dropEvent: NgFlowchart.DropEvent) {
   step children or parents, use beforeDeleteStep
 
 - #### **onDropStep?**: (drop: DropEvent) => void;
+
   Called whenever a new step or existing step is successfully dropped on the canvas
 
 - #### **beforeRender?**: () => void;
+
   Called before the canvas is about to re-render
 
 - #### **afterRender?**: (drop: DropEvent) => void;
+
   Called after the canvas completes a re-render
 
 - #### **afterScale?**: (newScale: number) => void
   Called after the canvas has been scaled
+
 # Custom Steps
 
 Custom steps can be created if you need any kind of complex logic for specific steps. The example below is a custom step for a router which can be seen elsewhere on this page.
@@ -531,8 +537,11 @@ export class EditableStepComponent extends NgFlowchartStepComponent {
 }
 
 ```
+
 # Disabling the Chart
+
 The canvas directive binds directly to the html **disabled** attribute.
+
 ```
 //component.ts
 disabled = false;
@@ -544,12 +553,13 @@ disabled = false;
     ngFlowchartCanvas
     [ngFlowchartOptions]="options"
     [disabled]="disabled"
-    
+
   ></div>
 </main>
 ```
 
 When the chart is disabled no styling is applied but easily can be by override the following styles:
+
 ```
 /** Your base selector may be different */
 div#canvas[disabled="true"] {
@@ -563,7 +573,8 @@ div#canvas[disabled="true"] ::ng-deep.ngflowchart-step-wrapper {
 ```
 
 # Contributers
-  * [michaelmarcuccio](https://github.com/michaelmarcuccio)
+
+- [michaelmarcuccio](https://github.com/michaelmarcuccio)
 
 # FAQ
 

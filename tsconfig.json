@@ -11,16 +11,15 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "es2020",
-    "lib": [
-      "es2018",
-      "dom"
-    ],
+    "lib": ["es2018", "dom"],
     "paths": {
-      "ng-flowchart": [
-        "dist/ng-flowchart/ng-flowchart",
-        "dist/ng-flowchart"
-      ]
+      "ng-flowchart": ["dist/ng-flowchart/ng-flowchart", "dist/ng-flowchart"]
     },
     "useDefineForClassFields": false
+  },
+  "angularCompilerOptions": {
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
   }
 }

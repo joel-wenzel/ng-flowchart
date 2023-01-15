@@ -4,8 +4,7 @@
     ngFlowchartCanvas
     [ngFlowchartOptions]="options"
     [ngFlowchartCallbacks]="callbacks"
-    [disabled]="disabled"    
-  ></div>
+    [disabled]="disabled"></div>
   <div id="palette">
     <section>
       <div
@@ -15,15 +14,13 @@
           template: normalStep,
           type: item.type,
           data: item.data
-        }"
-      >
+        }">
         <span>{{ item.name }}</span>
       </div>
       <div
         class="plugin-op"
         *ngFor="let op of customOps"
-        [ngFlowchartStep]="op.step"
-      >
+        [ngFlowchartStep]="op.step">
         <span>{{ op.paletteName }}</span>
       </div>
     </section>
@@ -39,8 +36,7 @@
           name="step-gap-select"
           id="step-gap-select"
           class="wide"
-          (change)="onGapChanged($event)"
-        >
+          (change)="onGapChanged($event)">
           <option value="30">30</option>
           <option value="40" selected>40</option>
           <option value="60">60</option>
@@ -51,28 +47,30 @@
         <input
           type="checkbox"
           name="sequential"
-          (change)="onSequentialChange($event)"
-        />
+          (change)="onSequentialChange($event)" />
       </div>
       <div class="sub-section">
         <label for="disabled">Disabled</label>
         <input
           type="checkbox"
           name="disabled"
-          (change)="disabled = $event.target.checked"
-        />
+          (change)="disabled = $any($event).target.checked" />
       </div>
     </section>
     <section>
       <button (click)="clearData()">Clear Flow</button>
+    </section>
+    <section>
+      <button (click)="onGrow()">+</button>
+      <button (click)="onShrink()">-</button>
+      <button (click)="onReset()">Reset</button>
     </section>
     <ng-template #normalStep let-data>
       <div
         class="card"
         [attr.name]="data.data.name"
         #card
-        (click)="onDelete(data.id)"
-      >
+        (click)="onDelete(data.id)">
         <span>{{ data.data.name }}</span>
       </div>
     </ng-template>

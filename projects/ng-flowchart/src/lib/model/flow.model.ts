@@ -44,7 +44,7 @@ export namespace NgFlowchart {
      * @param id Id of the step to find. By default, the html id of the step
      */
     getStep(id): NgFlowchartStepComponent {
-      return this.canvas.flow.steps.find((child) => child.id == id);
+      return this.canvas.flow.steps.find(child => child.id == id);
     }
 
     /**
@@ -90,6 +90,9 @@ export namespace NgFlowchart {
       mode: 'WHEEL',
       defaultStep: 0.1,
     };
+
+    /** Drag canvas to scroll. Left click directly on canvas or middle mouse click anywhere on canvas. */
+    dragScroll?: boolean = false;
   }
 
   export type DropEvent = {

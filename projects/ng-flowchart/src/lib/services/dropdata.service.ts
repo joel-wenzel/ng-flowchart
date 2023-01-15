@@ -1,23 +1,19 @@
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 
-
-
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root',
 })
 export class DropDataService {
+  dragStep: NgFlowchart.PendingStep | NgFlowchart.MoveStep;
 
-    dragStep: NgFlowchart.PendingStep | NgFlowchart.MoveStep;
+  constructor() {}
 
-    constructor() {
-    }
+  public setDragStep(ref: NgFlowchart.PendingStep) {
+    this.dragStep = ref;
+  }
 
-    public setDragStep(ref: NgFlowchart.PendingStep) {
-        this.dragStep = ref;
-    }
-
-    public getDragStep() {
-        return this.dragStep;
-    }
+  public getDragStep() {
+    return this.dragStep;
+  }
 }

@@ -1,4 +1,9 @@
-import { ComponentRef, Injectable, ViewContainerRef } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  ComponentRef,
+  Injectable,
+  ViewContainerRef,
+} from '@angular/core';
 import { NgFlowchart } from './model/flow.model';
 import { NgFlowchartStepComponent } from './ng-flowchart-step/ng-flowchart-step.component';
 import { CanvasRendererService } from './services/canvas-renderer.service';
@@ -26,7 +31,7 @@ export class CanvasFlow {
   }
 
   removeStep(step: NgFlowchartStepComponent) {
-    let index = this._steps.findIndex((ele) => ele.id == step.id);
+    let index = this._steps.findIndex(ele => ele.id == step.id);
     if (index >= 0) {
       this._steps.splice(index, 1);
     }
@@ -63,7 +68,8 @@ export class NgFlowchartCanvasService {
     private drag: DragService,
     public options: OptionsService,
     private renderer: CanvasRendererService,
-    private stepmanager: StepManagerService
+    private stepmanager: StepManagerService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   public init(view: ViewContainerRef) {
@@ -88,7 +94,7 @@ export class NgFlowchartCanvasService {
     this.renderer.clearAllSnapIndicators(this.flow.steps);
 
     let step: NgFlowchartStepComponent = this.flow.steps.find(
-      (step) => step.nativeElement.id === id
+      step => step.nativeElement.id === id
     );
     let error = {};
     if (!step) {
@@ -180,11 +186,12 @@ export class NgFlowchartCanvasService {
     data: any
   ): Promise<ComponentRef<NgFlowchartStepComponent>> {
     let compRef = this.stepmanager.createFromRegistry(id, type, data, this);
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       let sub = compRef.instance.viewInit.subscribe(async () => {
         sub.unsubscribe();
         setTimeout(() => {
           compRef.instance.onUpload(data);
+          this.cdr.markForCheck();
         });
         resolve(compRef);
       });
@@ -198,13 +205,13 @@ export class NgFlowchartCanvasService {
 
     componentRef = this.stepmanager.create(pending, this);
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       let sub = componentRef.instance.viewInit.subscribe(
         () => {
           sub.unsubscribe();
           resolve(componentRef);
         },
-        (error) => console.error(error)
+        error => console.error(error)
       );
     });
   }
@@ -357,7 +364,7 @@ export class NgFlowchartCanvasService {
     if (siblingStep.parent) {
       //find the adjacent steps index in the parents child array
       const adjacentIndex = siblingStep.parent.children.findIndex(
-        (child) => child.nativeElement.id == siblingStep.nativeElement.id
+        child => child.nativeElement.id == siblingStep.nativeElement.id
       );
       siblingStep.parent.zaddChildSibling0(
         newStep,

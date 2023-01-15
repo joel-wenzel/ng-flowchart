@@ -8,22 +8,16 @@ import { NestedFlowComponent } from './nested-flow/nested-flow.component';
 import { FormStepComponent } from './form-step/form-step.component';
 import { FormsModule } from '@angular/forms';
 
-
-
 @NgModule({
   declarations: [
     AppComponent,
     CustomStepComponent,
     RouteStepComponent,
     NestedFlowComponent,
-    FormStepComponent
+    FormStepComponent,
   ],
-  imports: [
-    BrowserModule,
-    NgFlowchartModule,
-    FormsModule,
-  ],
+  imports: [BrowserModule, NgFlowchartModule, FormsModule],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

@@ -28,6 +28,15 @@
             "tsConfig": "projects/ng-flowchart/tsconfig.spec.json",
             "karmaConfig": "projects/ng-flowchart/karma.conf.js"
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/ng-flowchart/**/*.ts",
+              "projects/ng-flowchart/**/*.html"
+            ]
+          }
         }
       }
     },
@@ -54,9 +63,7 @@
               "projects/workspace/src/favicon.ico",
               "projects/workspace/src/assets"
             ],
-            "styles": [
-              "projects/workspace/src/styles.scss"
-            ],
+            "styles": ["projects/workspace/src/styles.scss"],
             "scripts": [],
             "vendorChunk": true,
             "extractLicenses": false,
@@ -124,9 +131,7 @@
               "projects/workspace/src/favicon.ico",
               "projects/workspace/src/assets"
             ],
-            "styles": [
-              "projects/workspace/src/styles.scss"
-            ],
+            "styles": ["projects/workspace/src/styles.scss"],
             "scripts": []
           }
         },
@@ -141,7 +146,23 @@
               "devServerTarget": "workspace:serve:production"
             }
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/workspace/**/*.ts",
+              "projects/workspace/**/*.html"
+            ]
+          }
         }
       }
-    }}
+    }
+  },
+  "cli": {
+    "schematicCollections": [
+      "@angular-eslint/schematics",
+      "@angular-eslint/schematics"
+    ]
+  }
 }

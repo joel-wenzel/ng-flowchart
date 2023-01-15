@@ -1,35 +1,37 @@
-import { AfterViewInit, Directive, ElementRef, HostListener, Input } from '@angular/core';
+import {
+  AfterViewInit,
+  Directive,
+  ElementRef,
+  HostListener,
+  Input,
+} from '@angular/core';
 import { NgFlowchart } from './model/flow.model';
 import { DropDataService } from './services/dropdata.service';
 
 @Directive({
-    selector: '[ngFlowchartStep]'
+  selector: '[ngFlowchartStep]',
 })
 export class NgFlowchartStepDirective implements AfterViewInit {
+  @HostListener('dragstart', ['$event'])
+  onDragStart(event: DragEvent) {
+    this.data.setDragStep(this.flowStep);
+    event.dataTransfer.setData('type', 'FROM_PALETTE');
+  }
 
-    @HostListener('dragstart', ['$event'])
-    onDragStart(event: DragEvent) {
-        this.data.setDragStep(this.flowStep);
-        event.dataTransfer.setData('type', 'FROM_PALETTE');
-    }
+  @HostListener('dragend', ['$event'])
+  onDragEnd(event: DragEvent) {
+    this.data.setDragStep(null);
+  }
 
-    @HostListener('dragend', ['$event'])
-    onDragEnd(event: DragEvent) {
-        
-        this.data.setDragStep(null);
-       
-    }
+  @Input('ngFlowchartStep')
+  flowStep: NgFlowchart.PendingStep;
 
-    @Input('ngFlowchartStep')
-    flowStep: NgFlowchart.PendingStep;
+  constructor(
+    protected element: ElementRef<HTMLElement>,
+    private data: DropDataService
+  ) {
+    this.element.nativeElement.setAttribute('draggable', 'true');
+  }
 
-    constructor(
-        protected element: ElementRef<HTMLElement>,
-        private data: DropDataService
-    ) {
-        this.element.nativeElement.setAttribute('draggable', 'true');
-    }
-
-    ngAfterViewInit() {
-    }
+  ngAfterViewInit() {}
 }
