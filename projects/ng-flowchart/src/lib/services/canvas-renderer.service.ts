@@ -58,7 +58,7 @@ export class CanvasRendererService {
     return this.options.options.stepGap;
   }
 
-  private renderChildTree(
+  private renderVerticalChildTree(
     rootNode: NgFlowchartStepComponent,
     rootRect: Partial<DOMRect>,
     canvasRect: DOMRect
@@ -119,8 +119,74 @@ export class CanvasRendererService {
         ]
       );
 
-      this.renderChildTree(child, currentChildRect, canvasRect);
+      this.renderVerticalChildTree(child, currentChildRect, canvasRect);
       leftXTree += childExtent + this.getStepGap();
+    });
+  }
+
+  private renderHorizontalChildTree(
+    rootNode: NgFlowchartStepComponent,
+    rootRect: Partial<DOMRect>,
+    canvasRect: DOMRect
+  ) {
+    //the rootNode passed in is already rendered. just need to render its children /subtree
+
+    if (!rootNode.hasChildren()) {
+      return;
+    }
+
+    const rootRight =
+      rootRect.left - canvasRect.left + rootRect.width / this.scale;
+    //top of the child row is simply the relative Right of the root + stepGap
+    const childXLeft = rootRight + this.getStepGap();
+
+    const rootHeight = rootRect.height / this.scale;
+
+    const rootYCenter = rootRect.top - canvasRect.top + rootHeight / 2;
+
+    //get the width of the child trees
+    let childTreeHeights = {};
+    let totalTreeHeight = 0;
+
+    rootNode.children.forEach(child => {
+      let totalChildHeight = child.getNodeTreeHeight(this.getStepGap());
+      totalChildHeight = totalChildHeight / this.scale;
+      childTreeHeights[child.nativeElement.id] = totalChildHeight;
+
+      totalTreeHeight += totalChildHeight;
+    });
+
+    //add length for stepGaps between child trees
+    totalTreeHeight += (rootNode.children.length - 1) * this.getStepGap();
+
+    //if we have more than 1 child, we want half the extent on the left and half on the right
+    let topYTree = rootYCenter - totalTreeHeight / 2;
+
+    // dont allow it to go negative since you cant scroll that way
+    topYTree = Math.max(0, topYTree);
+
+    rootNode.children.forEach(child => {
+      let childExtent = childTreeHeights[child.nativeElement.id];
+
+      let childTop =
+        topYTree + childExtent / 2 - child.nativeElement.offsetHeight / 2;
+
+      child.zsetPosition([childXLeft, childTop]);
+
+      const currentChildRect = child.getCurrentRect(canvasRect);
+
+      const childHeight = currentChildRect.height / this.scale;
+
+      child.zdrawArrow(
+        [rootRight, rootYCenter],
+        [
+          currentChildRect.left - canvasRect.left,
+          currentChildRect.top + childHeight / 2 - canvasRect.top,
+        ]
+      );
+
+      this.renderHorizontalChildTree(child, currentChildRect, canvasRect);
+      topYTree += childExtent + this.getStepGap();
     });
   }
 
@@ -150,11 +216,20 @@ export class CanvasRendererService {
       //this will place the root at the top center of the canvas and render from there
       this.setRootPosition(flow.rootStep, null);
     }
-    this.renderChildTree(
-      flow.rootStep,
-      flow.rootStep.getCurrentRect(canvasRect),
-      canvasRect
-    );
+
+    if (this.options.options.orientation === 'VERTICAL') {
+      this.renderVerticalChildTree(
+        flow.rootStep,
+        flow.rootStep.getCurrentRect(canvasRect),
+        canvasRect
+      );
+    } else if (this.options.options.orientation === 'HORIZONTAL') {
+      this.renderHorizontalChildTree(
+        flow.rootStep,
+        flow.rootStep.getCurrentRect(canvasRect),
+        canvasRect
+      );
+    }
 
     if (
       !skipAdjustDimensions &&
@@ -213,21 +288,40 @@ export class CanvasRendererService {
         result = 'deadzone';
       }
 
-      if (absYDistance > absXDistance) {
-        result = {
-          step: targetStep,
-          position: yDiff > 0 ? 'BELOW' : 'ABOVE',
-          proximity: absYDistance,
-        };
-      } else if (
-        !this.options.options.isSequential &&
-        !targetStep.isRootElement()
-      ) {
-        result = {
-          step: targetStep,
-          position: xDiff > 0 ? 'RIGHT' : 'LEFT',
-          proximity: absXDistance,
-        };
+      if (this.options.options.orientation === 'VERTICAL') {
+        if (absYDistance > absXDistance) {
+          result = {
+            step: targetStep,
+            position: yDiff > 0 ? 'BELOW' : 'ABOVE',
+            proximity: absYDistance,
+          };
+        } else if (
+          !this.options.options.isSequential &&
+          !targetStep.isRootElement()
+        ) {
+          result = {
+            step: targetStep,
+            position: xDiff > 0 ? 'RIGHT' : 'LEFT',
+            proximity: absXDistance,
+          };
+        }
+      } else if (this.options.options.orientation === 'HORIZONTAL') {
+        if (absXDistance > absYDistance) {
+          result = {
+            step: targetStep,
+            position: xDiff > 0 ? 'BELOW' : 'ABOVE',
+            proximity: absXDistance,
+          };
+        } else if (
+          !this.options.options.isSequential &&
+          !targetStep.isRootElement()
+        ) {
+          result = {
+            step: targetStep,
+            position: yDiff > 0 ? 'RIGHT' : 'LEFT',
+            proximity: absYDistance,
+          };
+        }
       }
     }
 
@@ -439,11 +533,19 @@ export class CanvasRendererService {
 
   private getCanvasTopCenterPosition(htmlRootElement: HTMLElement) {
     const canvasRect = this.getCanvasContentElement().getBoundingClientRect();
-    const rootElementHeight = htmlRootElement.getBoundingClientRect().height;
-    const yCoord = rootElementHeight / 2 + this.options.options.stepGap;
-    const scaleYOffset = (1 - this.scale) * 100;
+    if (this.options.options.orientation === 'VERTICAL') {
+      const rootElementTop = htmlRootElement.getBoundingClientRect().height;
+      const topCoord = rootElementTop / 2 + this.options.options.stepGap;
+      const scaleTopOffset = (1 - this.scale) * 100;
 
-    return [canvasRect.width / (this.scale * 2), yCoord + scaleYOffset];
+      return [canvasRect.width / (this.scale * 2), topCoord + scaleTopOffset];
+    } else if (this.options.options.orientation === 'HORIZONTAL') {
+      const rootElementTop = htmlRootElement.getBoundingClientRect().width;
+      const topCoord = rootElementTop / 2 + this.options.options.stepGap;
+      const scaleTopOffset = (1 - this.scale) * 100;
+
+      return [topCoord + scaleTopOffset, canvasRect.height / (this.scale * 2)];
+    }
   }
 
   private getCanvasCenterPosition() {

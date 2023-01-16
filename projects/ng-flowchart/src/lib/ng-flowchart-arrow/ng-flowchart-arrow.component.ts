@@ -2,10 +2,12 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  Inject,
   Input,
   OnInit,
   ViewChild,
 } from '@angular/core';
+import { OptionsService } from '../services/options.service';
 
 @Component({
   selector: 'ng-flowchart-arrow',
@@ -20,16 +22,27 @@ export class NgFlowchartArrowComponent implements OnInit, AfterViewInit {
   set position(pos: { start: number[]; end: number[] }) {
     this._position = pos;
 
-    this.isLeftFlowing = pos.start[0] > pos.end[0];
+    if (this.options.options.orientation === 'VERTICAL') {
+      this.isLeftFlowing = pos.start[0] > pos.end[0];
 
-    //in the case where steps are directly underneath we need some minimum width
-    this.containerWidth =
-      Math.abs(pos.start[0] - pos.end[0]) + this.padding * 2;
+      //in the case where steps are directly underneath we need some minimum width
+      this.containerWidth =
+        Math.abs(pos.start[0] - pos.end[0]) + this.padding * 2;
+      this.containerLeft = Math.min(pos.start[0], pos.end[0]) - this.padding;
 
-    this.containerLeft = Math.min(pos.start[0], pos.end[0]) - this.padding;
+      this.containerHeight = Math.abs(pos.start[1] - pos.end[1]);
+      this.containerTop = pos.start[1];
+    } else if (this.options.options.orientation === 'HORIZONTAL') {
+      this.isLeftFlowing = pos.start[1] < pos.end[1];
 
-    this.containerHeight = Math.abs(pos.start[1] - pos.end[1]);
-    this.containerTop = pos.start[1];
+      this.containerWidth = Math.abs(pos.start[0] - pos.end[0]);
+      this.containerLeft = pos.start[0];
+
+      //in the case where steps are directly underneath we need some minimum height
+      this.containerHeight =
+        Math.abs(pos.start[1] - pos.end[1]) + this.padding * 2;
+      this.containerTop = Math.min(pos.start[1], pos.end[1]) - this.padding;
+    }
 
     this.updatePath();
   }
@@ -45,7 +58,7 @@ export class NgFlowchartArrowComponent implements OnInit, AfterViewInit {
   private padding = 10;
   private isLeftFlowing = false;
 
-  constructor() {}
+  constructor(@Inject('OptionsService') private options: OptionsService) {}
 
   ngOnInit(): void {}
 
@@ -66,26 +79,50 @@ export class NgFlowchartArrowComponent implements OnInit, AfterViewInit {
       return;
     }
 
-    if (this.isLeftFlowing) {
-      this.arrow.nativeElement.setAttribute(
-        'd',
-        `
+    if (this.options.options.orientation === 'VERTICAL') {
+      if (this.isLeftFlowing) {
+        this.arrow.nativeElement.setAttribute(
+          'd',
+          `
         M${this.containerWidth - this.padding},0 
         L${this.containerWidth - this.padding},${this.containerHeight / 2}
         L${this.padding},${this.containerHeight / 2}
         L${this.padding},${this.containerHeight - 4}
       `
-      );
-    } else {
-      this.arrow.nativeElement.setAttribute(
-        'd',
-        `
+        );
+      } else {
+        this.arrow.nativeElement.setAttribute(
+          'd',
+          `
         M${this.padding},0 
         L${this.padding},${this.containerHeight / 2}
         L${this.containerWidth - this.padding},${this.containerHeight / 2}
         L${this.containerWidth - this.padding},${this.containerHeight - 4}
       `
-      );
+        );
+      }
+    } else if (this.options.options.orientation === 'HORIZONTAL') {
+      if (this.isLeftFlowing) {
+        this.arrow.nativeElement.setAttribute(
+          'd',
+          `
+        M0,${this.padding}
+        L${this.containerWidth / 2},${this.padding}
+        L${this.containerWidth / 2},${this.containerHeight - this.padding}
+        L${this.containerWidth - 4},${this.containerHeight - this.padding}
+      `
+        );
+      } else {
+        this.arrow.nativeElement.setAttribute(
+          'd',
+          `
+        M0,${this.containerHeight - this.padding} 
+        L${this.containerWidth / 2},${this.containerHeight - this.padding},
+        L${this.containerWidth / 2},${this.padding}
+        L${this.containerWidth - 4},${this.padding}
+      `
+        );
+      }
     }
   }
 }

@@ -237,4 +237,23 @@ export class NgFlowchartCanvasDirective
 
     this.canvasEle.nativeElement.style.cursor = 'auto';
   }
+
+  public setOrientation(orientation: NgFlowchart.Orientation) {
+    var options = {
+      ...this.options,
+      orientation: orientation,
+    };
+    this.optionService.setOptions(options);
+    this._options = this.optionService.options;
+
+    //set orientation class for all steps
+    this.canvas.flow.steps.forEach(step => {
+      if (this.options.orientation === 'HORIZONTAL') {
+        step.nativeElement.classList.add('horizontal');
+      } else {
+        step.nativeElement.classList.remove('horizontal');
+      }
+    });
+    this.canvas.reRender(true);
+  }
 }

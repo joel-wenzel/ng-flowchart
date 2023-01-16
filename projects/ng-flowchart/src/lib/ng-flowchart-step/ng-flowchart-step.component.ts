@@ -5,6 +5,7 @@ import {
   ElementRef,
   EventEmitter,
   HostListener,
+  Injector,
   Input,
   OnInit,
   Output,
@@ -133,6 +134,9 @@ export class NgFlowchartStepComponent<T = any>
     }
 
     this.nativeElement.classList.add('ngflowchart-step-wrapper');
+    if (this.canvas.options.options.orientation === 'HORIZONTAL') {
+      this.nativeElement.classList.add('horizontal');
+    }
     this.nativeElement.setAttribute('draggable', 'true');
 
     if (this._initPosition) {
@@ -304,6 +308,26 @@ export class NgFlowchartStepComponent<T = any>
     childWidth += stepGap * (this._children.length - 1);
 
     return Math.max(currentNodeWidth, childWidth);
+  }
+
+  /**
+   * Returns the total height extent (in pixels) of this node tree
+   * @param stepGap The current step gap for the flow canvas
+   */
+  getNodeTreeHeight(stepGap: number) {
+    const currentNodeHeight = this.nativeElement.getBoundingClientRect().height;
+
+    if (!this.hasChildren()) {
+      return this.nativeElement.getBoundingClientRect().height;
+    }
+
+    let childHeight = this._children.reduce((childTreeHeight, child) => {
+      return (childTreeHeight += child.getNodeTreeHeight(stepGap));
+    }, 0);
+
+    childHeight += stepGap * (this._children.length - 1);
+
+    return Math.max(currentNodeHeight, childHeight);
   }
 
   /**
@@ -489,7 +513,17 @@ export class NgFlowchartStepComponent<T = any>
   }
 
   private createArrow() {
-    this.arrow = this.viewContainer.createComponent(NgFlowchartArrowComponent);
+    const injector = Injector.create({
+      providers: [
+        {
+          provide: 'OptionsService',
+          useValue: this.canvas.options,
+        },
+      ],
+    });
+    this.arrow = this.viewContainer.createComponent(NgFlowchartArrowComponent, {
+      injector,
+    });
     this.nativeElement.parentElement.appendChild(
       this.arrow.location.nativeElement
     );

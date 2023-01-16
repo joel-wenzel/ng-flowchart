@@ -30,6 +30,7 @@ export class AppComponent implements AfterViewInit {
       mode: 'WHEEL',
     },
     dragScroll: true,
+    orientation: 'VERTICAL',
   };
 
   @ViewChild('normalStep')
@@ -154,6 +155,12 @@ export class AppComponent implements AfterViewInit {
       ...this.options,
       isSequential: event.target.checked,
     };
+  }
+
+  onOrientationChange(event) {
+    this.canvas.setOrientation(
+      event.target.checked ? 'HORIZONTAL' : 'VERTICAL'
+    );
   }
 
   onDelete(id) {

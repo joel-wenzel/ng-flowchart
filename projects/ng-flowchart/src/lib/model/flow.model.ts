@@ -93,6 +93,9 @@ export namespace NgFlowchart {
 
     /** Drag canvas to scroll. Left click directly on canvas or middle mouse click anywhere on canvas. */
     dragScroll?: boolean = false;
+
+    /** Canvas flow orientation. Horizontal rotates the ABOVE, BELOW, LEFT, RIGHT drop positions -90 degrees. */
+    orientation?: Orientation = 'VERTICAL';
   }
 
   export type DropEvent = {
@@ -149,6 +152,7 @@ export namespace NgFlowchart {
 
   export type DropStatus = 'SUCCESS' | 'PENDING' | 'FAILED';
   export type DropPosition = 'RIGHT' | 'LEFT' | 'BELOW' | 'ABOVE';
+  export type Orientation = 'VERTICAL' | 'HORIZONTAL';
 
   export type Callbacks = {
     /**

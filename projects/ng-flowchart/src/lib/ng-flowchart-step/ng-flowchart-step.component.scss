@@ -48,32 +48,76 @@
   animation: backgroundOpacity 2s linear infinite;
 }
 
-.ngflowchart-step-wrapper[ngflowchart-drop-hover='above']::before,
-.ngflowchart-step-wrapper[ngflowchart-drop-hover='above']::after {
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='above']::before,
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='above']::after {
   top: 0;
   right: 50%;
   transform: translate(50%, -50%);
 }
 
-.ngflowchart-step-wrapper[ngflowchart-drop-hover='below']::before,
-.ngflowchart-step-wrapper[ngflowchart-drop-hover='below']::after {
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='below']::before,
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='below']::after {
   bottom: 0;
   right: 50%;
   transform: translate(50%, 50%);
 }
 
-.ngflowchart-step-wrapper[ngflowchart-drop-hover='right']::before,
-.ngflowchart-step-wrapper[ngflowchart-drop-hover='right']::after {
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='right']::before,
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='right']::after {
   right: 0;
   top: 50%;
   transform: translate(50%, -50%);
 }
 
-.ngflowchart-step-wrapper[ngflowchart-drop-hover='left']::before,
-.ngflowchart-step-wrapper[ngflowchart-drop-hover='left']::after {
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='left']::before,
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='left']::after {
   left: 0;
   top: 50%;
   transform: translate(-50%, -50%);
+}
+
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='above']::before,
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='above']::after {
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='below']::before,
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='below']::after {
+  right: 0;
+  top: 50%;
+  transform: translate(50%, -50%);
+}
+
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='right']::before,
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='right']::after {
+  bottom: 0;
+  right: 50%;
+  transform: translate(50%, 50%);
+}
+
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='left']::before,
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='left']::after {
+  top: 0;
+  right: 50%;
+  transform: translate(50%, -50%);
 }
 
 @keyframes wiggle {
