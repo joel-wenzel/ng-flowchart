@@ -328,7 +328,6 @@ export class NgFlowchartCanvasService {
         break;
       case 'BELOW':
         response = this.placeStepBelow(step, dropTarget.step);
-        console.log(response, [...dropTarget.step.children]);
         break;
       case 'LEFT':
         response = this.placeStepAdjacent(step, dropTarget.step, true);
