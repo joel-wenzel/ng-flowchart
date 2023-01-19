@@ -73,6 +73,8 @@ export class NgFlowchartCanvasDirective
   pos = { top: 0, left: 0, x: 0, y: 0 };
   @HostListener('mousedown', ['$event'])
   protected onMouseDown(e) {
+    //prevent scrollbar click
+    if (e.clientX + 15 >= e.target.clientWidth) return;
     var validDragAnchor =
       e.target === this.canvasContent ||
       e.target === this.canvasEle.nativeElement ||
