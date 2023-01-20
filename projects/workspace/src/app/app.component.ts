@@ -145,14 +145,14 @@ export class AppComponent implements AfterViewInit {
 
   onGapChanged(event) {
     this.options = {
-      ...this.options,
+      ...this.canvas.options,
       stepGap: parseInt(event.target.value),
     };
   }
 
   onSequentialChange(event) {
     this.options = {
-      ...this.options,
+      ...this.canvas.options,
       isSequential: event.target.checked,
     };
   }

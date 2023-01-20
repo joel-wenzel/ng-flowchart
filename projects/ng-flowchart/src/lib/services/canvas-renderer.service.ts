@@ -38,6 +38,7 @@ export class CanvasRendererService {
   ) {
     this.getCanvasContentElement().appendChild(step.location.nativeElement);
     this.setRootPosition(step.instance, dragEvent);
+    this.cdr.markForCheck();
   }
 
   public renderNonRoot(
@@ -45,6 +46,7 @@ export class CanvasRendererService {
     dragEvent?: DragEvent
   ) {
     this.getCanvasContentElement().appendChild(step.location.nativeElement);
+    this.cdr.markForCheck();
   }
 
   public updatePosition(step: NgFlowchartStepComponent, dragEvent: DragEvent) {

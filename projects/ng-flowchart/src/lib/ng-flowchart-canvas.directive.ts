@@ -46,7 +46,7 @@ export class NgFlowchartCanvasDirective
     const type = event.dataTransfer.getData('type');
     if ('FROM_CANVAS' == type) {
       this.canvas.moveStep(event, event.dataTransfer.getData('id'));
-    } else {
+    } else if ('FROM_PALETTE' == type) {
       this.canvas.onDrop(event);
     }
   }
@@ -72,14 +72,13 @@ export class NgFlowchartCanvasDirective
 
   pos = { top: 0, left: 0, x: 0, y: 0 };
   @HostListener('mousedown', ['$event'])
-  protected onMouseDown(e) {
-    //prevent scrollbar click
-    if (e.clientX + 15 >= e.target.clientWidth) return;
+  protected onMouseDown(e: MouseEvent) {
     var validDragAnchor =
       e.target === this.canvasContent ||
       e.target === this.canvasEle.nativeElement ||
       e.which === 2;
     if (this.options.dragScroll && validDragAnchor) {
+      e.preventDefault();
       this.pos = {
         // The current scroll
         left: this.canvasEle.nativeElement.scrollLeft,
@@ -89,7 +88,6 @@ export class NgFlowchartCanvasDirective
         y: e.clientY,
       };
 
-      this.canvasEle.nativeElement.style.cursor = 'all-scroll';
       document.addEventListener('mousemove', this.mouseMoveHandler);
       document.addEventListener('mouseup', this.mouseUpHandler);
     }
@@ -168,9 +166,7 @@ export class NgFlowchartCanvasDirective
 
   private handleWindowResize(): void {
     this.windowResizeSubscription = fromEvent(window, 'resize')
-      .pipe(
-        debounceTime(100) // emits once, then ignores subsequent emissions for 300ms, repeat...
-      )
+      .pipe(debounceTime(100))
       .subscribe(() => {
         if (this._options.centerOnResize) {
           this.canvas.reRender(true);
@@ -185,6 +181,7 @@ export class NgFlowchartCanvasDirective
     let canvasContent = document.createElement('div');
     canvasContent.id = canvasId;
     canvasContent.classList.add(CONSTANTS.CANVAS_CONTENT_CLASS);
+    canvasContent.style.cursor = 'auto';
     canvasEle.appendChild(canvasContent);
     return canvasContent;
   }
@@ -236,8 +233,6 @@ export class NgFlowchartCanvasDirective
   private mouseUpHandler() {
     document.removeEventListener('mousemove', this.mouseMoveHandler);
     document.removeEventListener('mouseup', this.mouseUpHandler);
-
-    this.canvasEle.nativeElement.style.cursor = 'auto';
   }
 
   public setOrientation(orientation: NgFlowchart.Orientation) {
