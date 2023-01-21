@@ -38,6 +38,7 @@ export class CanvasRendererService {
   ) {
     this.getCanvasContentElement().appendChild(step.location.nativeElement);
     this.setRootPosition(step.instance, dragEvent);
+    this.cdr.markForCheck();
   }
 
   public renderNonRoot(
@@ -45,6 +46,7 @@ export class CanvasRendererService {
     dragEvent?: DragEvent
   ) {
     this.getCanvasContentElement().appendChild(step.location.nativeElement);
+    this.cdr.markForCheck();
   }
 
   public updatePosition(step: NgFlowchartStepComponent, dragEvent: DragEvent) {
@@ -193,7 +195,7 @@ export class CanvasRendererService {
   public render(
     flow: CanvasFlow,
     pretty?: boolean,
-    skipAdjustDimensions = false
+    skipAdjustDimensions?: boolean
   ) {
     if (!flow.hasRoot()) {
       if (this.options.options.zoom.mode === 'DISABLED') {
@@ -350,20 +352,22 @@ export class CanvasRendererService {
       maxBottom = Math.max(rect.bottom, maxBottom);
     });
 
-    const widthBorderGap = 100;
-    const widthDiff = canvasRect.width - (maxRight - canvasRect.left);
+    const widthBorderGap = this.getStepGap();
+    const widthDiff =
+      canvasRect.width - (maxRight - canvasRect.left + widthBorderGap);
     if (widthDiff < widthBorderGap) {
-      let growWidth = widthBorderGap;
-      if (widthDiff < 0) {
-        growWidth += Math.abs(widthDiff);
-      }
-      this.getCanvasContentElement().style.minWidth = `${
-        canvasRect.width + growWidth
-      }px`;
-      if (this.options.options.centerOnResize) {
-        this.render(flow, true, true);
+      //grow x
+      let growWidth = Math.abs(widthDiff);
+      if (growWidth > widthBorderGap) {
+        this.getCanvasContentElement().style.minWidth = `${
+          canvasRect.width + growWidth
+        }px`;
+        if (this.options.options.centerOnResize) {
+          this.render(flow, true, true);
+        }
       }
     } else if (widthDiff > widthBorderGap) {
+      //shrink x
       var totalTreeWidth = this.getTotalTreeWidth(flow);
       if (this.isNestedCanvas()) {
         this.getCanvasContentElement().style.minWidth = `${
@@ -381,17 +385,19 @@ export class CanvasRendererService {
       }
     }
 
-    const heightBorderGap = 50;
-    const heightDiff = canvasRect.height - (maxBottom - canvasRect.top);
+    let heightBorderGap = this.getStepGap() / 2;
+    const heightDiff =
+      canvasRect.height - (maxBottom - canvasRect.top + heightBorderGap);
     if (heightDiff < heightBorderGap) {
-      let growHeight = heightBorderGap;
-      if (heightDiff < 0) {
-        growHeight += Math.abs(heightDiff);
+      //grow y
+      let growHeight = Math.abs(heightDiff);
+      if (growHeight >= heightBorderGap) {
+        this.getCanvasContentElement().style.minHeight = `${
+          canvasRect.height + growHeight
+        }px`;
       }
-      this.getCanvasContentElement().style.minHeight = `${
-        canvasRect.height + growHeight
-      }px`;
     } else if (heightDiff > heightBorderGap) {
+      //shrink y
       if (this.isNestedCanvas()) {
         let shrinkHeight = heightDiff - heightBorderGap;
         this.getCanvasContentElement().style.minHeight = `${
@@ -533,18 +539,26 @@ export class CanvasRendererService {
 
   private getCanvasTopCenterPosition(htmlRootElement: HTMLElement) {
     const canvasRect = this.getCanvasContentElement().getBoundingClientRect();
+    var edgeMargin = this.options.options.stepGap;
+    //format nested canvses with smaller edge margin for cleaner look
+    if (this.isNestedCanvas()) {
+      edgeMargin /= 2;
+    }
     if (this.options.options.orientation === 'VERTICAL') {
       const rootElementTop = htmlRootElement.getBoundingClientRect().height;
-      const topCoord = rootElementTop / 2 + this.options.options.stepGap;
+      const topCoord = rootElementTop / 2 + edgeMargin;
       const scaleTopOffset = (1 - this.scale) * 100;
 
       return [canvasRect.width / (this.scale * 2), topCoord + scaleTopOffset];
     } else if (this.options.options.orientation === 'HORIZONTAL') {
-      const rootElementTop = htmlRootElement.getBoundingClientRect().width;
-      const topCoord = rootElementTop / 2 + this.options.options.stepGap;
-      const scaleTopOffset = (1 - this.scale) * 100;
+      const rootElementRight = htmlRootElement.getBoundingClientRect().width;
+      const rightCoord = rootElementRight / 2 + edgeMargin;
+      const scaleRightOffset = (1 - this.scale) * 100;
 
-      return [topCoord + scaleTopOffset, canvasRect.height / (this.scale * 2)];
+      return [
+        rightCoord + scaleRightOffset,
+        canvasRect.height / (this.scale * 2),
+      ];
     }
   }
 

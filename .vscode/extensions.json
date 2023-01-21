@@ -5,7 +5,6 @@
   // List of extensions which should be recommended for users of this workspace.
   "recommendations": [
     "angular.ng-template",
-    "infinity1207.angular2-switcher",
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint"
   ],

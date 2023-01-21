@@ -5,7 +5,6 @@ import {
   OnDestroy,
   OnInit,
   ViewChild,
-  ViewChildren,
 } from '@angular/core';
 import {
   NgFlowchart,
@@ -44,6 +43,7 @@ export class NestedFlowComponent
     zoom: {
       mode: 'DISABLED',
     },
+    dragScroll: true,
   };
 
   constructor() {
@@ -59,9 +59,7 @@ export class NestedFlowComponent
     this.addAlternateClass();
   }
 
-  ngOnDestroy() {
-    this.nestedCanvas?.getFlow().clear();
-  }
+  ngOnDestroy() {}
 
   // add nested-alt class to alternate nested flows for better visibility
   addAlternateClass(): void {

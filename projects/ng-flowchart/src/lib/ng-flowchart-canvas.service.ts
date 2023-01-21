@@ -191,7 +191,6 @@ export class NgFlowchartCanvasService {
         sub.unsubscribe();
         setTimeout(() => {
           compRef.instance.onUpload(data);
-          this.cdr.markForCheck();
         });
         resolve(compRef);
       });
@@ -262,6 +261,8 @@ export class NgFlowchartCanvasService {
   }
 
   async upload(root: any) {
+    await new Promise(res => setTimeout(res));
+    this.cdr.markForCheck();
     await this.uploadNode(root);
     this.reRender(true);
   }
