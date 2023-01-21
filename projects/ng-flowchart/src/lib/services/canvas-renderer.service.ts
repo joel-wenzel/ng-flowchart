@@ -192,7 +192,11 @@ export class CanvasRendererService {
     });
   }
 
-  public render(flow: CanvasFlow, pretty?: boolean) {
+  public render(
+    flow: CanvasFlow,
+    pretty?: boolean,
+    skipAdjustDimensions?: boolean
+  ) {
     if (!flow.hasRoot()) {
       if (this.options.options.zoom.mode === 'DISABLED') {
         this.resetAdjustDimensions();
@@ -229,7 +233,10 @@ export class CanvasRendererService {
       );
     }
 
-    if (this.options.options.zoom.mode === 'DISABLED') {
+    if (
+      !skipAdjustDimensions &&
+      this.options.options.zoom.mode === 'DISABLED'
+    ) {
       this.adjustDimensions(flow, canvasRect);
     }
 
@@ -346,16 +353,17 @@ export class CanvasRendererService {
     });
 
     const widthBorderGap = this.getStepGap();
-    const widthDiff = canvasRect.width - (maxRight - canvasRect.left);
+    const widthDiff =
+      canvasRect.width - (maxRight - canvasRect.left + widthBorderGap);
     if (widthDiff < widthBorderGap) {
       //grow x
-      let growWidth = widthBorderGap - widthDiff;
-      if (growWidth >= widthBorderGap) {
+      let growWidth = Math.abs(widthDiff);
+      if (growWidth > widthBorderGap) {
         this.getCanvasContentElement().style.minWidth = `${
           canvasRect.width + growWidth
         }px`;
         if (this.options.options.centerOnResize) {
-          this.render(flow, true);
+          this.render(flow, true, true);
         }
       }
     } else if (widthDiff > widthBorderGap) {
@@ -366,22 +374,23 @@ export class CanvasRendererService {
           totalTreeWidth + widthBorderGap
         }px`;
         if (this.options.options.centerOnResize) {
-          this.render(flow, true);
+          this.render(flow, true, true);
         }
       } else if (this.getCanvasContentElement().style.minWidth) {
         // reset normal canvas width if auto width set
         this.getCanvasContentElement().style.minWidth = null;
         if (this.options.options.centerOnResize) {
-          this.render(flow, true);
+          this.render(flow, true, true);
         }
       }
     }
 
     let heightBorderGap = this.getStepGap() / 2;
-    const heightDiff = canvasRect.height - (maxBottom - canvasRect.top);
+    const heightDiff =
+      canvasRect.height - (maxBottom - canvasRect.top + heightBorderGap);
     if (heightDiff < heightBorderGap) {
       //grow y
-      let growHeight = heightBorderGap - heightDiff;
+      let growHeight = Math.abs(heightDiff);
       if (growHeight >= heightBorderGap) {
         this.getCanvasContentElement().style.minHeight = `${
           canvasRect.height + growHeight
@@ -542,11 +551,14 @@ export class CanvasRendererService {
 
       return [canvasRect.width / (this.scale * 2), topCoord + scaleTopOffset];
     } else if (this.options.options.orientation === 'HORIZONTAL') {
-      const rootElementTop = htmlRootElement.getBoundingClientRect().width;
-      const topCoord = rootElementTop / 2 + edgeMargin;
-      const scaleTopOffset = (1 - this.scale) * 100;
+      const rootElementRight = htmlRootElement.getBoundingClientRect().width;
+      const rightCoord = rootElementRight / 2 + edgeMargin;
+      const scaleRightOffset = (1 - this.scale) * 100;
 
-      return [topCoord + scaleTopOffset, canvasRect.height / (this.scale * 2)];
+      return [
+        rightCoord + scaleRightOffset,
+        canvasRect.height / (this.scale * 2),
+      ];
     }
   }
 

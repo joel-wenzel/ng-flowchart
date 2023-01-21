@@ -94,7 +94,7 @@ export namespace NgFlowchart {
     /** Drag canvas to scroll. Left click directly on canvas or middle mouse click anywhere on canvas. */
     dragScroll?: boolean = false;
 
-    /** Canvas flow orientation. Horizontal rotates the ABOVE, BELOW, LEFT, RIGHT drop positions -90 degrees. */
+    /** Canvas flow orientation. Horizontal rotates the ABOVE, BELOW, LEFT, RIGHT drop positions -90 degrees visually. */
     orientation?: Orientation = 'VERTICAL';
   }
 
