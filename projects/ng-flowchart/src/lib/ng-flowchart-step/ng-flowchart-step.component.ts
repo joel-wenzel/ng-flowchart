@@ -18,6 +18,7 @@ import { NgFlowchart } from '../model/flow.model';
 import { CONSTANTS } from '../model/flowchart.constants';
 import { NgFlowchartArrowComponent } from '../ng-flowchart-arrow/ng-flowchart-arrow.component';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
+import { NgFlowchartConnectorPadComponent } from '../ng-flowchart-connector-pad/ng-flowchart-connector-pad.component';
 import { DropDataService } from '../services/dropdata.service';
 
 export type AddChildOptions = {
@@ -46,7 +47,8 @@ export class NgFlowchartStepComponent<T = any>
       return;
     }
     this.hideTree();
-    event.dataTransfer.setData('type', 'FROM_CANVAS');
+    event.dataTransfer.setData('type', NgFlowchart.DropType.Step);
+    event.dataTransfer.setData('source', NgFlowchart.DropSource.Canvas);
     event.dataTransfer.setData('id', this.nativeElement.id);
 
     this.drop.dragStep = {
@@ -59,6 +61,41 @@ export class NgFlowchartStepComponent<T = any>
   @HostListener('dragend', ['$event'])
   onMoveEnd(event: DragEvent) {
     this.showTree();
+  }
+
+  @HostListener('mouseenter', ['$event'])
+  onMouseEnter(event: MouseEvent) {
+    event.preventDefault();
+    if (
+      this.drop.dragConnector &&
+      this.drop.dragConnector.startStepId !== this.id
+    ) {
+      //no duplicate connectors
+      var connector = this.canvas.flow.getConnector({
+        startStepId: this.drop.dragConnector.startStepId,
+        endStepId: this.id,
+      });
+
+      if (!connector) {
+        this.nativeElement.classList.add('connector-target');
+      }
+    }
+  }
+
+  @HostListener('mouseleave', ['$event'])
+  onMouseLeave(event: MouseEvent) {
+    this.nativeElement.classList.remove('connector-target');
+  }
+
+  @HostListener('mouseup', ['$event'])
+  onMouseUp(event: MouseEvent) {
+    this.nativeElement.classList.remove('connector-target');
+    if (
+      this.drop.dragConnector &&
+      this.drop.dragConnector.startStepId !== this.id
+    ) {
+      this.canvas.linkConnector(this.drop.dragConnector.startStepId, this.id);
+    }
   }
 
   //could potentially try to make this abstract
@@ -92,6 +129,7 @@ export class NgFlowchartStepComponent<T = any>
   private _parent: NgFlowchartStepComponent;
   private _children: Array<NgFlowchartStepComponent>;
   private arrow: ComponentRef<NgFlowchartArrowComponent>;
+  private connectorPad: ComponentRef<NgFlowchartConnectorPadComponent>;
 
   private drop: DropDataService;
   private viewContainer: ViewContainerRef;
@@ -469,6 +507,12 @@ export class NgFlowchartStepComponent<T = any>
     // remove from master array
     this.canvas.flow.removeStep(this);
 
+    // remove connectors
+    const connectors = this.canvas.flow.getConnectorsByStep(this.id);
+    for (const conn of connectors) {
+      conn.destroy();
+    }
+
     if (this.isRootElement()) {
       this.canvas.flow.rootStep = null;
     }
@@ -577,5 +621,34 @@ export class NgFlowchartStepComponent<T = any>
     this.children.forEach(child => {
       child.setParent(this, true);
     });
+  }
+
+  createConnectorPad(): void {
+    this.connectorPad = this.viewContainer.createComponent(
+      NgFlowchartConnectorPadComponent
+    );
+    this.connectorPad.instance.flowConnector = {
+      startStepId: this.id,
+      endStepId: null,
+    };
+    this.connectorPad.instance.canvas = this.canvas;
+    this.nativeElement.parentElement.appendChild(
+      this.connectorPad.location.nativeElement
+    );
+  }
+
+  drawConnectorPad(position: number[]): void {
+    if (!this.connectorPad) {
+      this.createConnectorPad();
+    }
+    this.connectorPad.instance.position = position;
+
+    const sequentialRuleFailure =
+      this.canvas.options.options.isSequential &&
+      (this.hasChildren() ||
+        this.canvas.flow.getConnectorsByStartStep(this.id).length > 0);
+    const hidePad =
+      this.canvas.disabled || sequentialRuleFailure || this.isRootElement();
+    this.connectorPad.instance.hidden = hidePad;
   }
 }

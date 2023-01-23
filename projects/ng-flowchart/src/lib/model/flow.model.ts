@@ -17,6 +17,7 @@ export namespace NgFlowchart {
     toObject() {
       return {
         root: this.canvas.flow.rootStep?.toJSON(),
+        connectors: this.canvas.flow.connectors?.map(c => c.toJSON()),
       };
     }
 
@@ -27,9 +28,10 @@ export namespace NgFlowchart {
     async upload(json: string | object): Promise<void> {
       let jsonObj = typeof json === 'string' ? JSON.parse(json) : json;
       let root: any = jsonObj.root;
+      let connectors: any = jsonObj.connectors;
       this.clear();
 
-      await this.canvas.upload(root);
+      await this.canvas.upload(root, connectors);
     }
 
     /**
@@ -196,4 +198,18 @@ export namespace NgFlowchart {
      */
     afterScale?: (newScale: number) => void;
   };
+
+  export type Connector = {
+    startStepId: string;
+    endStepId: string;
+  };
+
+  export enum DropType {
+    Step = 'STEP',
+    Connector = 'CONNECTOR',
+  }
+  export enum DropSource {
+    Canvas = 'FROM_CANVAS',
+    Palette = 'FROM_PALETTE',
+  }
 }

@@ -34,7 +34,6 @@ export class NgFlowchartCanvasDirective
     if (this._disabled) {
       return;
     }
-
     // its possible multiple canvases exist so make sure we only move/drop on the closest one
     const closestCanvasId = (event.target as HTMLElement).closest(
       '.ngflowchart-canvas-content'
@@ -44,10 +43,13 @@ export class NgFlowchartCanvasDirective
     }
 
     const type = event.dataTransfer.getData('type');
-    if ('FROM_CANVAS' == type) {
-      this.canvas.moveStep(event, event.dataTransfer.getData('id'));
-    } else if ('FROM_PALETTE' == type) {
-      this.canvas.onDrop(event);
+    if (type === NgFlowchart.DropType.Step) {
+      const source = event.dataTransfer.getData('source');
+      if (NgFlowchart.DropSource.Canvas == source) {
+        this.canvas.moveStep(event, event.dataTransfer.getData('id'));
+      } else if (NgFlowchart.DropSource.Palette == source) {
+        this.canvas.onDrop(event);
+      }
     }
   }
 
@@ -181,7 +183,6 @@ export class NgFlowchartCanvasDirective
     let canvasContent = document.createElement('div');
     canvasContent.id = canvasId;
     canvasContent.classList.add(CONSTANTS.CANVAS_CONTENT_CLASS);
-    canvasContent.style.cursor = 'auto';
     canvasEle.appendChild(canvasContent);
     return canvasContent;
   }

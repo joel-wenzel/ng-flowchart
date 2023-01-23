@@ -7,12 +7,18 @@ import {
 import { NgFlowchart } from '../model/flow.model';
 import { CONSTANTS } from '../model/flowchart.constants';
 import { CanvasFlow } from '../ng-flowchart-canvas.service';
+import { NgFlowchartConnectorComponent } from '../ng-flowchart-connector/ng-flowchart-connector.component';
 import { NgFlowchartStepComponent } from '../ng-flowchart-step/ng-flowchart-step.component';
 import { OptionsService } from './options.service';
 
 export type DropProximity = {
   step: NgFlowchartStepComponent;
   position: NgFlowchart.DropPosition;
+  proximity: number;
+};
+
+export type ConnectorDropProximity = {
+  step: NgFlowchartStepComponent;
   proximity: number;
 };
 
@@ -46,6 +52,15 @@ export class CanvasRendererService {
     dragEvent?: DragEvent
   ) {
     this.getCanvasContentElement().appendChild(step.location.nativeElement);
+    this.cdr.markForCheck();
+  }
+
+  public renderConnector(
+    connector: ComponentRef<NgFlowchartConnectorComponent>
+  ) {
+    this.getCanvasContentElement().appendChild(
+      connector.location.nativeElement
+    );
     this.cdr.markForCheck();
   }
 
@@ -232,6 +247,9 @@ export class CanvasRendererService {
         canvasRect
       );
     }
+
+    this.drawConnectorPads(flow, canvasRect);
+    this.drawConnectors(flow, canvasRect);
 
     if (
       !skipAdjustDimensions &&
@@ -625,5 +643,108 @@ export class CanvasRendererService {
     this.scaleDebounceTimer = setTimeout(() => {
       canvasContent.classList.remove('scaling');
     }, 300);
+  }
+
+  private drawConnectors(flow: CanvasFlow, canvasRect: DOMRect): void {
+    for (const conn of flow.connectors) {
+      const startStep = flow.steps.find(
+        s => s.id === conn.connector.startStepId
+      );
+      const startStepRect = startStep.getCurrentRect(canvasRect);
+      let startStepPos: number[];
+      if (this.options.options.orientation === 'VERTICAL') {
+        startStepPos = [
+          startStepRect.left -
+            canvasRect.left +
+            (startStepRect.width / this.scale) * (2 / 3),
+          startStepRect.top -
+            canvasRect.top +
+            startStepRect.height / this.scale,
+        ];
+      } else if (this.options.options.orientation === 'HORIZONTAL') {
+        startStepPos = [
+          startStepRect.left -
+            canvasRect.left +
+            startStepRect.width / this.scale,
+          startStepRect.top -
+            canvasRect.top +
+            (startStepRect.height / this.scale) * (1 / 5),
+        ];
+      }
+
+      const endStep = flow.steps.find(s => s.id === conn.connector.endStepId);
+      const endStepRect = endStep.getCurrentRect();
+      const closestEndEdge = this.findClosestEndEdge(startStepPos, endStepRect);
+      conn.drawArrow(startStepPos, closestEndEdge);
+    }
+  }
+
+  private drawConnectorPads(flow: CanvasFlow, canvasRect: DOMRect): void {
+    for (const step of flow.steps) {
+      const stepRect = step.getCurrentRect(canvasRect);
+      let padX: number;
+      let padY: number;
+      if (this.options.options.orientation === 'VERTICAL') {
+        padX =
+          stepRect.left -
+          canvasRect.left +
+          (stepRect.width / this.scale) * (2 / 3);
+        padY = stepRect.top - canvasRect.top + stepRect.height / this.scale;
+      } else if (this.options.options.orientation === 'HORIZONTAL') {
+        padX = stepRect.left - canvasRect.left + stepRect.width / this.scale;
+        padY =
+          stepRect.top -
+          canvasRect.top +
+          (stepRect.height / this.scale) * (1 / 5);
+      }
+      step.drawConnectorPad([padX, padY]);
+    }
+  }
+
+  private findClosestEndEdge(
+    startPos: number[],
+    stepRect: Partial<DOMRect>
+  ): number[] {
+    let sides: number[][];
+    if (this.options.options.orientation === 'VERTICAL') {
+      sides = [
+        [stepRect.left, stepRect.top + stepRect.height / 2], //left
+        [stepRect.left + stepRect.width * (1 / 5), stepRect.top], //top
+        [stepRect.left + stepRect.width * (2 / 5), stepRect.top], //top
+        [stepRect.left + stepRect.width * (3 / 5), stepRect.top], //top
+        [stepRect.left + stepRect.width * (4 / 5), stepRect.top], //top
+        [stepRect.right, stepRect.top + stepRect.height / 2], //right
+      ];
+    } else if (this.options.options.orientation === 'HORIZONTAL') {
+      sides = [
+        [stepRect.left, stepRect.top + stepRect.height * (1 / 4)], //left
+        [stepRect.left, stepRect.top + stepRect.height * (3 / 4)], //left
+        [stepRect.left + stepRect.width * (1 / 5), stepRect.top], //top
+        [stepRect.left + stepRect.width * (2 / 5), stepRect.top], //top
+        [stepRect.left + stepRect.width * (3 / 5), stepRect.top], //top
+        [stepRect.left + stepRect.width * (4 / 5), stepRect.top], //top
+        [stepRect.left + stepRect.width * (1 / 5), stepRect.bottom], //bottom
+        [stepRect.left + stepRect.width * (2 / 5), stepRect.bottom], //bottom
+        [stepRect.left + stepRect.width * (3 / 5), stepRect.bottom], //bottom
+        [stepRect.left + stepRect.width * (4 / 5), stepRect.bottom], //bottom
+      ];
+    }
+
+    const closest = sides.reduce(
+      (closest, current) => {
+        const absXDistance = Math.abs(startPos[0] - current[0]);
+        const absYDistance = Math.abs(startPos[1] - current[1]);
+        const distance = Math.sqrt(
+          absXDistance * absXDistance + absYDistance * absYDistance
+        );
+        if (!closest.pos || distance < closest.distance) {
+          return { pos: current, distance };
+        }
+        return closest;
+      },
+      { pos: null, distance: null }
+    );
+
+    return closest.pos;
   }
 }

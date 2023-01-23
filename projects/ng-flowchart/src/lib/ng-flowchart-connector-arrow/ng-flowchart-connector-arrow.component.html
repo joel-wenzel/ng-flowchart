@@ -1,0 +1,32 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  [ngStyle]="{
+    height: containerHeight + 'px',
+    width: containerWidth + 'px',
+    left: containerLeft + 'px',
+    top: containerTop + 'px',
+    opacity: opacity
+  }"
+  class="ngflowchart-arrow">
+  <defs>
+    <marker
+      id="arrowhead"
+      viewBox="0 0 10 10"
+      refX="3"
+      refY="5"
+      markerWidth="5"
+      markerHeight="5"
+      orient="auto"
+      fill="grey">
+      <path d="M 0 0 L 10 5 L 0 10 z" />
+    </marker>
+  </defs>
+  <g
+    id="arrowpath"
+    fill="none"
+    stroke="grey"
+    stroke-width="2"
+    marker-end="url(#arrowhead)">
+    <path id="arrow" #arrow />
+  </g>
+</svg>
