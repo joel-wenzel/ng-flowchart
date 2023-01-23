@@ -93,11 +93,14 @@ export namespace NgFlowchart {
       defaultStep: 0.1,
     };
 
-    /** Drag canvas to scroll. Left click directly on canvas or middle mouse click anywhere on canvas. */
-    dragScroll?: boolean = false;
+    /** Drag canvas to scroll. Choose which mouse buttons to move with. Default is right click. */
+    dragScroll?: ('LEFT' | 'MIDDLE' | 'RIGHT')[] = ['RIGHT'];
 
     /** Canvas flow orientation. Horizontal rotates the ABOVE, BELOW, LEFT, RIGHT drop positions -90 degrees visually. */
     orientation?: Orientation = 'VERTICAL';
+
+    /** Enables use of the manual arrow pad for dragging the output of a step to any other step. Default is false. */
+    manualArrowPad?: boolean = false;
   }
 
   export type DropEvent = {

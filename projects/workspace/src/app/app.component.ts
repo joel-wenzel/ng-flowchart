@@ -29,8 +29,9 @@ export class AppComponent implements AfterViewInit {
     zoom: {
       mode: 'WHEEL',
     },
-    dragScroll: true,
+    dragScroll: ['RIGHT', 'MIDDLE'],
     orientation: 'VERTICAL',
+    manualArrowPad: true,
   };
 
   @ViewChild('normalStep')

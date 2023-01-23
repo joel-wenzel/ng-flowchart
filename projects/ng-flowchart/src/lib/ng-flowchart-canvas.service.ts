@@ -312,7 +312,7 @@ export class NgFlowchartCanvasService {
   }
 
   private uploadConnectors(connector: NgFlowchart.Connector[]): void {
-    if (!connector) {
+    if (!connector || !this.options.options.manualArrowPad) {
       return;
     }
 
@@ -500,8 +500,11 @@ export class NgFlowchartCanvasService {
   }
 
   public linkConnector(startStepId: string, endStepId: string) {
+    if (!this.options.options.manualArrowPad) {
+      return;
+    }
     //no duplicate connections
-    var existingConn = this.flow.getConnector({
+    const existingConn = this.flow.getConnector({
       startStepId: startStepId,
       endStepId: endStepId,
     });
@@ -510,7 +513,17 @@ export class NgFlowchartCanvasService {
       !this.options.options.isSequential ||
       this.flow.getConnectorsByStartStep(startStepId).length === 0;
 
-    if (startStepId !== endStepId && !existingConn && connectorCountValid) {
+    //nested canvas doesn't yet support connectors cross canvas
+    const stepsInSameCanvas =
+      this.flow.steps.some(s => s.id === startStepId) &&
+      this.flow.steps.some(s => s.id === endStepId);
+
+    if (
+      startStepId !== endStepId &&
+      !existingConn &&
+      connectorCountValid &&
+      stepsInSameCanvas
+    ) {
       var connector = { startStepId: startStepId, endStepId: endStepId };
       var connComponent = this.createConnector(connector);
       this.renderer.renderConnector(connComponent);

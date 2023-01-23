@@ -65,35 +65,29 @@ export class NgFlowchartStepComponent<T = any>
 
   @HostListener('mouseenter', ['$event'])
   onMouseEnter(event: MouseEvent) {
-    event.preventDefault();
-    if (
-      this.drop.dragConnector &&
-      this.drop.dragConnector.startStepId !== this.id
-    ) {
-      //no duplicate connectors
-      var connector = this.canvas.flow.getConnector({
-        startStepId: this.drop.dragConnector.startStepId,
-        endStepId: this.id,
-      });
-
-      if (!connector) {
-        this.nativeElement.classList.add('connector-target');
-      }
+    if (!this.canvas.options.options.manualArrowPad) {
+      return;
+    }
+    if (this.drop.dragConnector && this.isValidConnectorDropTarget()) {
+      this.nativeElement.classList.add('connector-target');
     }
   }
 
   @HostListener('mouseleave', ['$event'])
   onMouseLeave(event: MouseEvent) {
+    if (!this.canvas.options.options.manualArrowPad) {
+      return;
+    }
     this.nativeElement.classList.remove('connector-target');
   }
 
   @HostListener('mouseup', ['$event'])
   onMouseUp(event: MouseEvent) {
+    if (event.button !== 0 || !this.canvas.options.options.manualArrowPad) {
+      return;
+    }
     this.nativeElement.classList.remove('connector-target');
-    if (
-      this.drop.dragConnector &&
-      this.drop.dragConnector.startStepId !== this.id
-    ) {
+    if (this.drop.dragConnector && this.isValidConnectorDropTarget()) {
       this.canvas.linkConnector(this.drop.dragConnector.startStepId, this.id);
     }
   }
@@ -160,7 +154,9 @@ export class NgFlowchartStepComponent<T = any>
 
   async onUpload(data: T) {}
 
-  getDropPositionsForStep(step: NgFlowchart.Step): NgFlowchart.DropPosition[] {
+  getDropPositionsForStep(
+    step: NgFlowchart.Step | NgFlowchart.Connector
+  ): NgFlowchart.DropPosition[] {
     return ['BELOW', 'LEFT', 'RIGHT', 'ABOVE'];
   }
 
@@ -650,5 +646,18 @@ export class NgFlowchartStepComponent<T = any>
     const hidePad =
       this.canvas.disabled || sequentialRuleFailure || this.isRootElement();
     this.connectorPad.instance.hidden = hidePad;
+  }
+
+  private isValidConnectorDropTarget(): boolean {
+    var isSameStep = this.drop.dragConnector.startStepId === this.id;
+    var connectorAlreadyExists = this.canvas.flow.getConnector({
+      startStepId: this.drop.dragConnector.startStepId,
+      endStepId: this.id,
+    });
+    var canDropAbove = this.getDropPositionsForStep(
+      this.drop.dragConnector
+    ).includes('ABOVE');
+
+    return !isSameStep && !connectorAlreadyExists && canDropAbove;
   }
 }

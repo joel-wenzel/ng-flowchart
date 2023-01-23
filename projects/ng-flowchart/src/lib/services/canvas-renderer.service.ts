@@ -248,8 +248,10 @@ export class CanvasRendererService {
       );
     }
 
-    this.drawConnectorPads(flow, canvasRect);
-    this.drawConnectors(flow, canvasRect);
+    if (this.options.options.manualArrowPad) {
+      this.drawConnectorPads(flow, canvasRect);
+      this.drawConnectors(flow, canvasRect);
+    }
 
     if (
       !skipAdjustDimensions &&

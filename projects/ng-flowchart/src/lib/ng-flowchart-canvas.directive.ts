@@ -77,9 +77,16 @@ export class NgFlowchartCanvasDirective
   protected onMouseDown(e: MouseEvent) {
     var validDragAnchor =
       e.target === this.canvasContent ||
-      e.target === this.canvasEle.nativeElement ||
-      e.which === 2;
-    if (this.options.dragScroll && validDragAnchor) {
+      e.target === this.canvasEle.nativeElement;
+    const validLeftClick =
+      this.options.dragScroll.includes('LEFT') &&
+      validDragAnchor &&
+      e.button === 0;
+    const validOther =
+      (this.options.dragScroll.includes('MIDDLE') && e.button === 1) ||
+      (this.options.dragScroll.includes('RIGHT') && e.button === 2);
+
+    if (validLeftClick || validOther) {
       e.preventDefault();
       this.pos = {
         // The current scroll
@@ -92,6 +99,13 @@ export class NgFlowchartCanvasDirective
 
       document.addEventListener('mousemove', this.mouseMoveHandler);
       document.addEventListener('mouseup', this.mouseUpHandler);
+    }
+  }
+
+  @HostListener('contextmenu', ['$event'])
+  protected onContextMenu(e: MouseEvent) {
+    if (this.options.dragScroll.includes('RIGHT')) {
+      e.preventDefault();
     }
   }
 
