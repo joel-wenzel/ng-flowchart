@@ -1,30 +1,27 @@
 :host {
   position: relative;
   transition: all 0.2s;
+
+  #arrowPadding {
+    pointer-events: auto;
+  }
+
+  #deleteIcon {
+    height: 12px;
+    width: 12px;
+  }
 }
 
 .ngflowchart-canvas-content.scaling :host {
   transition: none !important;
 }
 
-.ngflowchart-connector {
-  position: absolute;
-  z-index: 1;
-
-  transition: all 0.2s;
-
-  overflow: visible;
-  pointer-events: none;
-  stroke-dasharray: 4, 3;
-  min-width: 1px;
-}
-
-.connector-menu {
+.ngflowchart-connector-menu {
   position: absolute;
   z-index: 5;
   pointer-events: none;
 
-  .delete-connector {
+  .ngflowchart-delete-connector {
     display: flex;
     position: absolute;
     top: calc(50% - 12px);
@@ -38,13 +35,16 @@
   }
 }
 
-#arrowPadding {
-  pointer-events: auto;
-}
+.ngflowchart-connector {
+  position: absolute;
+  z-index: 1;
 
-#deleteIcon {
-  height: 12px;
-  width: 12px;
+  transition: all 0.2s;
+
+  overflow: visible;
+  pointer-events: none;
+  stroke-dasharray: 4, 3;
+  min-width: 1px;
 }
 
 .ngflowchart-connector {
