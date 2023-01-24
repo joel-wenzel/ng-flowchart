@@ -27,22 +27,15 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
   @Input()
   set position(pos: number[]) {
     if (this.canvas.options.options.orientation === 'VERTICAL') {
-      this._position = [
-        pos[0] - this.padRadius - this.strokeWidth / 2,
-        pos[1] + this.padYOffset,
-      ]; // center pad icon and y offset
+      this._position = [pos[0] - this.padRadius - this.strokeWidth / 2, pos[1]]; // center pad icon and y offset
     } else if (this.canvas.options.options.orientation === 'HORIZONTAL') {
-      this._position = [
-        pos[0] + this.padYOffset,
-        pos[1] - this.padRadius - this.strokeWidth / 2,
-      ]; // center pad icon and y offset
+      this._position = [pos[0], pos[1] - this.padRadius - this.strokeWidth / 2]; // center pad icon and y offset
     }
     this.setPosition();
   }
 
   padRadius = 5;
   strokeWidth = 2;
-  padYOffset = -6;
 
   @Input() hidden = false;
 
@@ -59,14 +52,14 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
     this.cOffX = e.clientX - this.element.nativeElement.offsetLeft;
     this.cOffY = e.clientY - this.element.nativeElement.offsetTop;
 
+    this.element.nativeElement.classList.add('dragging');
+
     this.movingPad = this.element.nativeElement.cloneNode(true) as HTMLElement;
     this.movingPad.style.pointerEvents = 'none';
     this.element.nativeElement.parentElement.append(this.movingPad);
 
     document.addEventListener('mousemove', this.dragMove);
     document.addEventListener('mouseup', this.dragEnd);
-
-    this.element.nativeElement.classList.add('dragging');
   }
 
   private arrow: ComponentRef<NgFlowchartPadArrowComponent>;

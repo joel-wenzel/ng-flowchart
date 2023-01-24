@@ -677,7 +677,7 @@ export class CanvasRendererService {
       const endStep = flow.steps.find(s => s.id === conn.connector.endStepId);
       const endStepRect = endStep.getCurrentRect();
       const closestEndEdge = this.findClosestEndEdge(startStepPos, endStepRect);
-      conn.drawArrow(startStepPos, closestEndEdge);
+      conn.autoPosition = { start: startStepPos, end: closestEndEdge };
     }
   }
 

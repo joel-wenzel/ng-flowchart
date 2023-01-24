@@ -105,6 +105,7 @@ export class AppComponent implements AfterViewInit {
     this.stepRegistry.registerStep('nested-flow', NestedFlowComponent);
     this.stepRegistry.registerStep('form-step', FormStepComponent);
     this.stepRegistry.registerStep('route-step', RouteStepComponent);
+    this.showUpload();
   }
 
   onDropError(error: NgFlowchart.DropError) {

@@ -22,22 +22,13 @@ export class NgFlowchartPadArrowComponent implements OnInit, AfterViewInit {
   set position(pos: { start: number[]; end: number[] }) {
     this._position = pos;
     this.containerWidth = Math.abs(pos.start[0] - pos.end[0]);
-    this.containerLeft =
-      pos.start[0] > pos.end[0]
-        ? -this.containerWidth + this.leftOffset
-        : this.leftOffset;
+    this.containerLeft = pos.start[0] > pos.end[0] ? -this.containerWidth : 0;
 
     this.containerHeight = Math.abs(pos.start[1] - pos.end[1]);
-    this.containerTop =
-      pos.start[1] > pos.end[1]
-        ? -this.containerHeight + this.topOffset
-        : this.topOffset;
+    this.containerTop = pos.start[1] > pos.end[1] ? -this.containerHeight : 0;
 
     this.updatePath();
   }
-
-  leftOffset = 3;
-  topOffset = 3;
 
   opacity = 1;
   containerWidth: number = 0;
@@ -73,25 +64,22 @@ export class NgFlowchartPadArrowComponent implements OnInit, AfterViewInit {
     if (pos.start[1] > pos.end[1]) {
       if (pos.start[0] > pos.end[0]) {
         // top left
-        start = [
-          this.containerWidth + this.leftOffset,
-          this.containerHeight + this.topOffset,
-        ];
-        end = [this.leftOffset, 0];
+        start = [this.containerWidth, this.containerHeight];
+        end = [0, 0];
       } else {
         //topright
-        start = [this.leftOffset, this.containerHeight + this.topOffset];
-        end = [this.containerWidth - this.leftOffset, 0];
+        start = [0, this.containerHeight];
+        end = [this.containerWidth, 0];
       }
     } else {
       if (pos.start[0] > pos.end[0]) {
         // bottom left
-        start = [this.containerWidth + this.leftOffset, this.topOffset];
-        end = [this.leftOffset, this.containerHeight];
+        start = [this.containerWidth, 0];
+        end = [0, this.containerHeight];
       } else {
         //bottom right
-        start = [this.leftOffset, this.topOffset];
-        end = [this.containerWidth - this.leftOffset, this.containerHeight];
+        start = [0, 0];
+        end = [this.containerWidth, this.containerHeight];
       }
     }
     this.arrow.nativeElement.setAttribute(

@@ -1,16 +1,16 @@
 svg {
   position: absolute;
-  z-index: 1;
+  z-index: 11;
 
   overflow: visible;
   pointer-events: none;
   min-width: 1px;
-  stroke-dasharray: 4, 2;
+  stroke-dasharray: 4, 3;
 }
 
 //To override arrow style
-// .ngflowchart-arrow {
-//     & #arrowhead {
+// .ngflowchart-pad-arrow {
+//     & #padarrowhead {
 //         fill: #00b894;
 //     }
 
