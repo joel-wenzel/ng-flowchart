@@ -74,7 +74,7 @@ export class NgFlowchartCanvasDirective
 
   pos = { top: 0, left: 0, x: 0, y: 0 };
   @HostListener('mousedown', ['$event'])
-  protected onMouseDown(e: MouseEvent) {
+  protected canvasDragScroll(e: MouseEvent) {
     var validDragAnchor =
       e.target === this.canvasContent ||
       e.target === this.canvasEle.nativeElement;
@@ -85,9 +85,15 @@ export class NgFlowchartCanvasDirective
     const validOther =
       (this.options.dragScroll.includes('MIDDLE') && e.button === 1) ||
       (this.options.dragScroll.includes('RIGHT') && e.button === 2);
+    const scrollable =
+      this.canvasEle.nativeElement.scrollWidth >
+        this.canvasEle.nativeElement.clientWidth ||
+      this.canvasEle.nativeElement.scrollHeight >
+        this.canvasEle.nativeElement.clientHeight;
 
-    if (validLeftClick || validOther) {
+    if (scrollable && (validLeftClick || validOther)) {
       e.preventDefault();
+      e.stopPropagation();
       this.pos = {
         // The current scroll
         left: this.canvasEle.nativeElement.scrollLeft,
