@@ -43,7 +43,7 @@ export class NestedFlowComponent
     zoom: {
       mode: 'DISABLED',
     },
-    dragScroll: true,
+    dragScroll: ['RIGHT'],
   };
 
   constructor() {

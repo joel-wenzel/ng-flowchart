@@ -1,0 +1,86 @@
+:host {
+  position: relative;
+  transition: all 0.2s;
+}
+
+.ngflowchart-canvas-content.scaling :host {
+  transition: none !important;
+}
+
+.ngflowchart-connector {
+  position: absolute;
+  z-index: 1;
+
+  transition: all 0.2s;
+
+  overflow: visible;
+  pointer-events: none;
+  stroke-dasharray: 4, 3;
+  min-width: 1px;
+}
+
+.connector-menu {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+
+  .delete-connector {
+    display: flex;
+    position: absolute;
+    top: calc(50% - 12px);
+    left: calc(50% - 12px);
+
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 3px;
+    padding: 2px;
+    pointer-events: auto;
+  }
+}
+
+#arrowPadding {
+  pointer-events: auto;
+}
+
+#deleteIcon {
+  height: 12px;
+  width: 12px;
+}
+
+.ngflowchart-connector {
+  &:hover {
+    z-index: 3;
+    & #arrowpath {
+      stroke: black;
+    }
+  }
+  &.selected {
+    z-index: 4;
+    & #arrowpath {
+      stroke: green;
+    }
+  }
+}
+
+//To override connector style
+// .ngflowchart-connector {
+//   & #connectorArrowhead {
+//     fill: #00b894;
+//   }
+//   & #connectorArrowheadHover {
+//     fill: #00b894;
+//   }
+//   & #connectorArrowheadSelected {
+//     fill: #00b894;
+//   }
+
+//   & #arrowpath {
+//     stroke: #00b894;
+//   }
+//   &:hover #arrowpath {
+//     stroke: #00b894;
+//   }
+//   &.selected #arrowpath {
+//     stroke: #00b894;
+//   }
+//}

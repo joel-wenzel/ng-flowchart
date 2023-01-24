@@ -18,6 +18,7 @@ import { NgFlowchart } from '../model/flow.model';
 import { CONSTANTS } from '../model/flowchart.constants';
 import { NgFlowchartArrowComponent } from '../ng-flowchart-arrow/ng-flowchart-arrow.component';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
+import { NgFlowchartConnectorPadComponent } from '../ng-flowchart-connector-pad/ng-flowchart-connector-pad.component';
 import { DropDataService } from '../services/dropdata.service';
 
 export type AddChildOptions = {
@@ -46,7 +47,8 @@ export class NgFlowchartStepComponent<T = any>
       return;
     }
     this.hideTree();
-    event.dataTransfer.setData('type', 'FROM_CANVAS');
+    event.dataTransfer.setData('type', NgFlowchart.DropType.Step);
+    event.dataTransfer.setData('source', NgFlowchart.DropSource.Canvas);
     event.dataTransfer.setData('id', this.nativeElement.id);
 
     this.drop.dragStep = {
@@ -59,6 +61,35 @@ export class NgFlowchartStepComponent<T = any>
   @HostListener('dragend', ['$event'])
   onMoveEnd(event: DragEvent) {
     this.showTree();
+  }
+
+  @HostListener('mouseenter', ['$event'])
+  onMouseEnter(event: MouseEvent) {
+    if (!this.canvas.options.options.manualArrowPad) {
+      return;
+    }
+    if (this.drop.dragConnector && this.isValidConnectorDropTarget()) {
+      this.nativeElement.classList.add('connector-target');
+    }
+  }
+
+  @HostListener('mouseleave', ['$event'])
+  onMouseLeave(event: MouseEvent) {
+    if (!this.canvas.options.options.manualArrowPad) {
+      return;
+    }
+    this.nativeElement.classList.remove('connector-target');
+  }
+
+  @HostListener('mouseup', ['$event'])
+  onMouseUp(event: MouseEvent) {
+    if (event.button !== 0 || !this.canvas.options.options.manualArrowPad) {
+      return;
+    }
+    this.nativeElement.classList.remove('connector-target');
+    if (this.drop.dragConnector && this.isValidConnectorDropTarget()) {
+      this.canvas.linkConnector(this.drop.dragConnector.startStepId, this.id);
+    }
   }
 
   //could potentially try to make this abstract
@@ -92,6 +123,7 @@ export class NgFlowchartStepComponent<T = any>
   private _parent: NgFlowchartStepComponent;
   private _children: Array<NgFlowchartStepComponent>;
   private arrow: ComponentRef<NgFlowchartArrowComponent>;
+  private connectorPad: ComponentRef<NgFlowchartConnectorPadComponent>;
 
   private drop: DropDataService;
   private viewContainer: ViewContainerRef;
@@ -122,7 +154,9 @@ export class NgFlowchartStepComponent<T = any>
 
   async onUpload(data: T) {}
 
-  getDropPositionsForStep(step: NgFlowchart.Step): NgFlowchart.DropPosition[] {
+  getDropPositionsForStep(
+    step: NgFlowchart.Step | NgFlowchart.Connector
+  ): NgFlowchart.DropPosition[] {
     return ['BELOW', 'LEFT', 'RIGHT', 'ABOVE'];
   }
 
@@ -469,6 +503,12 @@ export class NgFlowchartStepComponent<T = any>
     // remove from master array
     this.canvas.flow.removeStep(this);
 
+    // remove connectors
+    const connectors = this.canvas.flow.getConnectorsByStep(this.id);
+    for (const conn of connectors) {
+      conn.destroy0();
+    }
+
     if (this.isRootElement()) {
       this.canvas.flow.rootStep = null;
     }
@@ -577,5 +617,61 @@ export class NgFlowchartStepComponent<T = any>
     this.children.forEach(child => {
       child.setParent(this, true);
     });
+  }
+
+  createConnectorPad(): void {
+    this.connectorPad = this.viewContainer.createComponent(
+      NgFlowchartConnectorPadComponent
+    );
+    this.connectorPad.instance.flowConnector = {
+      startStepId: this.id,
+      endStepId: null,
+    };
+    this.connectorPad.instance.canvas = this.canvas;
+    this.nativeElement.parentElement.appendChild(
+      this.connectorPad.location.nativeElement
+    );
+  }
+
+  drawConnectorPad(position: number[]): void {
+    if (!this.connectorPad) {
+      this.createConnectorPad();
+    }
+    this.connectorPad.instance.position = position;
+
+    const sequentialRuleFailure =
+      this.canvas.options.options.isSequential &&
+      (this.hasChildren() ||
+        this.canvas.flow.getConnectorsByStartStep(this.id).length > 0);
+    const hidePad =
+      this.canvas.disabled || sequentialRuleFailure || this.isRootElement();
+    this.connectorPad.instance.hidden = hidePad;
+  }
+
+  // this make take up too many resources in large workflows, need to try it out
+  private isValidConnectorDropTarget(): boolean {
+    var isSameStep = this.drop.dragConnector.startStepId === this.id;
+    var connectorAlreadyExists = this.canvas.flow.getConnector({
+      startStepId: this.drop.dragConnector.startStepId,
+      endStepId: this.id,
+    });
+    var canDropAbove = this.getDropPositionsForStep(
+      this.drop.dragConnector
+    ).includes('ABOVE');
+    const stepAlreadyChild = this.canvas.flow.steps
+      .find(s => s.id === this.drop.dragConnector.startStepId)
+      ?.children.find(c => c.id === this.id);
+    const stepsInSameCanvas =
+      this.canvas.flow.steps.some(
+        s => s.id === this.drop.dragConnector.startStepId
+      ) && this.canvas.flow.steps.some(s => s.id === this.id);
+
+    return (
+      !isSameStep &&
+      !connectorAlreadyExists &&
+      canDropAbove &&
+      !stepAlreadyChild &&
+      stepsInSameCanvas
+    );
   }
 }

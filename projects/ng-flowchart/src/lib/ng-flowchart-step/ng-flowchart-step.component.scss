@@ -4,7 +4,8 @@
 }
 
 .ngflowchart-canvas-content.scaling .ngflowchart-step-wrapper,
-.ngflowchart-canvas-content.scaling svg {
+.ngflowchart-canvas-content.scaling svg,
+.ngflowchart-canvas-content.scaling ng-flowchart-connector-pad {
   transition: none !important;
 }
 
@@ -150,4 +151,8 @@
   100% {
     opacity: 0.8;
   }
+}
+
+.ngflowchart-step-wrapper.connector-target {
+  box-shadow: 0 0 4px 1px green;
 }

@@ -1,0 +1,12 @@
+:host {
+  position: relative;
+  z-index: 10;
+  &:not(.dragging) {
+    transition: all 0.2s;
+  }
+}
+
+.pad {
+  position: absolute;
+  cursor: auto;
+}

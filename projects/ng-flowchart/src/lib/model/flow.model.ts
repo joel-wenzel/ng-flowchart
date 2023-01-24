@@ -17,6 +17,7 @@ export namespace NgFlowchart {
     toObject() {
       return {
         root: this.canvas.flow.rootStep?.toJSON(),
+        connectors: this.canvas.flow.connectors?.map(c => c.toJSON()),
       };
     }
 
@@ -27,9 +28,10 @@ export namespace NgFlowchart {
     async upload(json: string | object): Promise<void> {
       let jsonObj = typeof json === 'string' ? JSON.parse(json) : json;
       let root: any = jsonObj.root;
+      let connectors: any = jsonObj.connectors;
       this.clear();
 
-      await this.canvas.upload(root);
+      await this.canvas.upload(root, connectors);
     }
 
     /**
@@ -91,11 +93,14 @@ export namespace NgFlowchart {
       defaultStep: 0.1,
     };
 
-    /** Drag canvas to scroll. Left click directly on canvas or middle mouse click anywhere on canvas. */
-    dragScroll?: boolean = false;
+    /** Drag canvas to scroll. Choose which mouse buttons to move with. Default is right click. */
+    dragScroll?: ('LEFT' | 'MIDDLE' | 'RIGHT')[] = ['RIGHT'];
 
     /** Canvas flow orientation. Horizontal rotates the ABOVE, BELOW, LEFT, RIGHT drop positions -90 degrees visually. */
     orientation?: Orientation = 'VERTICAL';
+
+    /** Enables use of the manual arrow pad for dragging the output of a step to any other step. Default is false. */
+    manualArrowPad?: boolean = false;
   }
 
   export type DropEvent = {
@@ -196,4 +201,18 @@ export namespace NgFlowchart {
      */
     afterScale?: (newScale: number) => void;
   };
+
+  export type Connector = {
+    startStepId: string;
+    endStepId: string;
+  };
+
+  export enum DropType {
+    Step = 'STEP',
+    Connector = 'CONNECTOR',
+  }
+  export enum DropSource {
+    Canvas = 'FROM_CANVAS',
+    Palette = 'FROM_PALETTE',
+  }
 }

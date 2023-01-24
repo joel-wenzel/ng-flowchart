@@ -5,6 +5,7 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { NgFlowchart } from './model/flow.model';
+import { NgFlowchartConnectorComponent } from './ng-flowchart-connector/ng-flowchart-connector.component';
 import { NgFlowchartStepComponent } from './ng-flowchart-step/ng-flowchart-step.component';
 import { CanvasRendererService } from './services/canvas-renderer.service';
 import { DropDataService as DragService } from './services/dropdata.service';
@@ -21,6 +22,7 @@ export class CanvasFlow {
 
   // steps from this canvas only
   private _steps: NgFlowchartStepComponent[] = [];
+  private _connectors: NgFlowchartConnectorComponent[] = [];
 
   hasRoot() {
     return !!this.rootStep;
@@ -37,8 +39,49 @@ export class CanvasFlow {
     }
   }
 
+  getConnector(connector: NgFlowchart.Connector): boolean {
+    return this.connectors.some(
+      c =>
+        c.connector.startStepId === connector.startStepId &&
+        c.connector.endStepId === connector.endStepId
+    );
+  }
+  getConnectorsByStep(
+    stepId: string
+  ): ReadonlyArray<NgFlowchartConnectorComponent> {
+    return this._connectors.filter(
+      c =>
+        c.connector.startStepId === stepId || c.connector.endStepId === stepId
+    );
+  }
+
+  getConnectorsByStartStep(
+    stepId: string
+  ): ReadonlyArray<NgFlowchartConnectorComponent> {
+    return this._connectors.filter(c => c.connector.startStepId === stepId);
+  }
+
+  addConnector(comp: NgFlowchartConnectorComponent) {
+    this._connectors.push(comp);
+  }
+
+  removeConnector(comp: NgFlowchartConnectorComponent) {
+    let index = this._connectors.findIndex(
+      ele =>
+        ele.connector.startStepId === comp.connector.startStepId &&
+        ele.connector.endStepId === comp.connector.endStepId
+    );
+    if (index >= 0) {
+      this._connectors.splice(index, 1);
+    }
+  }
+
   get steps(): ReadonlyArray<NgFlowchartStepComponent> {
     return this._steps;
+  }
+
+  get connectors(): ReadonlyArray<NgFlowchartConnectorComponent> {
+    return this._connectors;
   }
 
   constructor() {}
@@ -260,11 +303,24 @@ export class NgFlowchartCanvasService {
     this.renderer.render(this.flow, pretty);
   }
 
-  async upload(root: any) {
+  async upload(root: any, connectors: any) {
     await new Promise(res => setTimeout(res));
     this.cdr.markForCheck();
     await this.uploadNode(root);
+    this.uploadConnectors(connectors);
     this.reRender(true);
+  }
+
+  private uploadConnectors(connector: NgFlowchart.Connector[]): void {
+    if (!connector || !this.options.options.manualArrowPad) {
+      return;
+    }
+
+    for (const conn of connector) {
+      var connComponent = this.createConnector(conn);
+      this.renderer.renderConnector(connComponent);
+      this.flow.addConnector(connComponent.instance);
+    }
   }
 
   private async uploadNode(
@@ -441,5 +497,61 @@ export class NgFlowchartCanvasService {
         error: error,
       });
     }
+  }
+
+  public linkConnector(startStepId: string, endStepId: string) {
+    if (!this.options.options.manualArrowPad) {
+      return;
+    }
+    //connection can't be to self
+    var isSameStep = startStepId === endStepId;
+    //no duplicate connections
+    const existingConn = this.flow.getConnector({
+      startStepId: startStepId,
+      endStepId: endStepId,
+    });
+    //respect sequential mode
+    const connectorCountValid =
+      !this.options.options.isSequential ||
+      this.flow.getConnectorsByStartStep(startStepId).length === 0;
+    //nested canvas doesn't yet support connectors cross canvas
+    const stepsInSameCanvas =
+      this.flow.steps.some(s => s.id === startStepId) &&
+      this.flow.steps.some(s => s.id === endStepId);
+    //step is already connected by normal step child
+    const stepAlreadyChild = this.flow.steps
+      .find(s => s.id === startStepId)
+      ?.children.find(c => c.id === endStepId);
+
+    if (
+      !isSameStep &&
+      !existingConn &&
+      connectorCountValid &&
+      stepsInSameCanvas &&
+      !stepAlreadyChild
+    ) {
+      var connector = { startStepId: startStepId, endStepId: endStepId };
+      var connComponent = this.createConnector(connector);
+      this.renderer.renderConnector(connComponent);
+      this.flow.addConnector(connComponent.instance);
+
+      this.renderer.render(this.flow);
+    }
+  }
+
+  private createConnector(
+    connector: NgFlowchart.Connector
+  ): ComponentRef<NgFlowchartConnectorComponent> {
+    var component = this.viewContainer.createComponent(
+      NgFlowchartConnectorComponent
+    );
+    component.instance.connector = connector;
+    component.instance.canvas = this;
+    component.instance.compRef = component;
+    return component;
+  }
+
+  public scaleCoordinate(pos: number[]): number[] {
+    return this.renderer.scaleCoordinate(pos);
   }
 }
