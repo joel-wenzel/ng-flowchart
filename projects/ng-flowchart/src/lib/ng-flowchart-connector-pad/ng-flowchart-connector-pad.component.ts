@@ -6,6 +6,7 @@ import {
   HostListener,
   Injector,
   Input,
+  ViewChild,
   ViewContainerRef,
 } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
@@ -34,13 +35,13 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
     this.setPosition();
   }
 
+  @ViewChild('connectorPad') connectorPad: ElementRef;
+
   padRadius = 5;
   strokeWidth = 2;
 
   @Input() hidden = false;
 
-  cOffX = 0;
-  cOffY = 0;
   movingPad: HTMLElement;
 
   @HostListener('mousedown', ['$event'])
@@ -48,9 +49,6 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
     if (e.button !== 0) return;
     e.preventDefault();
     this.data.setDragConnector(this.flowConnector);
-
-    this.cOffX = e.clientX - this.element.nativeElement.offsetLeft;
-    this.cOffY = e.clientY - this.element.nativeElement.offsetTop;
 
     this.element.nativeElement.classList.add('dragging');
 
@@ -82,13 +80,14 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
     this.element.nativeElement.style.top = `${this._position[1]}px`;
   }
 
-  drawArrow(start: number[], end: number[]) {
+  drawArrow(start: number[], end: number[], root: number[]) {
     if (!this.arrow) {
       this.createArrow();
     }
     this.arrow.instance.position = {
       start: start,
       end: end,
+      root: root,
     };
     this.arrow.changeDetectorRef.markForCheck();
   }
@@ -110,14 +109,30 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
 
   private dragMove(e: MouseEvent) {
     e.preventDefault();
+    const canvasEle = this.canvas.viewContainer.element.nativeElement;
+    let canvasBounds = canvasEle.getBoundingClientRect();
 
-    this.movingPad.style.top = e.clientY - this.cOffY + 'px';
-    this.movingPad.style.left = e.clientX - this.cOffX + 'px';
-
-    this.drawArrow(this._position, [
-      e.clientX - this.cOffY,
-      e.clientY - this.cOffX,
+    const padBounds = this.connectorPad.nativeElement.getBoundingClientRect();
+    var startPos = this.canvas.scaleCoordinate([
+      padBounds.left - canvasBounds.left,
+      padBounds.top - canvasBounds.top,
     ]);
+
+    const padOffset = this.padRadius + this.strokeWidth / 2;
+    const left = e.clientX - canvasBounds.left;
+    const top = e.clientY - canvasBounds.top;
+    var endPos = this.canvas.scaleCoordinate([left, top]);
+    endPos[0] -= padOffset;
+    endPos[1] -= padOffset;
+
+    const scrollOffset = this.canvas.scaleCoordinate([
+      canvasEle.scrollLeft,
+      canvasEle.scrollTop,
+    ]);
+    this.movingPad.style.left = endPos[0] + scrollOffset[0] + 'px';
+    this.movingPad.style.top = endPos[1] + scrollOffset[1] + 'px';
+
+    this.drawArrow(startPos, endPos, [padOffset, padOffset]);
     this.edgePan(e);
   }
 

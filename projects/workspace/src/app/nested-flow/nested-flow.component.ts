@@ -44,7 +44,6 @@ export class NestedFlowComponent
       mode: 'DISABLED',
     },
     dragScroll: ['RIGHT'],
-    manualArrowPad: false,
   };
 
   constructor() {

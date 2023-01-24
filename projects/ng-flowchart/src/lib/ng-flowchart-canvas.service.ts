@@ -503,6 +503,8 @@ export class NgFlowchartCanvasService {
     if (!this.options.options.manualArrowPad) {
       return;
     }
+    //connection can't be to self
+    var isSameStep = startStepId === endStepId;
     //no duplicate connections
     const existingConn = this.flow.getConnector({
       startStepId: startStepId,
@@ -512,17 +514,21 @@ export class NgFlowchartCanvasService {
     const connectorCountValid =
       !this.options.options.isSequential ||
       this.flow.getConnectorsByStartStep(startStepId).length === 0;
-
     //nested canvas doesn't yet support connectors cross canvas
     const stepsInSameCanvas =
       this.flow.steps.some(s => s.id === startStepId) &&
       this.flow.steps.some(s => s.id === endStepId);
+    //step is already connected by normal step child
+    const stepAlreadyChild = this.flow.steps
+      .find(s => s.id === startStepId)
+      ?.children.find(c => c.id === endStepId);
 
     if (
-      startStepId !== endStepId &&
+      !isSameStep &&
       !existingConn &&
       connectorCountValid &&
-      stepsInSameCanvas
+      stepsInSameCanvas &&
+      !stepAlreadyChild
     ) {
       var connector = { startStepId: startStepId, endStepId: endStepId };
       var connComponent = this.createConnector(connector);
@@ -543,5 +549,9 @@ export class NgFlowchartCanvasService {
     component.instance.canvas = this;
     component.instance.compRef = component;
     return component;
+  }
+
+  public scaleCoordinate(pos: number[]): number[] {
+    return this.renderer.scaleCoordinate(pos);
   }
 }

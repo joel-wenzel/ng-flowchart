@@ -3,12 +3,8 @@ import {
   Component,
   ComponentRef,
   ElementRef,
-  EventEmitter,
-  HostBinding,
   HostListener,
-  Injector,
   Input,
-  Output,
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
@@ -49,7 +45,6 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
     this.updatePath();
   }
 
-  //@HostBinding('class.selected') selected = false;
   selected = false;
   @HostListener('click', ['$event'])
   onClick(event: MouseEvent) {
@@ -94,7 +89,12 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
   containerWidth: number = 0;
   containerHeight: number = 0;
   private _position: { start: number[]; end: number[] };
-  offset = 6;
+  get yOffset(): number {
+    return this.canvas.options.options.orientation === 'VERTICAL' ? 6 : 0;
+  }
+  get xOffset(): number {
+    return this.canvas.options.options.orientation === 'HORIZONTAL' ? 6 : 0;
+  }
   constructor(
     protected element: ElementRef<HTMLElement>,
     private viewContainer: ViewContainerRef
@@ -111,7 +111,12 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
     };
   }
 
-  destroy(): void {
+  deleteConnector(): void {
+    this.destroy0();
+    this.canvas.reRender(true);
+  }
+
+  destroy0(): void {
     this.compRef.destroy();
     this.canvas.flow.removeConnector(this);
   }
@@ -131,27 +136,27 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
     let start = new Array(2);
     let end = new Array(2);
     if (pos.start[1] > pos.end[1]) {
-      start[1] = this.containerHeight;
+      start[1] = this.containerHeight + this.yOffset;
       end[1] = 0;
       if (pos.start[0] > pos.end[0]) {
         // top left
-        start[0] = this.containerWidth - this.offset;
+        start[0] = this.containerWidth + this.xOffset;
         end[0] = 0;
       } else {
         //topright
-        start[0] = -this.offset;
+        start[0] = this.xOffset;
         end[0] = this.containerWidth;
       }
     } else {
-      start[1] = 0;
+      start[1] = this.yOffset;
       end[1] = this.containerHeight;
       if (pos.start[0] > pos.end[0]) {
         // bottom left
-        start[0] = this.containerWidth - this.offset;
+        start[0] = this.containerWidth + this.xOffset;
         end[0] = 0;
       } else {
         //bottom right
-        start[0] = -this.offset;
+        start[0] = this.xOffset;
         end[0] = this.containerWidth;
       }
     }

@@ -19,13 +19,19 @@ export class NgFlowchartPadArrowComponent implements OnInit, AfterViewInit {
   arrow: ElementRef;
 
   @Input()
-  set position(pos: { start: number[]; end: number[] }) {
+  set position(pos: { start: number[]; end: number[]; root: number[] }) {
     this._position = pos;
     this.containerWidth = Math.abs(pos.start[0] - pos.end[0]);
-    this.containerLeft = pos.start[0] > pos.end[0] ? -this.containerWidth : 0;
+    this.containerLeft =
+      pos.start[0] > pos.end[0]
+        ? -this.containerWidth + pos.root[0]
+        : pos.root[0];
 
     this.containerHeight = Math.abs(pos.start[1] - pos.end[1]);
-    this.containerTop = pos.start[1] > pos.end[1] ? -this.containerHeight : 0;
+    this.containerTop =
+      pos.start[1] > pos.end[1]
+        ? -this.containerHeight + pos.root[1]
+        : pos.root[1];
 
     this.updatePath();
   }

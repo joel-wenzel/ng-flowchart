@@ -506,7 +506,7 @@ export class NgFlowchartStepComponent<T = any>
     // remove connectors
     const connectors = this.canvas.flow.getConnectorsByStep(this.id);
     for (const conn of connectors) {
-      conn.destroy();
+      conn.destroy0();
     }
 
     if (this.isRootElement()) {
@@ -648,6 +648,7 @@ export class NgFlowchartStepComponent<T = any>
     this.connectorPad.instance.hidden = hidePad;
   }
 
+  // this make take up too many resources in large workflows, need to try it out
   private isValidConnectorDropTarget(): boolean {
     var isSameStep = this.drop.dragConnector.startStepId === this.id;
     var connectorAlreadyExists = this.canvas.flow.getConnector({
@@ -657,7 +658,20 @@ export class NgFlowchartStepComponent<T = any>
     var canDropAbove = this.getDropPositionsForStep(
       this.drop.dragConnector
     ).includes('ABOVE');
+    const stepAlreadyChild = this.canvas.flow.steps
+      .find(s => s.id === this.drop.dragConnector.startStepId)
+      ?.children.find(c => c.id === this.id);
+    const stepsInSameCanvas =
+      this.canvas.flow.steps.some(
+        s => s.id === this.drop.dragConnector.startStepId
+      ) && this.canvas.flow.steps.some(s => s.id === this.id);
 
-    return !isSameStep && !connectorAlreadyExists && canDropAbove;
+    return (
+      !isSameStep &&
+      !connectorAlreadyExists &&
+      canDropAbove &&
+      !stepAlreadyChild &&
+      stepsInSameCanvas
+    );
   }
 }

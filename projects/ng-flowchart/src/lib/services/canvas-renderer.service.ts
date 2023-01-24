@@ -708,27 +708,29 @@ export class CanvasRendererService {
     stepRect: Partial<DOMRect>
   ): number[] {
     let sides: number[][];
+    let scaledHeight = stepRect.height / this.scale;
+    let scaledWidth = stepRect.width / this.scale;
     if (this.options.options.orientation === 'VERTICAL') {
       sides = [
-        [stepRect.left, stepRect.top + stepRect.height / 2], //left
-        [stepRect.left + stepRect.width * (1 / 5), stepRect.top], //top
-        [stepRect.left + stepRect.width * (2 / 5), stepRect.top], //top
-        [stepRect.left + stepRect.width * (3 / 5), stepRect.top], //top
-        [stepRect.left + stepRect.width * (4 / 5), stepRect.top], //top
-        [stepRect.right, stepRect.top + stepRect.height / 2], //right
+        [stepRect.left, stepRect.top + scaledHeight / 2], //left
+        [stepRect.left + scaledWidth * (1 / 5), stepRect.top], //top
+        [stepRect.left + scaledWidth * (2 / 5), stepRect.top], //top
+        [stepRect.left + scaledWidth * (3 / 5), stepRect.top], //top
+        [stepRect.left + scaledWidth * (4 / 5), stepRect.top], //top
+        [stepRect.left + scaledWidth, stepRect.top + scaledHeight / 2], //right
       ];
     } else if (this.options.options.orientation === 'HORIZONTAL') {
       sides = [
-        [stepRect.left, stepRect.top + stepRect.height * (1 / 4)], //left
-        [stepRect.left, stepRect.top + stepRect.height * (3 / 4)], //left
-        [stepRect.left + stepRect.width * (1 / 5), stepRect.top], //top
-        [stepRect.left + stepRect.width * (2 / 5), stepRect.top], //top
-        [stepRect.left + stepRect.width * (3 / 5), stepRect.top], //top
-        [stepRect.left + stepRect.width * (4 / 5), stepRect.top], //top
-        [stepRect.left + stepRect.width * (1 / 5), stepRect.bottom], //bottom
-        [stepRect.left + stepRect.width * (2 / 5), stepRect.bottom], //bottom
-        [stepRect.left + stepRect.width * (3 / 5), stepRect.bottom], //bottom
-        [stepRect.left + stepRect.width * (4 / 5), stepRect.bottom], //bottom
+        [stepRect.left, stepRect.top + scaledHeight * (1 / 4)], //left
+        [stepRect.left, stepRect.top + scaledHeight * (3 / 4)], //left
+        [stepRect.left + scaledWidth * (1 / 5), stepRect.top], //top
+        [stepRect.left + scaledWidth * (2 / 5), stepRect.top], //top
+        [stepRect.left + scaledWidth * (3 / 5), stepRect.top], //top
+        [stepRect.left + scaledWidth * (4 / 5), stepRect.top], //top
+        [stepRect.left + scaledWidth * (1 / 5), stepRect.top + scaledHeight], //bottom
+        [stepRect.left + scaledWidth * (2 / 5), stepRect.top + scaledHeight], //bottom
+        [stepRect.left + scaledWidth * (3 / 5), stepRect.top + scaledHeight], //bottom
+        [stepRect.left + scaledWidth * (4 / 5), stepRect.top + scaledHeight], //bottom
       ];
     }
 
@@ -748,5 +750,9 @@ export class CanvasRendererService {
     );
 
     return closest.pos;
+  }
+
+  public scaleCoordinate(pos: number[]): number[] {
+    return [pos[0] / this.scale, pos[1] / this.scale];
   }
 }

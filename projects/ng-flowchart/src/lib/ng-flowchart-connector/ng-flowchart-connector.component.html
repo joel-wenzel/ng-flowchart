@@ -1,9 +1,9 @@
 <div
-  *ngIf="selected"
+  *ngIf="selected && !canvas.disabled"
   class="connector-menu"
   [style.width.px]="containerWidth"
   [style.height.px]="containerHeight">
-  <div (mousedown)="destroy()" class="delete-connector">
+  <div (mousedown)="deleteConnector()" class="delete-connector">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       id="deleteIcon"
