@@ -111,9 +111,11 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
     };
   }
 
-  deleteConnector(): void {
-    this.destroy0();
-    this.canvas.reRender(true);
+  deleteConnector(event: MouseEvent): void {
+    if (event.button === 0) {
+      this.destroy0();
+      this.canvas.reRender(true);
+    }
   }
 
   destroy0(): void {

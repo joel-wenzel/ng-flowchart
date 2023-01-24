@@ -3,7 +3,9 @@
   class="ngflowchart-connector-menu"
   [style.width.px]="containerWidth"
   [style.height.px]="containerHeight">
-  <div (mousedown)="deleteConnector()" class="ngflowchart-delete-connector">
+  <div
+    (mousedown)="deleteConnector($event)"
+    class="ngflowchart-delete-connector">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       id="deleteIcon"
