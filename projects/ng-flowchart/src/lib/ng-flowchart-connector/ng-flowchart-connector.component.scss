@@ -54,7 +54,7 @@
       stroke: black;
     }
   }
-  &.selected {
+  &.ngflowchart-connector-selected {
     z-index: 4;
     & #arrowpath {
       stroke: green;
@@ -80,7 +80,7 @@
 //   &:hover #arrowpath {
 //     stroke: #00b894;
 //   }
-//   &.selected #arrowpath {
+//   &.ngflowchart-connector-selected #arrowpath {
 //     stroke: #00b894;
 //   }
 //}
