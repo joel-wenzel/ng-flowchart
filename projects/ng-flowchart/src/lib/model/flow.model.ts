@@ -100,8 +100,8 @@ export namespace NgFlowchart {
     /** Canvas flow orientation. Horizontal rotates the ABOVE, BELOW, LEFT, RIGHT drop positions -90 degrees visually. */
     orientation?: Orientation = 'VERTICAL';
 
-    /** Enables use of the manual arrow pad for dragging the output of a step to any other step. Default is false. */
-    manualArrowPad?: boolean = false;
+    /** Enables use of the manual connectors for dragging the output of a step to any other step. Default is false. */
+    manualConnectors?: boolean = false;
   }
 
   export type DropEvent = {

@@ -312,7 +312,7 @@ export class NgFlowchartCanvasService {
   }
 
   private uploadConnectors(connector: NgFlowchart.Connector[]): void {
-    if (!connector || !this.options.options.manualArrowPad) {
+    if (!connector || !this.options.options.manualConnectors) {
       return;
     }
 
@@ -500,7 +500,7 @@ export class NgFlowchartCanvasService {
   }
 
   public linkConnector(startStepId: string, endStepId: string) {
-    if (!this.options.options.manualArrowPad) {
+    if (!this.options.options.manualConnectors) {
       return;
     }
     //connection can't be to self

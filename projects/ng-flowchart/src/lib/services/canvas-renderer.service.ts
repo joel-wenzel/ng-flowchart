@@ -248,7 +248,7 @@ export class CanvasRendererService {
       );
     }
 
-    if (this.options.options.manualArrowPad) {
+    if (this.options.options.manualConnectors) {
       this.drawConnectorPads(flow, canvasRect);
       this.drawConnectors(flow, canvasRect);
     }

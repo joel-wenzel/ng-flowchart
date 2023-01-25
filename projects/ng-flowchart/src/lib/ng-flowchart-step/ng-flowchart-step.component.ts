@@ -65,7 +65,7 @@ export class NgFlowchartStepComponent<T = any>
 
   @HostListener('mouseenter', ['$event'])
   onMouseEnter(event: MouseEvent) {
-    if (!this.canvas.options.options.manualArrowPad) {
+    if (!this.canvas.options.options.manualConnectors) {
       return;
     }
     if (this.drop.dragConnector && this.isValidConnectorDropTarget()) {
@@ -75,7 +75,7 @@ export class NgFlowchartStepComponent<T = any>
 
   @HostListener('mouseleave', ['$event'])
   onMouseLeave(event: MouseEvent) {
-    if (!this.canvas.options.options.manualArrowPad) {
+    if (!this.canvas.options.options.manualConnectors) {
       return;
     }
     this.nativeElement.classList.remove('connector-target');
@@ -83,7 +83,7 @@ export class NgFlowchartStepComponent<T = any>
 
   @HostListener('mouseup', ['$event'])
   onMouseUp(event: MouseEvent) {
-    if (event.button !== 0 || !this.canvas.options.options.manualArrowPad) {
+    if (event.button !== 0 || !this.canvas.options.options.manualConnectors) {
       return;
     }
     this.nativeElement.classList.remove('connector-target');

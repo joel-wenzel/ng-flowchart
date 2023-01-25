@@ -31,7 +31,7 @@ export class AppComponent implements AfterViewInit {
     },
     dragScroll: ['RIGHT', 'MIDDLE'],
     orientation: 'VERTICAL',
-    manualArrowPad: true,
+    manualConnectors: true,
   };
 
   @ViewChild('normalStep')
