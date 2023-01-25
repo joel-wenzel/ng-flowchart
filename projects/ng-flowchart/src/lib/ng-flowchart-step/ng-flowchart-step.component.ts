@@ -160,6 +160,10 @@ export class NgFlowchartStepComponent<T = any>
     return ['BELOW', 'LEFT', 'RIGHT', 'ABOVE'];
   }
 
+  isConnectorPadEnabled(): boolean {
+    return true;
+  }
+
   ngOnInit(): void {}
 
   ngAfterViewInit() {
