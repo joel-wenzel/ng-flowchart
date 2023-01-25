@@ -107,10 +107,10 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
     this.element.nativeElement.appendChild(this.arrow.location.nativeElement);
   }
 
-  private dragMove(e: MouseEvent) {
+  private dragMove(e: MouseEvent, skipPan?: boolean) {
     e.preventDefault();
     const canvasEle = this.canvas.viewContainer.element.nativeElement;
-    let canvasBounds = canvasEle.getBoundingClientRect();
+    const canvasBounds: DOMRect = canvasEle.getBoundingClientRect();
 
     const padBounds = this.connectorPad.nativeElement.getBoundingClientRect();
     var startPos = this.canvas.scaleCoordinate([
@@ -133,11 +133,12 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
     this.movingPad.style.top = endPos[1] + scrollOffset[1] + 'px';
 
     this.drawArrow(startPos, endPos, [padOffset, padOffset]);
-    this.edgePan(e);
+    if (!skipPan) {
+      this.edgePan(e, canvasBounds);
+    }
   }
 
   private dragEnd(e: MouseEvent) {
-    if (e.button !== 0) return;
     e.preventDefault();
 
     document.removeEventListener('mousemove', this.dragMove);
@@ -158,23 +159,22 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
     }
   }
 
-  private panEdgeSize = 25;
+  private panEdgeSize = 50;
   private panTimer = null;
-  private edgePan(event: MouseEvent): void {
+  private edgePan(event: MouseEvent, canvasBounds: DOMRect): void {
     // Get the viewport-relative coordinates of the mousemove event.
     var viewportX = event.clientX;
     var viewportY = event.clientY;
 
     // Get the viewport dimensions.
-    var canvasEle = this.canvas.viewContainer.element.nativeElement;
-    var viewportWidth = canvasEle.clientWidth;
-    var viewportHeight = canvasEle.clientHeight;
+    var viewportWidth = canvasBounds.width;
+    var viewportHeight = canvasBounds.height;
 
     // calculate the boundaries of the edge
-    var edgeTop = canvasEle.offsetTop + this.panEdgeSize;
-    var edgeLeft = canvasEle.offsetLeft + this.panEdgeSize;
-    var edgeBottom = viewportHeight + canvasEle.offsetTop - this.panEdgeSize;
-    var edgeRight = viewportWidth + canvasEle.offsetLeft - this.panEdgeSize;
+    var edgeTop = canvasBounds.top + this.panEdgeSize;
+    var edgeLeft = canvasBounds.left + this.panEdgeSize;
+    var edgeBottom = canvasBounds.height - this.panEdgeSize;
+    var edgeRight = canvasBounds.right - this.panEdgeSize;
 
     var isInLeftEdge = viewportX < edgeLeft;
     var isInRightEdge = viewportX > edgeRight;
@@ -185,6 +185,8 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
       clearTimeout(this.panTimer);
       return;
     }
+
+    var canvasEle = this.canvas.viewContainer.element.nativeElement;
 
     // Get the canvas dimensions.
     var canvasWidth = Math.max(
@@ -208,6 +210,7 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
 
       if (adjustCanvasScroll()) {
         scope.panTimer = setTimeout(checkForCanvasScroll, 30);
+        scope.dragMove(event, true);
       }
     })();
 
@@ -228,7 +231,7 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
       var nextScrollY = currentScrollY;
 
       // control intensity of scroll
-      var maxStep = 25;
+      var maxStep = 30;
 
       // Should we scroll left?
       if (isInLeftEdge && canScrollLeft) {

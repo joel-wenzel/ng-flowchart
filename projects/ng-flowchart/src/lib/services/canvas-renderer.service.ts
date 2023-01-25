@@ -248,7 +248,7 @@ export class CanvasRendererService {
       );
     }
 
-    if (this.options.options.manualArrowPad) {
+    if (this.options.options.manualConnectors) {
       this.drawConnectorPads(flow, canvasRect);
       this.drawConnectors(flow, canvasRect);
     }
@@ -683,6 +683,9 @@ export class CanvasRendererService {
 
   private drawConnectorPads(flow: CanvasFlow, canvasRect: DOMRect): void {
     for (const step of flow.steps) {
+      if (!step.isConnectorPadEnabled()) {
+        return;
+      }
       const stepRect = step.getCurrentRect(canvasRect);
       let padX: number;
       let padY: number;

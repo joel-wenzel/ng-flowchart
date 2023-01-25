@@ -1,5 +1,6 @@
 import { TemplateRef, Type } from '@angular/core';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
+import { NgFlowchartConnectorComponent } from '../ng-flowchart-connector/ng-flowchart-connector.component';
 import { NgFlowchartStepComponent } from '../ng-flowchart-step/ng-flowchart-step.component';
 
 export namespace NgFlowchart {
@@ -99,8 +100,8 @@ export namespace NgFlowchart {
     /** Canvas flow orientation. Horizontal rotates the ABOVE, BELOW, LEFT, RIGHT drop positions -90 degrees visually. */
     orientation?: Orientation = 'VERTICAL';
 
-    /** Enables use of the manual arrow pad for dragging the output of a step to any other step. Default is false. */
-    manualArrowPad?: boolean = false;
+    /** Enables use of the manual connectors for dragging the output of a step to any other step. Default is false. */
+    manualConnectors?: boolean = false;
   }
 
   export type DropEvent = {
@@ -200,6 +201,16 @@ export namespace NgFlowchart {
      * Called after the canvas has been scaled
      */
     afterScale?: (newScale: number) => void;
+
+    /**
+     * Called after the connector has been linked to a destination step
+     */
+    onLinkConnector?: (connector: Connector) => void;
+
+    /**
+     * Called after the delete method has been run on the connector
+     */
+    afterDeleteConnector?: (connector: NgFlowchartConnectorComponent) => void;
   };
 
   export type Connector = {

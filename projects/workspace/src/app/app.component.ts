@@ -31,7 +31,7 @@ export class AppComponent implements AfterViewInit {
     },
     dragScroll: ['RIGHT', 'MIDDLE'],
     orientation: 'VERTICAL',
-    manualArrowPad: true,
+    manualConnectors: true,
   };
 
   @ViewChild('normalStep')
@@ -96,6 +96,8 @@ export class AppComponent implements AfterViewInit {
     this.callbacks.onMoveError = this.onMoveError;
     this.callbacks.afterDeleteStep = this.afterDeleteStep;
     this.callbacks.beforeDeleteStep = this.beforeDeleteStep;
+    this.callbacks.onLinkConnector = this.onLinkConnector;
+    this.callbacks.afterDeleteConnector = this.afterDeleteConnector;
   }
 
   ngAfterViewInit() {
@@ -122,6 +124,14 @@ export class AppComponent implements AfterViewInit {
 
   afterDeleteStep(step) {
     console.log(JSON.stringify(step.children));
+  }
+
+  onLinkConnector(conn) {
+    console.log(conn);
+  }
+
+  afterDeleteConnector(conn) {
+    console.log(conn);
   }
 
   showUpload() {
