@@ -536,6 +536,9 @@ export class NgFlowchartCanvasService {
       this.flow.addConnector(connComponent.instance);
 
       this.renderer.render(this.flow);
+
+      this.options.callbacks.onLinkConnector &&
+        this.options.callbacks.onLinkConnector(connector);
     }
   }
 

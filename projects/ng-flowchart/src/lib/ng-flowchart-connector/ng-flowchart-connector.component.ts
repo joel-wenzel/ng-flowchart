@@ -115,6 +115,9 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
     if (event.button === 0) {
       this.destroy0();
       this.canvas.reRender(true);
+
+      this.canvas.options.callbacks.afterDeleteConnector &&
+        this.canvas.options.callbacks.afterDeleteConnector(this);
     }
   }
 
