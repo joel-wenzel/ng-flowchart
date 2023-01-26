@@ -61,7 +61,13 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
   @HostListener('document:mousedown', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const path = this.arrow.nativeElement as SVGPathElement;
-    if (event.target !== this.arrowPadding.nativeElement) {
+    const insideMenuClicked = (event.target as HTMLElement).matches(
+      '.ngflowchart-connector-menu *'
+    );
+    if (
+      event.target !== this.arrowPadding.nativeElement &&
+      !insideMenuClicked
+    ) {
       path.parentElement.setAttribute('marker-end', 'url(#connectorArrowhead)');
       this.selected = false;
     }
@@ -112,13 +118,11 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
   }
 
   deleteConnector(event: MouseEvent): void {
-    if (event.button === 0) {
-      this.destroy0();
-      this.canvas.reRender(true);
+    this.destroy0();
+    this.canvas.reRender(true);
 
-      this.canvas.options.callbacks.afterDeleteConnector &&
-        this.canvas.options.callbacks.afterDeleteConnector(this);
-    }
+    this.canvas.options.callbacks.afterDeleteConnector &&
+      this.canvas.options.callbacks.afterDeleteConnector(this);
   }
 
   destroy0(): void {

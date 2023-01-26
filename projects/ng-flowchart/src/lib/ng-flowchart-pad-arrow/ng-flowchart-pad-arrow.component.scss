@@ -4,7 +4,8 @@ svg {
 
   overflow: visible;
   pointer-events: none;
-  min-width: 1px;
+  min-width: 5px;
+  min-height: 5px;
   stroke-dasharray: 4, 3;
 }
 

@@ -39,28 +39,6 @@ export class CanvasFlow {
     }
   }
 
-  getConnector(connector: NgFlowchart.Connector): boolean {
-    return this.connectors.some(
-      c =>
-        c.connector.startStepId === connector.startStepId &&
-        c.connector.endStepId === connector.endStepId
-    );
-  }
-  getConnectorsByStep(
-    stepId: string
-  ): ReadonlyArray<NgFlowchartConnectorComponent> {
-    return this._connectors.filter(
-      c =>
-        c.connector.startStepId === stepId || c.connector.endStepId === stepId
-    );
-  }
-
-  getConnectorsByStartStep(
-    stepId: string
-  ): ReadonlyArray<NgFlowchartConnectorComponent> {
-    return this._connectors.filter(c => c.connector.startStepId === stepId);
-  }
-
   addConnector(comp: NgFlowchartConnectorComponent) {
     this._connectors.push(comp);
   }
@@ -506,14 +484,16 @@ export class NgFlowchartCanvasService {
     //connection can't be to self
     var isSameStep = startStepId === endStepId;
     //no duplicate connections
-    const existingConn = this.flow.getConnector({
-      startStepId: startStepId,
-      endStepId: endStepId,
-    });
+    const existingConn = this.flow.connectors.some(
+      c =>
+        c.connector.startStepId === startStepId &&
+        c.connector.endStepId === endStepId
+    );
     //respect sequential mode
     const connectorCountValid =
       !this.options.options.isSequential ||
-      this.flow.getConnectorsByStartStep(startStepId).length === 0;
+      this.flow.connectors.filter(c => c.connector.startStepId === startStepId)
+        .length === 0;
     //nested canvas doesn't yet support connectors cross canvas
     const stepsInSameCanvas =
       this.flow.steps.some(s => s.id === startStepId) &&
