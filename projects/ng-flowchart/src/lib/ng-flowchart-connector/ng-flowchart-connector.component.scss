@@ -32,6 +32,7 @@
     border-radius: 3px;
     padding: 2px;
     pointer-events: auto;
+    cursor: pointer;
   }
 }
 
@@ -45,6 +46,7 @@
   pointer-events: none;
   stroke-dasharray: 4, 3;
   min-width: 1px;
+  cursor: pointer;
 }
 
 .ngflowchart-connector {
