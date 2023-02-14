@@ -20,4 +20,8 @@ export class RouteStepComponent
       return ['LEFT', 'RIGHT'];
     }
   }
+
+  isValidConnectorDropTarget() {
+    return true;
+  }
 }

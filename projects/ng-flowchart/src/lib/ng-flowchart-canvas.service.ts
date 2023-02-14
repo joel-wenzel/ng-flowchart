@@ -484,16 +484,11 @@ export class NgFlowchartCanvasService {
     //connection can't be to self
     var isSameStep = startStepId === endStepId;
     //no duplicate connections
-    const existingConn = this.flow.connectors.some(
+    const isExistingConn = this.flow.connectors.some(
       c =>
         c.connector.startStepId === startStepId &&
         c.connector.endStepId === endStepId
     );
-    //respect sequential mode
-    const connectorCountValid =
-      !this.options.options.isSequential ||
-      this.flow.connectors.filter(c => c.connector.startStepId === startStepId)
-        .length === 0;
     //nested canvas doesn't yet support connectors cross canvas
     const stepsInSameCanvas =
       this.flow.steps.some(s => s.id === startStepId) &&
@@ -505,8 +500,7 @@ export class NgFlowchartCanvasService {
 
     if (
       !isSameStep &&
-      !existingConn &&
-      connectorCountValid &&
+      !isExistingConn &&
       stepsInSameCanvas &&
       !stepAlreadyChild
     ) {
