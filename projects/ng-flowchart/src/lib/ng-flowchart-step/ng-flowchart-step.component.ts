@@ -68,7 +68,7 @@ export class NgFlowchartStepComponent<T = any>
     if (!this.canvas.options.options.manualConnectors) {
       return;
     }
-    if (this.drop.dragConnector && this.isValidConnectorDropTarget()) {
+    if (this.drop.dragConnector && this.internalIsValidConnectorDropTarget()) {
       this.nativeElement.classList.add('connector-target');
     }
   }
@@ -87,7 +87,7 @@ export class NgFlowchartStepComponent<T = any>
       return;
     }
     this.nativeElement.classList.remove('connector-target');
-    if (this.drop.dragConnector && this.isValidConnectorDropTarget()) {
+    if (this.drop.dragConnector && this.internalIsValidConnectorDropTarget()) {
       this.canvas.linkConnector(this.drop.dragConnector.startStepId, this.id);
     }
   }
@@ -161,7 +161,21 @@ export class NgFlowchartStepComponent<T = any>
   }
 
   isConnectorPadEnabled(): boolean {
-    return true;
+    //disable pad if sequential and has child/connection
+    return !(
+      this.canvas.options.options.isSequential &&
+      (this.hasChildren() ||
+        this.canvas.flow.connectors.filter(
+          c => c.connector.startStepId === this.id
+        ).length > 0)
+    );
+  }
+
+  isValidConnectorDropTarget(): boolean {
+    var canDropAbove = this.getDropPositionsForStep(
+      this.drop.dragConnector
+    ).includes('ABOVE');
+    return canDropAbove;
   }
 
   ngOnInit(): void {}
@@ -646,28 +660,20 @@ export class NgFlowchartStepComponent<T = any>
     }
     this.connectorPad.instance.position = position;
 
-    const sequentialRuleFailure =
-      this.canvas.options.options.isSequential &&
-      (this.hasChildren() ||
-        this.canvas.flow.connectors.filter(
-          c => c.connector.startStepId === this.id
-        ).length > 0);
     const hidePad =
-      this.canvas.disabled || sequentialRuleFailure || this.isRootElement();
+      this.canvas.disabled ||
+      !this.isConnectorPadEnabled() ||
+      this.isRootElement();
     this.connectorPad.instance.hidden = hidePad;
   }
 
-  // this make take up too many resources in large workflows, need to try it out
-  private isValidConnectorDropTarget(): boolean {
+  private internalIsValidConnectorDropTarget(): boolean {
     var isSameStep = this.drop.dragConnector.startStepId === this.id;
     var connectorAlreadyExists = this.canvas.flow.connectors.some(
       c =>
         c.connector.startStepId === this.drop.dragConnector.startStepId &&
         c.connector.endStepId === this.id
     );
-    var canDropAbove = this.getDropPositionsForStep(
-      this.drop.dragConnector
-    ).includes('ABOVE');
     const stepAlreadyChild = this.canvas.flow.steps
       .find(s => s.id === this.drop.dragConnector.startStepId)
       ?.children.find(c => c.id === this.id);
@@ -679,9 +685,9 @@ export class NgFlowchartStepComponent<T = any>
     return (
       !isSameStep &&
       !connectorAlreadyExists &&
-      canDropAbove &&
       !stepAlreadyChild &&
-      stepsInSameCanvas
+      stepsInSameCanvas &&
+      this.isValidConnectorDropTarget()
     );
   }
 }

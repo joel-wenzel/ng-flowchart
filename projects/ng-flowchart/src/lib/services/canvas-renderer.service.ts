@@ -683,9 +683,6 @@ export class CanvasRendererService {
 
   private drawConnectorPads(flow: CanvasFlow, canvasRect: DOMRect): void {
     for (const step of flow.steps) {
-      if (!step.isConnectorPadEnabled()) {
-        return;
-      }
       const stepRect = step.getCurrentRect(canvasRect);
       let padX: number;
       let padY: number;
