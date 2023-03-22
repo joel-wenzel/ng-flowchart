@@ -483,7 +483,9 @@ export class NgFlowchartStepComponent<T = any>
         //if we have children and the child has children we need to confirm the child doesnt have multiple children at any point
         let newChildLastChild = newChild.findLastSingleChild();
         if (!newChildLastChild) {
-          newChild._parent.zaddChildSibling0(newChild, oldChildIndex);
+          if (newChild._parent) {
+            newChild._parent.zaddChildSibling0(newChild, oldChildIndex);
+          }
           console.error('Invalid move. A node cannot have multiple parents');
           return false;
         }
@@ -494,8 +496,41 @@ export class NgFlowchartStepComponent<T = any>
         newChild.setChildren(this._children.slice());
       }
     }
-    //finally reset this nodes to children to the single new child
+    //finally reset this nodes children to the single new child
     this.setChildren([newChild]);
+    return true;
+  }
+
+  zaddChildFromAbove0(
+    newChild: NgFlowchartStepComponent,
+    newParent: NgFlowchartStepComponent
+  ): boolean {
+    let oldChildIndex = null;
+    if (newChild._parent) {
+      oldChildIndex = newChild._parent.removeChild(newChild);
+    }
+
+    let finalChild = this;
+    if (this.hasChildren()) {
+      //if we have children we need to confirm the child doesnt have multiple children at any point
+      const newChildLastChild = this.findLastSingleChild();
+      if (!newChildLastChild) {
+        if (newChild._parent) {
+          newChild._parent.zaddChildSibling0(newChild, oldChildIndex);
+        }
+        console.error('Invalid move. A node cannot have multiple parents');
+        return false;
+      } else {
+        finalChild = newChildLastChild;
+        //move the this nodes children to last child of the step arg
+        newChildLastChild.setChildren(this._children.slice());
+      }
+    }
+    //finally reset this nodes children to the single new child
+    finalChild.setChildren([newChild]);
+    if (newParent) {
+      newParent.zaddChildSibling0(this, oldChildIndex);
+    }
     return true;
   }
 
