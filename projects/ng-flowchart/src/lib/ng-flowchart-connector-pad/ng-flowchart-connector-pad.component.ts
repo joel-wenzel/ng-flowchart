@@ -140,22 +140,23 @@ export class NgFlowchartConnectorPadComponent implements AfterViewInit {
 
   private dragEnd(e: MouseEvent) {
     e.preventDefault();
+    if (e.button === 0) {
+      document.removeEventListener('mousemove', this.dragMove);
+      document.removeEventListener('mouseup', this.dragEnd);
 
-    document.removeEventListener('mousemove', this.dragMove);
-    document.removeEventListener('mouseup', this.dragEnd);
+      this.element.nativeElement.classList.remove('dragging');
 
-    this.element.nativeElement.classList.remove('dragging');
+      this.data.setDragConnector(null);
+      clearTimeout(this.panTimer);
 
-    this.data.setDragConnector(null);
-    clearTimeout(this.panTimer);
-
-    if (this.arrow) {
-      this.arrow.destroy();
-      this.arrow = null;
-    }
-    if (this.movingPad) {
-      this.movingPad.remove();
-      this.movingPad = null;
+      if (this.arrow) {
+        this.arrow.destroy();
+        this.arrow = null;
+      }
+      if (this.movingPad) {
+        this.movingPad.remove();
+        this.movingPad = null;
+      }
     }
   }
 

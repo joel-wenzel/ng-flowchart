@@ -264,6 +264,10 @@ export class NgFlowchartCanvasService {
     this.renderer.setScale(this.flow, scaleValue);
   }
 
+  public setNestedScale(scaleValue: number) {
+    this.renderer.setNestedScale(scaleValue);
+  }
+
   addChildStep(
     componentRef: ComponentRef<NgFlowchartStepComponent>,
     dropTarget: NgFlowchart.DropTarget

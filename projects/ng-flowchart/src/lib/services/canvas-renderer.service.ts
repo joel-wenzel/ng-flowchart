@@ -100,7 +100,9 @@ export class CanvasRendererService {
     let totalTreeWidth = 0;
 
     rootNode.children.forEach(child => {
-      let totalChildWidth = child.getNodeTreeWidth(this.getStepGap());
+      let totalChildWidth = child.getNodeTreeWidth(
+        this.getStepGap() * this.scale
+      );
       totalChildWidth = totalChildWidth / this.scale;
       childTreeWidths[child.nativeElement.id] = totalChildWidth;
 
@@ -166,7 +168,9 @@ export class CanvasRendererService {
     let totalTreeHeight = 0;
 
     rootNode.children.forEach(child => {
-      let totalChildHeight = child.getNodeTreeHeight(this.getStepGap());
+      let totalChildHeight = child.getNodeTreeHeight(
+        this.getStepGap() * this.scale
+      );
       totalChildHeight = totalChildHeight / this.scale;
       childTreeHeights[child.nativeElement.id] = totalChildHeight;
 
@@ -372,74 +376,97 @@ export class CanvasRendererService {
       maxBottom = Math.max(rect.bottom, maxBottom);
     });
 
-    const widthBorderGap = this.getStepGap();
+    const widthBorderGap = this.getStepGap() / this.scale;
     const widthDiff =
-      canvasRect.width - (maxRight - canvasRect.left + widthBorderGap);
-    if (widthDiff < widthBorderGap) {
+      canvasRect.width / this.scale -
+      (maxRight - canvasRect.left + widthBorderGap);
+    if (widthDiff < -this.getStepGap()) {
       //grow x
       let growWidth = Math.abs(widthDiff);
-      if (growWidth > widthBorderGap) {
+      if (growWidth > this.getStepGap()) {
         this.getCanvasContentElement().style.minWidth = `${
-          canvasRect.width + growWidth
+          canvasRect.width / this.scale + growWidth + this.getStepGap()
         }px`;
-        if (this.options.options.centerOnResize) {
+        if (
+          this.options.options.orientation === 'VERTICAL' &&
+          this.options.options.centerOnResize
+        ) {
           this.render(flow, true, true);
         }
       }
-    } else if (widthDiff > widthBorderGap) {
+    } else if (widthDiff > this.getStepGap()) {
       //shrink x
-      var totalTreeWidth = this.getTotalTreeWidth(flow);
       if (this.isNestedCanvas()) {
+        const shrinkWidth =
+          this.options.options.orientation === 'VERTICAL'
+            ? widthDiff * 2
+            : widthDiff;
         this.getCanvasContentElement().style.minWidth = `${
-          totalTreeWidth + widthBorderGap
+          canvasRect.width / this.scale - shrinkWidth
         }px`;
-        if (this.options.options.centerOnResize) {
+        if (
+          this.options.options.orientation === 'VERTICAL' &&
+          this.options.options.centerOnResize
+        ) {
           this.render(flow, true, true);
         }
       } else if (this.getCanvasContentElement().style.minWidth) {
         // reset normal canvas width if auto width set
         this.getCanvasContentElement().style.minWidth = null;
-        if (this.options.options.centerOnResize) {
+        if (
+          this.options.options.orientation === 'VERTICAL' &&
+          this.options.options.centerOnResize
+        ) {
           this.render(flow, true, true);
         }
       }
     }
 
-    let heightBorderGap = this.getStepGap() / 2;
+    let heightBorderGap = this.getStepGap() / this.scale;
     const heightDiff =
-      canvasRect.height - (maxBottom - canvasRect.top + heightBorderGap);
-    if (heightDiff < heightBorderGap) {
+      canvasRect.height / this.scale -
+      (maxBottom - canvasRect.top + heightBorderGap);
+    if (heightDiff < -this.getStepGap()) {
       //grow y
       let growHeight = Math.abs(heightDiff);
-      if (growHeight >= heightBorderGap) {
+      if (growHeight > this.getStepGap()) {
         this.getCanvasContentElement().style.minHeight = `${
-          canvasRect.height + growHeight
+          canvasRect.height / this.scale + growHeight
         }px`;
+        if (
+          this.options.options.orientation === 'HORIZONTAL' &&
+          this.options.options.centerOnResize
+        ) {
+          this.render(flow, true, true);
+        }
       }
-    } else if (heightDiff > heightBorderGap) {
+    } else if (heightDiff > this.getStepGap()) {
       //shrink y
       if (this.isNestedCanvas()) {
-        let shrinkHeight = heightDiff - heightBorderGap;
+        const shrinkHeight =
+          this.options.options.orientation === 'HORIZONTAL'
+            ? heightDiff * 2
+            : heightDiff;
         this.getCanvasContentElement().style.minHeight = `${
-          canvasRect.height - shrinkHeight
+          canvasRect.height / this.scale - shrinkHeight
         }px`;
+        if (
+          this.options.options.orientation === 'HORIZONTAL' &&
+          this.options.options.centerOnResize
+        ) {
+          this.render(flow, true, true);
+        }
       } else if (this.getCanvasContentElement().style.minHeight) {
         // reset normal canvas height if auto height set
         this.getCanvasContentElement().style.minHeight = null;
+        if (
+          this.options.options.orientation === 'HORIZONTAL' &&
+          this.options.options.centerOnResize
+        ) {
+          this.render(flow, true, true);
+        }
       }
     }
-  }
-
-  private getTotalTreeWidth(flow: CanvasFlow): number {
-    let totalTreeWidth = 0;
-    const rootWidth = flow.rootStep.getCurrentRect().width / this.scale;
-    flow.rootStep.children.forEach(child => {
-      let totalChildWidth = child.getNodeTreeWidth(this.getStepGap());
-      totalTreeWidth += totalChildWidth / this.scale;
-    });
-    totalTreeWidth += (flow.rootStep.children.length - 1) * this.getStepGap();
-    // total tree width doesn't give root width
-    return Math.max(totalTreeWidth, rootWidth);
   }
 
   private findBestMatchForSteps(
@@ -559,11 +586,7 @@ export class CanvasRendererService {
 
   private getCanvasTopCenterPosition(htmlRootElement: HTMLElement) {
     const canvasRect = this.getCanvasContentElement().getBoundingClientRect();
-    var edgeMargin = this.options.options.stepGap;
-    //format nested canvses with smaller edge margin for cleaner look
-    if (this.isNestedCanvas()) {
-      edgeMargin /= 2;
-    }
+    const edgeMargin = this.getStepGap() * this.scale;
     if (this.options.options.orientation === 'VERTICAL') {
       const rootElementTop = htmlRootElement.getBoundingClientRect().height;
       const topCoord = rootElementTop / 2 + edgeMargin;
@@ -645,6 +668,10 @@ export class CanvasRendererService {
     this.scaleDebounceTimer = setTimeout(() => {
       canvasContent.classList.remove('scaling');
     }, 300);
+  }
+
+  public setNestedScale(scaleValue: number) {
+    this.scale = scaleValue;
   }
 
   private drawConnectors(flow: CanvasFlow, canvasRect: DOMRect): void {
