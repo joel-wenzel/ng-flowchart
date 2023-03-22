@@ -264,6 +264,21 @@ export class NgFlowchartStepComponent<T = any>
   }
 
   /**
+   * Destroys connector(s) starting at this step
+   * @param endStepId optionally destroy only connector with specified endStepId
+   */
+  destroyConnectors(endStepId?: string): void {
+    const connectors = this.canvas.flow.connectors.filter(
+      c =>
+        c.connector.startStepId === this.id &&
+        (!endStepId || c.connector.endStepId === endStepId)
+    );
+    for (const conn of connectors) {
+      conn.destroy0();
+    }
+  }
+
+  /**
    * Remove a child from this step. Returns the index at which the child was found or -1 if not found.
    * @param childToRemove Step component to remove
    */
@@ -521,7 +536,7 @@ export class NgFlowchartStepComponent<T = any>
     // remove from master array
     this.canvas.flow.removeStep(this);
 
-    // remove connectors
+    // remove all associated connectors
     const connectors = this.canvas.flow.connectors.filter(
       c =>
         c.connector.startStepId === this.id || c.connector.endStepId === this.id
