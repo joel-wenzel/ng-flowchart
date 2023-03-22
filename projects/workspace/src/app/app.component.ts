@@ -28,6 +28,7 @@ export class AppComponent implements AfterViewInit {
     rootPosition: 'TOP_CENTER',
     zoom: {
       mode: 'WHEEL',
+      skipRender: true,
     },
     dragScroll: ['RIGHT', 'MIDDLE'],
     orientation: 'VERTICAL',

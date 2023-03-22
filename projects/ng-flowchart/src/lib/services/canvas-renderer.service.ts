@@ -658,7 +658,9 @@ export class CanvasRendererService {
     canvasContent.classList.add('scaling');
 
     this.scale = scaleValue;
-    this.render(flow, true);
+    if (!this.options.options.zoom.skipRender) {
+      this.render(flow, true);
+    }
 
     if (this.options.callbacks?.afterScale) {
       this.options.callbacks.afterScale(this.scale);
