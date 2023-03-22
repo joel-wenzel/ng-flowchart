@@ -46,6 +46,9 @@ export class NgFlowchartStepComponent<T = any>
     if (this.canvas.disabled) {
       return;
     }
+    //allow dragging steps in nested canvas
+    event.stopPropagation();
+
     this.hideTree();
     event.dataTransfer.setData('type', NgFlowchart.DropType.Step);
     event.dataTransfer.setData('source', NgFlowchart.DropSource.Canvas);
