@@ -46,6 +46,9 @@ export class NgFlowchartStepComponent<T = any>
     if (this.canvas.disabled) {
       return;
     }
+    //allow dragging steps in nested canvas
+    event.stopPropagation();
+
     this.hideTree();
     event.dataTransfer.setData('type', NgFlowchart.DropType.Step);
     event.dataTransfer.setData('source', NgFlowchart.DropSource.Canvas);
@@ -264,6 +267,21 @@ export class NgFlowchartStepComponent<T = any>
   }
 
   /**
+   * Destroys connector(s) starting at this step
+   * @param endStepId optionally destroy only connector with specified endStepId
+   */
+  destroyConnectors(endStepId?: string): void {
+    const connectors = this.canvas.flow.connectors.filter(
+      c =>
+        c.connector.startStepId === this.id &&
+        (!endStepId || c.connector.endStepId === endStepId)
+    );
+    for (const conn of connectors) {
+      conn.destroy0();
+    }
+  }
+
+  /**
    * Remove a child from this step. Returns the index at which the child was found or -1 if not found.
    * @param childToRemove Step component to remove
    */
@@ -468,7 +486,9 @@ export class NgFlowchartStepComponent<T = any>
         //if we have children and the child has children we need to confirm the child doesnt have multiple children at any point
         let newChildLastChild = newChild.findLastSingleChild();
         if (!newChildLastChild) {
-          newChild._parent.zaddChildSibling0(newChild, oldChildIndex);
+          if (newChild._parent) {
+            newChild._parent.zaddChildSibling0(newChild, oldChildIndex);
+          }
           console.error('Invalid move. A node cannot have multiple parents');
           return false;
         }
@@ -479,8 +499,41 @@ export class NgFlowchartStepComponent<T = any>
         newChild.setChildren(this._children.slice());
       }
     }
-    //finally reset this nodes to children to the single new child
+    //finally reset this nodes children to the single new child
     this.setChildren([newChild]);
+    return true;
+  }
+
+  zaddChildFromAbove0(
+    newChild: NgFlowchartStepComponent,
+    newParent: NgFlowchartStepComponent
+  ): boolean {
+    let oldChildIndex = null;
+    if (newChild._parent) {
+      oldChildIndex = newChild._parent.removeChild(newChild);
+    }
+
+    let finalChild = this;
+    if (this.hasChildren()) {
+      //if we have children we need to confirm the child doesnt have multiple children at any point
+      const newChildLastChild = this.findLastSingleChild();
+      if (!newChildLastChild) {
+        if (newChild._parent) {
+          newChild._parent.zaddChildSibling0(newChild, oldChildIndex);
+        }
+        console.error('Invalid move. A node cannot have multiple parents');
+        return false;
+      } else {
+        finalChild = newChildLastChild;
+        //move the this nodes children to last child of the step arg
+        newChildLastChild.setChildren(this._children.slice());
+      }
+    }
+    //finally reset this nodes children to the single new child
+    finalChild.setChildren([newChild]);
+    if (newParent) {
+      newParent.zaddChildSibling0(this, oldChildIndex);
+    }
     return true;
   }
 
@@ -521,7 +574,7 @@ export class NgFlowchartStepComponent<T = any>
     // remove from master array
     this.canvas.flow.removeStep(this);
 
-    // remove connectors
+    // remove all associated connectors
     const connectors = this.canvas.flow.connectors.filter(
       c =>
         c.connector.startStepId === this.id || c.connector.endStepId === this.id

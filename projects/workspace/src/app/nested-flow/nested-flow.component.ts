@@ -53,6 +53,7 @@ export class NestedFlowComponent
 
   ngOnInit(): void {
     super.ngOnInit();
+    this.canvas.options.callbacks.afterScale = this.afterScale.bind(this);
   }
 
   ngAfterViewInit(): void {
@@ -61,6 +62,10 @@ export class NestedFlowComponent
   }
 
   ngOnDestroy() {}
+
+  private afterScale(newScale: number): void {
+    this.nestedCanvas.setNestedScale(newScale);
+  }
 
   // add nested-alt class to alternate nested flows for better visibility
   addAlternateClass(): void {

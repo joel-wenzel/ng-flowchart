@@ -227,6 +227,11 @@ export class NgFlowchartCanvasDirective
     this.canvas.setScale(scaleVal);
   }
 
+  public setNestedScale(scaleValue: number) {
+    const scaleVal = Math.max(0, scaleValue);
+    this.canvas.setNestedScale(scaleVal);
+  }
+
   private adjustWheelScale(event) {
     if (this.canvas.flow.hasRoot()) {
       event.preventDefault();
@@ -251,9 +256,15 @@ export class NgFlowchartCanvasDirective
     this.canvasEle.nativeElement.scrollLeft = this.pos.left - dx;
   }
 
-  private mouseUpHandler() {
-    document.removeEventListener('mousemove', this.mouseMoveHandler);
-    document.removeEventListener('mouseup', this.mouseUpHandler);
+  private mouseUpHandler(e: MouseEvent) {
+    if (
+      (this.options.dragScroll.includes('LEFT') && e.button === 0) ||
+      (this.options.dragScroll.includes('MIDDLE') && e.button === 1) ||
+      (this.options.dragScroll.includes('RIGHT') && e.button === 2)
+    ) {
+      document.removeEventListener('mousemove', this.mouseMoveHandler);
+      document.removeEventListener('mouseup', this.mouseUpHandler);
+    }
   }
 
   public setOrientation(orientation: NgFlowchart.Orientation) {

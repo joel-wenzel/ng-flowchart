@@ -264,6 +264,10 @@ export class NgFlowchartCanvasService {
     this.renderer.setScale(this.flow, scaleValue);
   }
 
+  public setNestedScale(scaleValue: number) {
+    this.renderer.setNestedScale(scaleValue);
+  }
+
   addChildStep(
     componentRef: ComponentRef<NgFlowchartStepComponent>,
     dropTarget: NgFlowchart.DropTarget
@@ -329,22 +333,28 @@ export class NgFlowchartCanvasService {
     return comp.instance;
   }
 
-  private setRoot(step: NgFlowchartStepComponent, force: boolean = true) {
+  private setRoot(
+    step: NgFlowchartStepComponent,
+    force: boolean = true
+  ): boolean {
     if (this.flow.hasRoot()) {
       if (!force) {
         console.warn('Already have a root and force is false');
-        return;
+        return false;
       }
 
       //reparent root
       let oldRoot = this.flow.rootStep;
+      const success = step.zaddChildFromAbove0(oldRoot, null);
+      if (!success) return false;
+
       this.flow.rootStep = step;
-      step.zaddChild0(oldRoot);
     } else {
       this.flow.rootStep = step;
     }
 
     this.flow.addStep(step);
+    return true;
   }
 
   private addStepToFlow(
@@ -421,26 +431,29 @@ export class NgFlowchartCanvasService {
     newStep: NgFlowchartStepComponent,
     childStep: NgFlowchartStepComponent
   ): DropResponse {
+    let success = true;
     let prettyRender = false;
     let newParent = childStep.parent;
     if (newParent) {
-      //we want to remove child and insert our newStep at the same index
-      let index = newParent.removeChild(childStep);
-      newStep.zaddChild0(childStep);
-      newParent.zaddChildSibling0(newStep, index);
+      success = newStep.zaddChildFromAbove0(childStep, newParent);
     } else {
       // new root node
-      newStep.parent?.removeChild(newStep);
+      const oldStepParent = newStep.parent;
+      const oldChildIndex = newStep.parent?.removeChild(newStep);
       newStep.setParent(null, true);
 
       //if the new step was a direct child of the root step, we need to break that connection
       childStep.removeChild(newStep);
-      this.setRoot(newStep);
-
-      prettyRender = true;
+      success = this.setRoot(newStep);
+      if (success) {
+        prettyRender = true;
+      } else {
+        // if setRoot fails reset to original state
+        oldStepParent.zaddChildSibling0(newStep, oldChildIndex);
+      }
     }
     return {
-      added: true,
+      added: success,
       prettyRender,
     };
   }
