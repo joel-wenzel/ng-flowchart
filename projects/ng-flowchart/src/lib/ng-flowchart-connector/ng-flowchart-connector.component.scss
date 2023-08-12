@@ -1,6 +1,7 @@
 :host {
   position: relative;
   transition: all 0.2s;
+  display: block;
 
   #arrowPadding {
     pointer-events: auto;
