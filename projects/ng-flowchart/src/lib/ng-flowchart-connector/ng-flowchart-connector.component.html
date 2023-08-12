@@ -1,8 +1,8 @@
 <div
   *ngIf="selected && !canvas.disabled"
   class="ngflowchart-connector-menu"
-  [style.width.px]="containerWidth"
-  [style.height.px]="containerHeight">
+  [style.left.px]="deleteButtonPosition.x"
+  [style.top.px]="deleteButtonPosition.y">
   <div (click)="deleteConnector($event)" class="ngflowchart-delete-connector">
     <svg
       xmlns="http://www.w3.org/2000/svg"
