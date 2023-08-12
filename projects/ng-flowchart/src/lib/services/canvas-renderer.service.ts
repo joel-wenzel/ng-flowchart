@@ -674,10 +674,6 @@ export class CanvasRendererService {
 
   public setNestedScale(scaleValue: number) {
     this.scale = scaleValue;
-
-    if (this.options.callbacks?.afterScale) {
-      this.options.callbacks.afterScale(this.scale);
-    }
   }
 
   private drawConnectors(flow: CanvasFlow, canvasRect: DOMRect): void {

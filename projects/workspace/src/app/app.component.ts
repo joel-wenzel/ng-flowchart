@@ -99,6 +99,7 @@ export class AppComponent implements AfterViewInit {
     this.callbacks.beforeDeleteStep = this.beforeDeleteStep;
     this.callbacks.onLinkConnector = this.onLinkConnector;
     this.callbacks.afterDeleteConnector = this.afterDeleteConnector;
+    this.callbacks.afterScale = this.afterScale.bind(this);
   }
 
   ngAfterViewInit() {
@@ -133,6 +134,16 @@ export class AppComponent implements AfterViewInit {
 
   afterDeleteConnector(conn) {
     console.log(conn);
+  }
+
+  afterScale(scale: number): void {
+    //realistically you want to recursively get all steps in canvas
+    const firstSetOfChildren = this.canvas.getFlow().getRoot().children;
+    firstSetOfChildren.forEach(step => {
+      if (step instanceof NestedFlowComponent) {
+        step.nestedCanvas.setNestedScale(scale);
+      }
+    });
   }
 
   showUpload() {
