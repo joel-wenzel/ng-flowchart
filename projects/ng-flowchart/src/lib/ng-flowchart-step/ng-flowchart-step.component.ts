@@ -525,8 +525,6 @@ export class NgFlowchartStepComponent<T = any>
         return false;
       } else {
         finalChild = newChildLastChild;
-        //move the this nodes children to last child of the step arg
-        newChildLastChild.setChildren(this._children.slice());
       }
     }
     //finally reset this nodes children to the single new child
