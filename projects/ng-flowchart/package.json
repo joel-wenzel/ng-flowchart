@@ -1,10 +1,10 @@
 {
   "name": "@joelwenzel/ng-flowchart",
-  "version": "1.0.0-beta.28",
+  "version": "1.0.0-beta.29",
   "license": "Apache-2.0",
   "peerDependencies": {
-    "@angular/common": "14 || 16",
-    "@angular/core": "14 || 16"
+    "@angular/common": "14 - 16",
+    "@angular/core": "14 - 16"
   },
   "dependencies": {
     "tslib": "^2.0.0"
