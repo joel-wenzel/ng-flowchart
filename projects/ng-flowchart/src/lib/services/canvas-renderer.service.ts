@@ -658,7 +658,9 @@ export class CanvasRendererService {
     canvasContent.classList.add('scaling');
 
     this.scale = scaleValue;
-    this.render(flow, true);
+    if (!this.options.options.zoom.skipRender) {
+      this.render(flow, true);
+    }
 
     if (this.options.callbacks?.afterScale) {
       this.options.callbacks.afterScale(this.scale);
@@ -672,10 +674,6 @@ export class CanvasRendererService {
 
   public setNestedScale(scaleValue: number) {
     this.scale = scaleValue;
-
-    if (this.options.callbacks?.afterScale) {
-      this.options.callbacks.afterScale(this.scale);
-    }
   }
 
   private drawConnectors(flow: CanvasFlow, canvasRect: DOMRect): void {

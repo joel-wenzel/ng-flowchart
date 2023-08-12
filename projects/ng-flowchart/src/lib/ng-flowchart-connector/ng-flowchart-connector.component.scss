@@ -1,6 +1,7 @@
 :host {
   position: relative;
   transition: all 0.2s;
+  display: block;
 
   #arrowPadding {
     pointer-events: auto;
@@ -24,8 +25,6 @@
   .ngflowchart-delete-connector {
     display: flex;
     position: absolute;
-    top: calc(50% - 12px);
-    left: calc(50% - 12px);
 
     background-color: white;
     border: 1px solid black;

@@ -1,6 +1,8 @@
 :host {
   position: relative;
   z-index: 10;
+  display: block;
+
   &:not(.dragging) {
     transition: all 0.2s;
   }

@@ -6,7 +6,6 @@ import {
   HostListener,
   Input,
   ViewChild,
-  ViewContainerRef,
 } from '@angular/core';
 import { NgFlowchart } from '../model/flow.model';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
@@ -49,11 +48,20 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
   @HostListener('click', ['$event'])
   onClick(event: MouseEvent) {
     const path = this.arrow.nativeElement as SVGPathElement;
-    if (event.target === this.arrowPadding.nativeElement) {
+    if (event.target === this.arrowPadding.nativeElement && !this.selected) {
       path.parentElement.setAttribute(
         'marker-end',
         'url(#connectorArrowheadSelected)'
       );
+
+      let bounds = path.getBoundingClientRect();
+      const mouseX = event.clientX - bounds.left;
+      const mouseY = event.clientY - bounds.top;
+      const coord = this.canvas.scaleCoordinate([mouseX + 15, mouseY - 5]);
+      this.deleteButtonPosition = {
+        x: coord[0],
+        y: coord[1],
+      };
       this.selected = true;
     }
   }
@@ -94,6 +102,7 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
   opacity = 1;
   containerWidth: number = 0;
   containerHeight: number = 0;
+  deleteButtonPosition: { x: number; y: number };
   private _position: { start: number[]; end: number[] };
   get yOffset(): number {
     return this.canvas.options.options.orientation === 'VERTICAL' ? 6 : 0;
@@ -101,10 +110,7 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
   get xOffset(): number {
     return this.canvas.options.options.orientation === 'HORIZONTAL' ? 6 : 0;
   }
-  constructor(
-    protected element: ElementRef<HTMLElement>,
-    private viewContainer: ViewContainerRef
-  ) {}
+  constructor(protected element: ElementRef<HTMLElement>) {}
 
   ngAfterViewInit(): void {
     this.updatePath();
@@ -170,8 +176,8 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
       }
     }
     const arrow = `
-      M${start[0]},${start[1]}
-      L${end[0]},${end[1]}
+      M${start[0]} ${start[1]}
+      L${end[0]} ${end[1]}
     `;
     this.arrow.nativeElement.setAttribute('d', arrow);
     this.arrowPadding.nativeElement.setAttribute('d', arrow);

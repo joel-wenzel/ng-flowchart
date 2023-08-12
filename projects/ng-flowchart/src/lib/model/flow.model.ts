@@ -89,9 +89,11 @@ export namespace NgFlowchart {
     zoom?: {
       mode: 'WHEEL' | 'MANUAL' | 'DISABLED';
       defaultStep?: number;
+      skipRender?: boolean;
     } = {
       mode: 'WHEEL',
       defaultStep: 0.1,
+      skipRender: false,
     };
 
     /** Drag canvas to scroll. Choose which mouse buttons to move with. Default is right click. */

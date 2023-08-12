@@ -84,20 +84,20 @@ export class NgFlowchartArrowComponent implements OnInit, AfterViewInit {
         this.arrow.nativeElement.setAttribute(
           'd',
           `
-        M${this.containerWidth - this.padding},0 
-        L${this.containerWidth - this.padding},${this.containerHeight / 2}
-        L${this.padding},${this.containerHeight / 2}
-        L${this.padding},${this.containerHeight - 4}
+        M${this.containerWidth - this.padding} 0 
+        L${this.containerWidth - this.padding} ${this.containerHeight / 2}
+        L${this.padding} ${this.containerHeight / 2}
+        L${this.padding} ${this.containerHeight - 4}
       `
         );
       } else {
         this.arrow.nativeElement.setAttribute(
           'd',
           `
-        M${this.padding},0 
-        L${this.padding},${this.containerHeight / 2}
-        L${this.containerWidth - this.padding},${this.containerHeight / 2}
-        L${this.containerWidth - this.padding},${this.containerHeight - 4}
+        M${this.padding} 0 
+        L${this.padding} ${this.containerHeight / 2}
+        L${this.containerWidth - this.padding} ${this.containerHeight / 2}
+        L${this.containerWidth - this.padding} ${this.containerHeight - 4}
       `
         );
       }
@@ -106,20 +106,20 @@ export class NgFlowchartArrowComponent implements OnInit, AfterViewInit {
         this.arrow.nativeElement.setAttribute(
           'd',
           `
-        M0,${this.padding}
-        L${this.containerWidth / 2},${this.padding}
-        L${this.containerWidth / 2},${this.containerHeight - this.padding}
-        L${this.containerWidth - 4},${this.containerHeight - this.padding}
+        M0 ${this.padding}
+        L${this.containerWidth / 2} ${this.padding}
+        L${this.containerWidth / 2} ${this.containerHeight - this.padding}
+        L${this.containerWidth - 4} ${this.containerHeight - this.padding}
       `
         );
       } else {
         this.arrow.nativeElement.setAttribute(
           'd',
           `
-        M0,${this.containerHeight - this.padding} 
-        L${this.containerWidth / 2},${this.containerHeight - this.padding},
-        L${this.containerWidth / 2},${this.padding}
-        L${this.containerWidth - 4},${this.padding}
+        M0 ${this.containerHeight - this.padding}
+        L${this.containerWidth / 2} ${this.containerHeight - this.padding}
+        L${this.containerWidth / 2} ${this.padding}
+        L${this.containerWidth - 4} ${this.padding}
       `
         );
       }
