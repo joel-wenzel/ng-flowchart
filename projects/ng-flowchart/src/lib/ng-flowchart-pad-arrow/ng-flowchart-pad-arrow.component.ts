@@ -91,8 +91,8 @@ export class NgFlowchartPadArrowComponent implements OnInit, AfterViewInit {
     this.arrow.nativeElement.setAttribute(
       'd',
       `
-        M${start[0]},${start[1]}
-        L${end[0]},${end[1]}
+        M${start[0]} ${start[1]}
+        L${end[0]} ${end[1]}
       `
     );
   }

@@ -170,8 +170,8 @@ export class NgFlowchartConnectorComponent implements AfterViewInit {
       }
     }
     const arrow = `
-      M${start[0]},${start[1]}
-      L${end[0]},${end[1]}
+      M${start[0]} ${start[1]}
+      L${end[0]} ${end[1]}
     `;
     this.arrow.nativeElement.setAttribute('d', arrow);
     this.arrowPadding.nativeElement.setAttribute('d', arrow);
