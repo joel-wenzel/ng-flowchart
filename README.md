@@ -27,6 +27,7 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
     - Requires use of ```{ provide: REMOVE_STYLES_ON_COMPONENT_DESTROY, useValue: false }```
       OR
       ```@import '@joelwenzel/ng-flowchart/assets/styles.scss';```
+      to apply base step styles as Angular breaks base Component style inheritance with the new default ```REMOVE_STYLES_ON_COMPONENT_DESTROY: true```
       
 - 1.0.2-beta
 
