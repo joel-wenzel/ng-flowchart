@@ -1,0 +1,158 @@
+.ngflowchart-canvas {
+  overflow: auto;
+  display: flex;
+}
+
+.ngflowchart-canvas-content.scaling .ngflowchart-step-wrapper,
+.ngflowchart-canvas-content.scaling svg,
+.ngflowchart-canvas-content.scaling ng-flowchart-connector-pad {
+  transition: none !important;
+}
+
+.ngflowchart-canvas-content {
+  position: relative;
+  min-height: 100%;
+  min-width: 100%;
+  flex: 1 1 100%;
+}
+
+.ngflowchart-step-wrapper {
+  height: auto;
+  width: auto;
+  position: absolute;
+  box-sizing: border-box;
+
+  transition: all 0.2s;
+
+  cursor: grab;
+}
+
+.ngflowchart-step-wrapper[ngflowchart-drop-hover]::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 100%;
+  position: absolute;
+  z-index: 1;
+  background: darkred;
+}
+
+.ngflowchart-step-wrapper[ngflowchart-drop-hover]::after {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border-radius: 100%;
+  position: absolute;
+  z-index: 0;
+  background: rgb(192, 123, 123);
+  //TODO mixin so theme can be set
+  animation: backgroundOpacity 2s linear infinite;
+}
+
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='above']::before,
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='above']::after {
+  top: 0;
+  right: 50%;
+  transform: translate(50%, -50%);
+}
+
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='below']::before,
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='below']::after {
+  bottom: 0;
+  right: 50%;
+  transform: translate(50%, 50%);
+}
+
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='right']::before,
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='right']::after {
+  right: 0;
+  top: 50%;
+  transform: translate(50%, -50%);
+}
+
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='left']::before,
+.ngflowchart-step-wrapper:not(
+    .horizontal
+  )[ngflowchart-drop-hover='left']::after {
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='above']::before,
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='above']::after {
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='below']::before,
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='below']::after {
+  right: 0;
+  top: 50%;
+  transform: translate(50%, -50%);
+}
+
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='right']::before,
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='right']::after {
+  bottom: 0;
+  right: 50%;
+  transform: translate(50%, 50%);
+}
+
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='left']::before,
+.ngflowchart-step-wrapper.horizontal[ngflowchart-drop-hover='left']::after {
+  top: 0;
+  right: 50%;
+  transform: translate(50%, -50%);
+}
+
+@keyframes wiggle {
+  0% {
+    transform: translateX(0);
+    border: 2px solid red;
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  50% {
+    transform: translateX(0);
+  }
+  75% {
+    transform: translateX(10px);
+  }
+  100% {
+    transform: translateX(0);
+    border: 2px solid red;
+  }
+}
+
+@keyframes backgroundOpacity {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+.ngflowchart-step-wrapper.connector-target {
+  box-shadow: 0 0 4px 1px green;
+}

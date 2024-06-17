@@ -1,3 +1,6 @@
+// ANGULAR 17+ NECESSARY IF NOT USING providers: [{ provide: REMOVE_STYLES_ON_COMPONENT_DESTROY, useValue: false }]
+//@import 'projects/ng-flowchart/assets/styles.scss';
+
 /* You can add global styles to this file, and also import other style files */
 html,
 body {
