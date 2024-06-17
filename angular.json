@@ -63,7 +63,9 @@
               "projects/workspace/src/favicon.ico",
               "projects/workspace/src/assets"
             ],
-            "styles": ["projects/workspace/src/styles.scss"],
+            "styles": [
+              "projects/workspace/src/styles.scss"
+            ],
             "scripts": [],
             "vendorChunk": true,
             "extractLicenses": false,
@@ -131,7 +133,9 @@
               "projects/workspace/src/favicon.ico",
               "projects/workspace/src/assets"
             ],
-            "styles": ["projects/workspace/src/styles.scss"],
+            "styles": [
+              "projects/workspace/src/styles.scss"
+            ],
             "scripts": []
           }
         },
@@ -164,5 +168,13 @@
       "@angular-eslint/schematics",
       "@angular-eslint/schematics"
     ]
+  },
+  "schematics": {
+    "@angular-eslint/schematics:application": {
+      "setParserOptionsProject": true
+    },
+    "@angular-eslint/schematics:library": {
+      "setParserOptionsProject": true
+    }
   }
 }
