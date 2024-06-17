@@ -35,10 +35,8 @@ export class NgFlowchartCanvasDirective
       return;
     }
     // its possible multiple canvases exist so make sure we only move/drop on the closest one
-    const closestCanvasId = (event.target as HTMLElement).closest(
-      '.ngflowchart-canvas-content'
-    )?.id;
-    if (this._id !== closestCanvasId) {
+    const closestCanvasToTarget = (event.target as HTMLElement).closest(`.${CONSTANTS.CANVAS_CLASS}`);
+    if (closestCanvasToTarget !== this.canvasEle.nativeElement) {
       return;
     }
 
