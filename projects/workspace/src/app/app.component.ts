@@ -4,6 +4,7 @@ import {
   TemplateRef,
   ViewChild,
   ChangeDetectionStrategy,
+  VERSION,
 } from '@angular/core';
 import { NgFlowchart } from 'projects/ng-flowchart/src/lib/model/flow.model';
 import { NgFlowchartStepRegistry } from 'projects/ng-flowchart/src/lib/ng-flowchart-step-registry.service';
@@ -21,6 +22,7 @@ import { NestedFlowComponent } from './nested-flow/nested-flow.component';
 })
 export class AppComponent implements AfterViewInit {
   title = 'workspace';
+  version = VERSION;
 
   callbacks: NgFlowchart.Callbacks = {};
   options: NgFlowchart.Options = {
