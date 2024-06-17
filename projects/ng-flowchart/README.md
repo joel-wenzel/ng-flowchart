@@ -22,6 +22,12 @@ Inspired by [Alyssa X Flowy](https://github.com/alyssaxuu/flowy)
 
 ## Change Log
 
+- 1.0.0-beta.30
+  - Angular 17 & 18 support
+    - Requires use of ```{ provide: REMOVE_STYLES_ON_COMPONENT_DESTROY, useValue: false }```
+      OR
+      ```@import '@joelwenzel/ng-flowchart/assets/styles.scss';```
+
 - 1.0.2-beta
 
   - Support for canvas zoom/scale via mouse scroll or manual
