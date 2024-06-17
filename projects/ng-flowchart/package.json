@@ -3,11 +3,11 @@
   "version": "1.0.0-beta.29",
   "license": "Apache-2.0",
   "peerDependencies": {
-    "@angular/common": "14 - 17",
-    "@angular/core": "14 - 17"
+    "@angular/common": "14 - 18",
+    "@angular/core": "14 - 18"
   },
   "dependencies": {
-    "tslib": "^2.0.0"
+    "tslib": "^2.3.0"
   },
   "repository": {
     "url": "https://github.com/joel-wenzel/ng-flowchart/tree/master/projects/ng-flowchart"
