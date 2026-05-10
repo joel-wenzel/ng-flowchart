@@ -6,6 +6,7 @@ export type MyForm = {
 };
 
 @Component({
+  standalone: false,
   selector: 'app-form-step',
   templateUrl: './form-step.component.html',
   styleUrls: ['./form-step.component.scss'],

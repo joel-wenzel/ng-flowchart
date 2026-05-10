@@ -3,6 +3,7 @@ import { NgFlowchartStepComponent } from 'projects/ng-flowchart/src/lib/ng-flowc
 import { NgFlowchart } from 'projects/ng-flowchart/src';
 
 @Component({
+  standalone: false,
   selector: 'app-route-step',
   templateUrl: './route-step.component.html',
   styleUrls: ['./route-step.component.scss'],

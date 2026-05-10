@@ -1,41 +1,113 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the 1.0.0-beta branch
   push:
     branches: [1.0.0-beta]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 20
 
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
-
-      # Build
-      - name: Build Library
+      - name: Install and Build Library
         run: |
           npm install
           npm run build
 
+      - name: Pack Library
+        run: npm pack
+        working-directory: dist/ng-flowchart
+
+      - name: Upload Library Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ng-flowchart-dist
+          path: dist/ng-flowchart
+          retention-days: 1
+
+  compat-test:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Oldest supported Angular version
+          - angular-version: 16
+            node-version: 18
+          # Mid-range Angular version
+          - angular-version: 18
+            node-version: 20
+          # Latest supported Angular version
+          - angular-version: 21
+            node-version: 22
+    name: Compat (Angular ${{ matrix.angular-version }})
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ng-flowchart-dist
+          path: ng-flowchart-dist
+
+      - name: Create Angular ${{ matrix.angular-version }} Project
+        run: |
+          npx -y @angular/cli@${{ matrix.angular-version }} new compat-test \
+            --minimal --skip-git --skip-tests --defaults
+
+      - name: Install Library
+        working-directory: compat-test
+        run: npm install ${{ github.workspace }}/ng-flowchart-dist/joelwenzel-ng-flowchart-*.tgz
+
+      - name: Add Library Import
+        working-directory: compat-test
+        run: |
+          if [ -f src/app/app.module.ts ]; then
+            # NgModule-based app (Angular 16): patch app.module.ts
+            sed -i '1i import { NgFlowchartModule } from "@joelwenzel/ng-flowchart";' src/app/app.module.ts
+            # imports array spans multiple lines; match BrowserModule at end of line
+            sed -i 's/^\(\s*\)BrowserModule$/\1BrowserModule, NgFlowchartModule/' src/app/app.module.ts
+          else
+            # Standalone app: file is app.ts (Angular 21+) or app.component.ts (Angular 17-20)
+            if [ -f src/app/app.ts ]; then
+              APP_FILE=src/app/app.ts
+            else
+              APP_FILE=src/app/app.component.ts
+            fi
+            sed -i '1i import { NgFlowchartModule } from "@joelwenzel/ng-flowchart";' "$APP_FILE"
+            sed -i 's/imports: \[/imports: [NgFlowchartModule, /' "$APP_FILE"
+          fi
+
+      - name: Build Project
+        working-directory: compat-test
+        run: npx ng build
+
+  publish:
+    needs: [build, compat-test]
+    runs-on: ubuntu-latest
+    if: github.repository == 'joel-wenzel/ng-flowchart'
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: ng-flowchart-dist
+          path: ng-flowchart-dist
+
       - name: Publish
         run: npm publish --access public
-        working-directory: dist/ng-flowchart
+        working-directory: ng-flowchart-dist
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

@@ -33,6 +33,7 @@ export type AddChildOptions = {
 };
 
 @Component({
+  standalone: false,
   selector: 'ng-flowchart-step',
   templateUrl: './ng-flowchart-step.component.html',
   styleUrls: ['./ng-flowchart-step.component.scss'],

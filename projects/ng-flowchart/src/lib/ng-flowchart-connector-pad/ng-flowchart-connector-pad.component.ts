@@ -15,6 +15,7 @@ import { NgFlowchartPadArrowComponent } from '../ng-flowchart-pad-arrow/ng-flowc
 import { DropDataService } from '../services/dropdata.service';
 
 @Component({
+  standalone: false,
   selector: 'ng-flowchart-connector-pad',
   templateUrl: './ng-flowchart-connector-pad.component.html',
   styleUrls: ['./ng-flowchart-connector-pad.component.scss'],

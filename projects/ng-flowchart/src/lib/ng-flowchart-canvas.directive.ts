@@ -18,6 +18,7 @@ import { OptionsService } from './services/options.service';
 import { StepManagerService } from './services/step-manager.service';
 
 @Directive({
+  standalone: false,
   selector: '[ngFlowchartCanvas]',
   providers: [
     NgFlowchartCanvasService,

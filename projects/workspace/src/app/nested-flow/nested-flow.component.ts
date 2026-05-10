@@ -17,6 +17,7 @@ export type NestedData = {
 };
 
 @Component({
+  standalone: false,
   selector: 'app-nested-flow',
   templateUrl: './nested-flow.component.html',
   styleUrls: ['./nested-flow.component.scss'],

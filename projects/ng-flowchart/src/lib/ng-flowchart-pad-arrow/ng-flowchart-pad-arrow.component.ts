@@ -10,6 +10,7 @@ import {
 import { OptionsService } from '../services/options.service';
 
 @Component({
+  standalone: false,
   selector: 'ng-flowchart-pad-arrow',
   templateUrl: './ng-flowchart-pad-arrow.component.html',
   styleUrls: ['./ng-flowchart-pad-arrow.component.scss'],

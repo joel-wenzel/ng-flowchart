@@ -11,6 +11,7 @@ import { NgFlowchart } from '../model/flow.model';
 import { NgFlowchartCanvasService } from '../ng-flowchart-canvas.service';
 
 @Component({
+  standalone: false,
   selector: 'ng-flowchart-connector',
   templateUrl: './ng-flowchart-connector.component.html',
   styleUrls: ['./ng-flowchart-connector.component.scss'],
