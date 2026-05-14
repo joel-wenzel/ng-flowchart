@@ -14,7 +14,7 @@
         [ngFlowchartStep]="{
           template: normalStep,
           type: item.type,
-          data: item.data
+          data: item.data,
         }">
         <span>{{ item.name }}</span>
       </div>
@@ -23,6 +23,19 @@
         *ngFor="let op of customOps"
         [ngFlowchartStep]="op.step">
         <span>{{ op.paletteName }}</span>
+      </div>
+      <div
+        class="plugin-op"
+        [ngFlowchartStep]="
+          disabledStep
+            ? null
+            : {
+                template: normalStep,
+                type: items[0].type,
+                data: items[0].data,
+              }
+        ">
+        <span>{{ disabledStep ? 'Disabled' : 'Enabled' }} Step</span>
       </div>
     </section>
 
@@ -63,6 +76,13 @@
           type="checkbox"
           name="disabled"
           (change)="disabled = $any($event).target.checked" />
+      </div>
+      <div class="sub-section">
+        <label for="disabledStep">Disabled Step</label>
+        <input
+          type="checkbox"
+          name="disabledStep"
+          (change)="disabledStep = $any($event).target.checked" />
       </div>
     </section>
     <section>

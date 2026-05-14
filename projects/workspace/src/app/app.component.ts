@@ -94,6 +94,7 @@ export class AppComponent implements AfterViewInit {
   canvas: NgFlowchartCanvasDirective;
 
   disabled = false;
+  disabledStep = false;
 
   constructor(private stepRegistry: NgFlowchartStepRegistry) {
     this.callbacks.onDropError = this.onDropError;
